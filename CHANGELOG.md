@@ -10,6 +10,14 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- `docbound summary`: what a project is, assembled from the documentation and
+  no source at all. Purpose, shape, each module's contract and must-not list,
+  every decision with its reversal condition, recent work, and what is still
+  open. Ends with what it cost against what reading the source would have cost,
+  measured rather than asserted. `--open` for unfinished work across every
+  entry, `--json` for the same content as data.
+  `docs/decisions/0012-summary-from-docs.md` has the reasoning.
+
 - An architecture diagram, in Mermaid, seeded by `scaffold` from the top-level
   directories holding source and drawn the rest of the way by whoever knows why
   the edges are there.

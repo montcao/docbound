@@ -5,6 +5,108 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 - Add a summary that reads the docs instead of the code
+
+Agent: claude · Branch: main
+
+### Intent
+
+The README describes the wrong failure. It says you merge good code and cannot
+explain it three weeks later, which is true and is not what actually hurts.
+
+What hurts is scale. You ask an agent for a feature, it spawns more agents, you
+keep going, and the project outgrows what you can hold in your head. Then you
+need to decide what to build next, so you ask an agent what the project does. It
+re-reads the source to answer, which is slow, costs a great deal of context, and
+produces a reconstruction from code that can only recover what the code does and
+never why any of it is that way. The next time you ask, it pays the whole cost
+again.
+
+docbound already keeps a set of documents true: what each module owns, what it
+must not do, every decision and its reversal condition, and a worklog of intent
+and outcome per task. That is exactly the material such a question wants, and it
+is a rounding error next to the source tree.
+
+So the feature is a `summary` command that assembles an orientation from those
+documents and reads no source at all. It is also step 1 of the loop, Orient,
+which the skill currently describes as a list of files to go and read by hand.
+Mechanising it makes the cheap path the default one.
+
+The claim to be careful about is the token one. It has to be measured and
+printed rather than asserted, or it is marketing.
+
+### Expected to touch
+
+- `skill/docbound/scripts/summary.mjs` - new, and its library support
+- `cli/index.mjs` - a pass-through, as `audit` and `scaffold` already are
+- `tests/summary.test.mjs` - new
+- `skill/docbound/SKILL.md` - Orient names the command
+- `README.md` - the problem section, rewritten to the failure that matters
+- `docs/` - a decision record, the check reference is untouched
+
+### Unknowns going in
+
+- Whether a summary assembled from documents is good enough to answer "what
+  should I build next" without the source. It cannot be, entirely. The question
+  is whether it gets close enough to be worth the difference in cost.
+- What to do when the docs are thin. A summary of a repository that never
+  adopted the discipline is a summary of nothing, and saying so plainly is
+  better than padding it.
+
+### Outcome
+
+**`docbound summary`**, at `skill/docbound/scripts/summary.mjs`, with the
+document parsing in `skill/docbound/scripts/lib/digest.mjs`. It assembles
+purpose, shape and diagram, each module's contract and must-not list, known
+gaps, invariants, every decision with its reversal condition, recent worklog
+entries, and what is still open. `--open` gives unfinished work across every
+entry, deduplicated. `--json` gives the same content as data.
+
+**The claim is measured, not asserted.** Output ends with what the summary cost
+and what reading the source would have cost. On this repository that is about
+2,400 tokens against roughly 69,000 across 94 source files. Build output and
+Markdown are excluded from the source count, because counting a payload this
+project copies three times would inflate the ratio the figure exists to report
+honestly.
+
+**Step 1 of the loop names it.** Orient was a list of six files to open by
+hand, which made the cheap path the effortful one. It now runs one command, and
+keeps the reading list for a repository without the CLI installed.
+
+**Two defects the first run showed.** Bullets were read only from the line
+carrying the marker, so every wrapped bullet was truncated mid-sentence, which
+is worse than dropping it because a half-sentence reads as a whole one. And the
+must-not heading was prefixed onto bullets that already opened with "Must not".
+
+**One test carries the feature.** A marker string is planted in a source file
+and the output is required never to contain it. That survives any future change
+to the renderer, which an assertion about specific headings would not.
+
+`docs/decisions/0012-summary-from-docs.md` records why the summary never falls
+back to reading source, and why a thin summary is reported as thin rather than
+padded. The README's problem section is rewritten to the failure that actually
+hurts: not one forgotten decision, but a project outgrowing what anyone can
+hold, and every attempt to ask about it costing a re-read that recovers the what
+and drops the why.
+
+86 tests.
+
+### Still open
+
+- The summary is exactly as good as the documentation under it, with no
+  fallback. On a repository part-way through adopting the discipline it will be
+  partial, and nothing distinguishes "this module has no must-not list" from
+  "this module's must-not list is empty on purpose".
+- Nothing checks the summary stays useful. The fixtures assert it reads no
+  source and parses what is there, which is not the same as the output being
+  worth reading. That gap is the same shape as the one in the check set: the
+  audit measures truth, and neither measures usefulness.
+- `--entries` defaults to five, chosen without evidence. On a repository with
+  two hundred entries the right default is probably different, and there is no
+  data yet to pick it from.
+- Token figures are estimates at four characters per token. Good enough for a
+  ratio this large, wrong enough that nobody should budget from them.
+
 ## 2026-08-26 - Bound what the audit claims to decide
 
 Agent: claude · Branch: main

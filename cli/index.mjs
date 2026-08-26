@@ -40,6 +40,7 @@ usage: docbound <command> [options]
   update     re-copy an installed skill and report what changed
   link       symlink the skill from a local checkout or submodule
   audit      run the audit (pass-through to the skill's audit.mjs)
+  summary    what this project is, assembled from its docs and no source
   scaffold   create the initial docs structure
   adr        print the next decision-record number and create the file
   doctor     report what is installed, whether hooks are wired, and whether
@@ -259,6 +260,10 @@ function commandScaffold(options) {
   return passThrough(path.join(SKILL_SCRIPTS, "scaffold.mjs"), options.rest);
 }
 
+function commandSummary(options) {
+  return passThrough(path.join(SKILL_SCRIPTS, "summary.mjs"), options.rest);
+}
+
 function commandAdr(options) {
   const root = process.cwd();
   const result = spawnSync(
@@ -346,6 +351,8 @@ export async function main(argv) {
       return commandAudit(options);
     case "scaffold":
       return commandScaffold(options);
+    case "summary":
+      return commandSummary(options);
     case "adr":
       return commandAdr(options);
     case "doctor":

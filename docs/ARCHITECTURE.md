@@ -47,7 +47,7 @@ that writes into a user's repository.
 ### skill: `skill/docbound/`
 
 - Owns: the skill text, the reference prose, the templates, the audit, the
-  scaffold, the hook, and the documenter agent definition.
+  scaffold, the summary, the hook, and the documenter agent definition.
 - Must not: import anything outside itself, assume where it is installed, or
   gain a runtime dependency. It is copied verbatim into seven paths and may also
   be vendored by hand with nothing else present.
@@ -128,6 +128,9 @@ edit or a stop, `npx docbound audit`, and CI.
   their own message; `skill/docbound/references/hooks.md` names them and the
   limits.
 - The audit reads only below the root it is given.
+- The summary reads documentation and never source, enforced by a test that
+  plants a marker in a source file and requires it never to appear in the
+  output.
 
 ## Decisions
 

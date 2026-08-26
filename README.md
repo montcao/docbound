@@ -15,33 +15,52 @@ the reverse.
 
 ## The problem it solves
 
-You ask an AI assistant for a feature. It writes 300 good lines in four minutes.
-You read them, they look right, you merge.
+You ask an agent for a feature. It builds it, maybe spawning more agents along
+the way. You keep going. The project grows faster than anything you have worked
+on, because most of it was not typed by you.
 
-Three weeks later something breaks in that code. You open it and cannot work out
-why it was built that way. Neither can the assistant, because that session is
-gone and nothing about the reasoning survived it.
+Then you need to decide what to build next, and you have lost track of what is
+already in there. So you ask an agent what the project does.
 
-This is not a memory problem you can prompt your way out of. The reasoning has
-to be written down at the moment the decision is made. An hour later you are
-reconstructing, and a confident reconstruction that happens to be wrong is worse
-than no explanation at all.
+It re-reads the source to answer. That is slow, it costs most of a context
+window, and you pay it again the next time you ask. Worse, an answer
+reconstructed from code can only recover what the code does. The reasoning was
+never in the source to begin with, so the summary you get is a confident
+description of the *what* with the *why* quietly missing.
 
-docbound makes that happen by moving the explanation inside the task instead of
-after it. Writing it down stops being something the agent gets to later, because
-the agent is not allowed to finish without it.
+docbound attacks that from both ends.
+
+It moves the explanation inside the task instead of after it, so the reasoning
+gets written down while the agent still has it, and the agent is not allowed to
+finish until it is. Then it gives you a command that answers "what is this
+project" from those documents alone:
+
+```
+npx docbound summary
+```
+
+Purpose, shape, what each module owns and is forbidden from doing, every
+decision with the condition that would reverse it, recent work, and what is
+still open. It reads no source file. On this repository that is about 2,400
+tokens against roughly 69,000 in the source an agent would otherwise have
+chewed through, and the output tells you both numbers so you can check the
+claim rather than take it.
 
 ## Try it without installing anything
 
-This reads your repository and changes nothing in it. Run it on something real:
+Both of these read your repository and change nothing in it.
 
 ```
 cd your-repo
-npx docbound audit
+npx docbound summary     # what is already here, according to the docs
+npx docbound audit       # what is missing
 ```
 
-You get either `PASS` or a list. On a repository with an undocumented change,
-the list looks like this:
+`summary` on a repository that has never used docbound comes back thin, and it
+says so rather than padding it. That is a true report of the state of its docs.
+
+`audit` gives you either `PASS` or a list. On a repository with an undocumented
+change, that list looks like this:
 
 ```
 docbound audit · mode=author · root=your-repo · git=yes · 3 changed file(s), 2 source
@@ -300,6 +319,7 @@ narrow; see `docs/providers.md`.
 - `docs/subagent.md`: wiring the documentation subagent
 - `docs/DEVELOP.md`: building, testing, releasing, and how to add a check
 - `docs/decisions/`: why things are shaped this way, oldest first
+- `docs/decisions/0012-summary-from-docs.md`: why the summary never reads code
 - `skill/docbound/SKILL.md`: the skill your agent reads
 
 ## License
