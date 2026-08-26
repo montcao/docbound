@@ -1,0 +1,65 @@
+# 0006. One module per check
+
+- Date: 2026-08-26
+- Status: accepted
+- Supersedes: none
+
+## Context
+
+The Python reference holds twenty-one checks and their shared helpers in one
+946-line file. Two things about the check set make its shape an interface rather
+than an implementation detail. Adding a check is the most common change this
+repository will take, and each check must be exercised by a fixture whose
+expected output names it — so a check, its registration, its documentation row,
+and its fixture are one unit of work, and a contributor has to be able to find
+all four.
+
+The check set is also fixed for this pass. Whatever shape it takes has to make
+the next check obvious to add without making the current twenty-one harder to
+diff against the Python they came from.
+
+## Options
+
+### One module, mirroring the Python
+
+The port is a transcription, so diffing it against the specification is
+mechanical. Leaves a single file that every contributor edits, and no signature
+that says what a check is — the contract stays a convention observed by reading
+the other twenty.
+
+### One module per check under `lib/checks/`
+
+Each file exports `{ id, level, run(ctx) }`, and the shape of the contract is
+visible from any one of them. The list in `audit.mjs` is the registry, so
+registration is one line and forgetting it is a fixture failure. Costs
+twenty-one files where the Python had sections, and a shared context object that
+has to carry everything any check needs.
+
+## Decision
+
+One module per check. `skill/docbound/scripts/lib/checks/<check-id>.mjs` exports
+`{ id, level, run(ctx) }`; `audit.mjs` imports the list, runs each `run(ctx)` in
+order, applies waivers, and reports. Shared machinery that more than one check
+needs lives in `lib/` beside them: `git.mjs`, `paths.mjs`, `changes.mjs`,
+`worklog.mjs`, `report.mjs`, `config.mjs`.
+
+The file name is the check ID. That is what makes a finding navigable: an agent
+reading `[dead-ref] docs/OPS.md` can open the check that produced it without
+searching.
+
+## Consequences
+
+Adding a check is four steps in one commit, and `docs/DEVELOP.md` lists them:
+write the module, add a fixture whose `expected.json` names the ID, add a row to
+the table in `skill/docbound/SKILL.md`, add an entry to `docs/checks.md`. A
+check that needs data no other check needs has to put it on the context object,
+which is a shared surface — the pressure that keeps checks from accumulating
+private state.
+
+## What would reverse this
+
+If checks start needing to run in dependent order or to read each other's
+findings, the flat registry stops describing what happens and the set becomes a
+pipeline with explicit stages. The trigger is the second check that has to run
+after a specific other one; `adr-shape` and `adr-immutable` are close to it
+already and stay independent only because each re-derives whether the ADR is new.
