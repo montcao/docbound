@@ -15,11 +15,14 @@ import {
   removeTree,
   runAudit,
   runNode,
+  tempDir,
 } from "./harness.mjs";
 
 const built = [];
+const made = [];
 after(() => {
   for (const work of built) removeTree(work);
+  for (const dir of made) removeTree(dir);
 });
 
 function project() {
@@ -77,34 +80,65 @@ describe("docbound install", () => {
     assert.ok(manifest.hooks.stop[0].command.includes("--event stop"));
   });
 
-  test("aliases resolve to canonical provider names", () => {
+  test("an alias resolves to the canonical provider name", () => {
     const repo = project();
-    const result = cli(repo, ["install", "--providers=claude,copilot", "--yes"]);
+    const result = cli(repo, ["install", "--providers=claude", "--yes"]);
     assert.equal(result.status, 0, result.stderr);
     assert.ok(fs.existsSync(path.join(repo, ".claude/skills/docbound/SKILL.md")));
-    assert.ok(fs.existsSync(path.join(repo, ".github/skills/docbound/SKILL.md")));
+  });
+
+  test("no supported harness is a refusal, not a guess", () => {
+    const repo = project();
+    // A bare temporary HOME so nothing on the developer's machine is detected.
+    const elsewhere = tempDir("no-harness");
+    made.push(elsewhere);
+    const result = runNode(CLI, ["install", "--yes"], {
+      cwd: repo,
+      env: { ...process.env, HOME: elsewhere, USERPROFILE: elsewhere },
+    });
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /no supported harness detected/);
+    assert.match(result.stderr, /docs\/providers\.md/);
+    assert.ok(
+      !fs.existsSync(path.join(repo, ".agents")),
+      "nothing is written to a path nobody verified",
+    );
+  });
+
+  test("an unparseable harness config is never overwritten", () => {
+    const repo = project();
+    const settings = path.join(repo, ".claude", "settings.json");
+    fs.mkdirSync(path.dirname(settings), { recursive: true });
+    // Trailing comma: valid JSONC, invalid JSON. Treating it as absent would
+    // replace the developer's whole harness configuration.
+    fs.writeFileSync(settings, '{ "model": "opus", }');
+
+    const result = cli(repo, ["install", "--providers=claude-code", "--yes"]);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /Refusing to overwrite/);
+    assert.equal(fs.readFileSync(settings, "utf8"), '{ "model": "opus", }');
   });
 
   test("installs two providers at once and wires both hooks", () => {
     const repo = project();
     const result = cli(repo, [
       "install",
-      "--providers=claude-code,codex",
+      "--providers=claude-code,cursor",
       "--scope=project",
       "--yes",
     ]);
     assert.equal(result.status, 0, result.stderr);
 
     assert.ok(fs.existsSync(path.join(repo, ".claude/skills/docbound/SKILL.md")));
-    assert.ok(fs.existsSync(path.join(repo, ".agents/skills/docbound/SKILL.md")));
+    assert.ok(fs.existsSync(path.join(repo, ".cursor/skills/docbound/SKILL.md")));
     assert.ok(fs.existsSync(path.join(repo, ".claude/skills/docbound/scripts/audit.mjs")));
 
     const claude = readJson(path.join(repo, ".claude/settings.json"));
     assert.ok(claude.hooks.PostToolUse[0].hooks[0].command.includes("hook.mjs"));
     assert.ok(claude.hooks.Stop[0].hooks[0].command.includes("--event stop"));
 
-    const codex = readJson(path.join(repo, ".codex/hooks.json"));
-    assert.ok(codex.hooks.afterFileEdit[0].command.includes("hook.mjs"));
+    const cursor = readJson(path.join(repo, ".cursor/hooks.json"));
+    assert.ok(cursor.hooks.afterFileEdit[0].command.includes("hook.mjs"));
   });
 
   test("merging a hook manifest keeps unrelated hooks", () => {

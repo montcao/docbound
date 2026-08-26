@@ -112,6 +112,11 @@ export function build({
   pluginOut = path.join(REPO_ROOT, "plugin"),
   quiet = false,
 } = {}) {
+  // Remove the whole tree first. Writing per provider leaves the directory of a
+  // provider that has been dropped from the table sitting in the package, which
+  // is how an unsupported harness keeps shipping after it was removed.
+  fs.rmSync(out, { recursive: true, force: true });
+
   const payload = collectPayload();
   // Identical for every provider by construction, and the value an installed
   // copy is compared against; see `cli/install.mjs`.
@@ -129,6 +134,11 @@ export function build({
     };
     if (!quiet) process.stdout.write(`  ${provider.name}: ${files.size} file(s)\n`);
   }
+
+  // The payload with no harness path wrapped around it, for anyone vendoring
+  // by hand into a location this project has not verified.
+  writeTree(path.join(out, "payload"), payload);
+  lock.payload = { files: payload.size, hash: payloadHash };
 
   const pluginFiles = buildPlugin(payload);
   writeTree(pluginOut, pluginFiles);

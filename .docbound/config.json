@@ -1,6 +1,7 @@
 {
   "audit": {
     "exclude": [
+      ".cursor/**",
       "plugin/**",
       "skill/docbound/SKILL.md",
       "skill/docbound/agents/**",

@@ -11,7 +11,9 @@ which is build output. Reading it is reading the built copy of
 `skill/docbound/`. Edit the source, never the link's target — the next
 `node scripts/build.mjs` overwrites it.
 
-The same is true of `.agents/skills/docbound` and `.github/skills/docbound`.
+`.cursor/skills/docbound` is the same arrangement for the other shipped
+provider. Both are excluded from this repository's own audit, in
+`.docbound/config.json`.
 
 ## The hooks are deliberately not wired here
 

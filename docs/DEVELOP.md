@@ -127,12 +127,24 @@ use, and what its hook manifest looks like:
 Omit `hookFile` and `hookManifest` for a harness with no file-edit hook; the
 skill installs and the audit becomes something the agent has to remember to run.
 
-Then `node scripts/build.mjs`, add the name to the install matrix in
-`tests/cli.test.mjs`, and commit `dist/` and `skills-lock.json` with the change.
+**An entry needs evidence, not inference.** Answer all four questions from the
+harness itself — its bundled documentation, the skills it ships, its files on
+disk — and record what you used in the entry's `verified` field:
 
-This is the file most likely to be out of date, because it tracks seven other
-projects' conventions rather than this one's. A correction here is welcome and
-needs no decision record.
+1. Where does it read a **project-level** skill from?
+2. What file holds its hook manifest, and what is that file's schema?
+3. What are its event names for a file edit and for the agent stopping?
+4. What does a hook do to block a stop? The gate depends on a specific answer.
+
+A wrong entry fails silently: the payload lands where the harness never reads,
+the install reports success, and the skill never loads. `docs/providers.md`
+holds the candidates that do not ship and what each still needs; promoting one
+means moving it from there to here with its evidence, then deleting its section.
+
+Then `node scripts/build.mjs` — the install matrix in `tests/cli.test.mjs`
+iterates the table, so a new entry is covered without editing the test — and
+commit `dist/` and `skills-lock.json` with the change. Correcting an entry
+against better evidence is welcome and needs no decision record.
 
 ## Changing the skill's prose
 

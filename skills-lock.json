@@ -1,52 +1,26 @@
 {
   "version": "0.1.0",
-  "payloadHash": "sha256:5fde2ac051c60f75372aaa42153e9f275a2998a78c5ba96b3553bc6c438bd5e0",
+  "payloadHash": "sha256:affa617e72ffaad8f092a78c03573b791502d18e21efaf47d22b6628fe1defe6",
   "providers": {
-    "universal": {
-      "payload": ".agents/skills/docbound",
-      "hookFile": null,
-      "files": 45,
-      "hash": "sha256:e473bde2c90bae688eb6ac74d282a862cb42f61746c7c6d0cf606ac2d3b4ee63"
-    },
     "claude-code": {
       "payload": ".claude/skills/docbound",
       "hookFile": ".claude/settings.json",
       "files": 46,
-      "hash": "sha256:867e5030c7905b9d7aa94591ab3cd9642569ca3353d8c2236d91b0034d83050b"
-    },
-    "codex": {
-      "payload": ".agents/skills/docbound",
-      "hookFile": ".codex/hooks.json",
-      "files": 46,
-      "hash": "sha256:021b6e854de3c16e6e8f514d12d1dd3c52a53b7569bde92453f0cfd5af31c657"
+      "hash": "sha256:ba6dfabd8e74b461d0baa57e47c4fd7e2d2fc108b70d580e822f93cbbeab71f0"
     },
     "cursor": {
       "payload": ".cursor/skills/docbound",
       "hookFile": ".cursor/hooks.json",
       "files": 46,
-      "hash": "sha256:f48da85acc75cd69a34260c13a9a414386f8d0734eb97cfae35a0ce82ae875ce"
-    },
-    "gemini": {
-      "payload": ".gemini/skills/docbound",
-      "hookFile": null,
-      "files": 45,
-      "hash": "sha256:e8fac0aeab62f62e77b75bbfd7932ea9516a2f2688838be08949e5770f3f5d8b"
-    },
-    "github": {
-      "payload": ".github/skills/docbound",
-      "hookFile": ".github/hooks/docbound.json",
-      "files": 46,
-      "hash": "sha256:a2e8c2715c9af9ea3837281791472c43208581398f13b885151ef539c398d037"
-    },
-    "opencode": {
-      "payload": ".opencode/skill/docbound",
-      "hookFile": null,
-      "files": 45,
-      "hash": "sha256:983d780bb2ad673f56dc4996625561a254ec9572a96c9ec45bf4b186ea390ea9"
+      "hash": "sha256:609af42e68118f9520fe6f531eebd42d815f0fb5254c9ffaddb396d025634400"
     }
+  },
+  "payload": {
+    "files": 44,
+    "hash": "sha256:affa617e72ffaad8f092a78c03573b791502d18e21efaf47d22b6628fe1defe6"
   },
   "plugin": {
     "files": 46,
-    "hash": "sha256:b7482365a193b8a5e7486ace9b0bebc018bd0e04f4ca64f515b132bfb845ca02"
+    "hash": "sha256:300d1c40e581a767ccc18324c2c5d20028a9642ebea1ccc4cefbcef1d03f84d8"
   }
 }

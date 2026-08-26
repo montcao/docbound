@@ -47,8 +47,24 @@ function readJson(file) {
   }
 }
 
+// Keys that reach the prototype chain rather than the object. `JSON.parse`
+// preserves them as ordinary-looking keys, and assigning one walks out of the
+// object being built.
+const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
+
+/**
+ * Merge parsed configuration into a target, key by key.
+ *
+ * The config file is whatever the cloned repository carried, and the hook that
+ * reads it runs automatically after every file edit — so this is untrusted
+ * input on an automatic path, and it is treated that way.
+ */
 function mergeInto(target, source) {
   for (const [key, value] of Object.entries(source)) {
+    if (UNSAFE_KEYS.has(key)) {
+      process.stderr.write(`docbound: ignoring unsafe config key '${key}'\n`);
+      continue;
+    }
     if (isPlainObject(value) && isPlainObject(target[key])) {
       mergeInto(target[key], value);
     } else {
@@ -59,7 +75,15 @@ function mergeInto(target, source) {
 }
 
 function isPlainObject(value) {
-  return typeof value === "object" && value !== null && !Array.isArray(value);
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    !Array.isArray(value) &&
+    // A parsed object whose prototype was reassigned is not a plain object, and
+    // recursing into it would merge into whatever it now points at.
+    (Object.getPrototypeOf(value) === Object.prototype ||
+      Object.getPrototypeOf(value) === null)
+  );
 }
 
 function clone(value) {

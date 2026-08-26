@@ -53,19 +53,22 @@ parent, so a parent that ends a turn with the documenter's findings unresolved i
 blocked as well. That is the intended shape: the audit is the definition of done
 for the documenter's run *and* for the parent's task.
 
-## Codex
+## Cursor
 
-Codex discovers the agent definition nested in the skill payload at
-`.agents/skills/docbound/agents/`. Invoke it the same way, and approve the hook
-once through the hooks command — Codex requires an explicit approval before a
-hook in `.codex/hooks.json` will run.
+Cursor reads the agent definition out of the skill payload it was installed
+with, under its own skills directory. Invoke it the same way. The stop hook
+installed alongside blocks on a failed audit exactly as it does under Claude
+Code.
 
-Without a subagent mechanism, the same result comes from a second session with
-the skill loaded and this instruction:
+## Any other harness
+
+docbound ships verified support for two harnesses; `docs/providers.md` says why,
+and what a third would need. Anywhere else, the same result comes from a second
+session with the skill loaded by hand and this instruction:
 
 ```
-You are in subagent mode. Read .agents/skills/docbound/references/subagent-mode.md
-first. Document the work between main and 9f2c1ab. You did not write this code.
+You are in subagent mode. Read the skill's references/subagent-mode.md first.
+Document the work between main and 9f2c1ab. You did not write this code.
 Run the audit with --mode subagent --base main --since 9f2c1ab and return its
 result verbatim.
 ```

@@ -68,7 +68,7 @@ edit or a stop, `npx docbound audit`, and CI.
 | Audit JSON: `root`, `git`, `changed`, `errors`, `warnings`, `waived` | `skill/docbound/scripts/lib/report.mjs` | The hook, the CLI, the test suite | Architecture Decision Record |
 | Audit exit codes: 0 pass, 1 errors, 2 usage | `skill/docbound/scripts/audit.mjs` | CI, pre-commit hooks, the CLI | Architecture Decision Record |
 | The check module contract, `{ id, level, run(ctx) }` | `skill/docbound/scripts/audit.mjs` | Every check module | Architecture Decision Record |
-| Provider placement and hook manifests | `scripts/providers.mjs` | The build and the CLI | Nothing; it tracks other projects' conventions |
+| Provider placement and hook manifests | `scripts/providers.mjs` | The build and the CLI | Evidence from the harness itself, recorded in the entry |
 | Fixture contract: a setup script and an expected-findings file | `tests/harness.mjs` | Every fixture | Nothing |
 
 ## Invariants
@@ -82,8 +82,11 @@ edit or a stop, `npx docbound audit`, and CI.
   hook manifest differ — enforced by `tests/build.test.mjs`.
 - Zero runtime dependencies, anywhere. Not enforced by a check; enforced by
   `package.json` having no `dependencies` key and a reviewer noticing one appear.
-- The hook emits findings, never file contents. Enforced by construction in
-  `skill/docbound/scripts/hook.mjs`, which is handed findings and never a buffer.
+- The hook emits findings and never the edited buffer. Enforced by
+  construction in `skill/docbound/scripts/hook.mjs`, which is handed findings
+  and has no access to file contents. Two checks quote a truncated line inside
+  their own message; `skill/docbound/references/hooks.md` names them and the
+  limits.
 - The audit reads only below the root it is given.
 
 ## Decisions
@@ -100,13 +103,11 @@ table of the module README that owns them — `cli/README.md` and
 
 ## Known gaps
 
-- Four of the seven provider entries in `scripts/providers.mjs` are taken from
-  documentation and checked against no running harness: gemini, github,
-  opencode, and the generic `universal` layout. A wrong path installs a skill
-  where its harness will not look, and nothing reports an error —
-  `tests/cli.test.mjs` can only assert that the payload lands where the entry
-  says, not that the entry is right. Claude Code, Codex, and Cursor were
-  verified against the harness itself.
+- Only a harness can confirm a provider entry. `tests/cli.test.mjs` asserts the
+  payload lands where the entry says, which does not make the entry right about
+  the world — that is how the Cursor entry shipped wrong once. Both shipped
+  entries were checked against the harness's own files, and everything else is
+  a candidate in `docs/providers.md` rather than an entry here.
 - Two implementations of the audit exist for one release. The Python under
   `skill/docbound/scripts/reference/` is frozen and unmaintained, and nothing
   automatically checks that the two still agree — the diff is run by hand, and

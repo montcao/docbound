@@ -141,14 +141,18 @@ per-developer override and the hook caches are not. Add this to `.gitignore`:
 
 ## Supported tools
 
-Claude Code, Codex, Cursor, Gemini CLI, GitHub Copilot, opencode, and any agent
-that reads the Agent Skills format. The skill is plain Markdown plus Node
-scripts with no runtime dependencies, and it degrades to a whole-tree scan
-without git.
+**Claude Code** and **Cursor**. Both were verified against the harness itself —
+its own bundled files, not a description of them — and each entry in
+`scripts/providers.mjs` records what that evidence was.
 
-Provider placement and hook manifests live in one file,
-`scripts/providers.mjs`. It is the part of this repository most likely to be out
-of date; corrections are welcome and need no ceremony.
+Nothing else ships. A provider entry written from inference fails silently: the
+payload lands where the harness never reads, the install reports success, and
+the skill never loads. `docs/providers.md` lists the candidates, what is known
+about each, and the four questions to answer before one can be added.
+
+Any other tool can use docbound by hand — `dist/payload/` is the skill with no
+path claim attached. It is plain Markdown plus Node scripts with no runtime
+dependencies, and the audit degrades to a whole-tree scan without git.
 
 ## Where to go next
 

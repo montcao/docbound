@@ -154,7 +154,10 @@ export function copyDist(distRoot, root, provider) {
  */
 export function ensureConfig(root, providers) {
   const file = path.join(root, ".docbound", "config.json");
-  const config = readJson(file) ?? structuredClone(DEFAULT_CONFIG);
+  const existing = readExistingJson(file, ".docbound/config.json");
+  const config = Object.keys(existing).length > 0
+    ? existing
+    : structuredClone(DEFAULT_CONFIG);
   config.audit = config.audit ?? {};
   const exclude = new Set(config.audit.exclude ?? []);
   exclude.add(".docbound/**");
@@ -180,17 +183,38 @@ export function linkDist(source, root, provider) {
   return provider.payload;
 }
 
-/** Merge the provider's hook entries into its manifest, keeping what is there. */
+/**
+ * Merge the provider's hook entries into its manifest, keeping what is there.
+ *
+ * Throws rather than writing when an existing manifest will not parse. That
+ * file is the developer's harness configuration, and treating an unreadable one
+ * as absent would replace all of it with docbound's two hooks.
+ */
 export function mergeHookManifest(root, provider) {
   if (!provider.hookFile) return null;
   const target = path.join(root, provider.hookFile);
+  const existing = readExistingJson(target, provider.hookFile);
   const incoming = provider.hookManifest(provider.payload);
-  const existing = readJson(target) ?? {};
   const merged = mergeHooks(existing, incoming);
   fs.mkdirSync(path.dirname(target), { recursive: true });
   fs.writeFileSync(target, `${JSON.stringify(merged, null, 2)}\n`);
   return provider.hookFile;
 }
+
+/** `{}` when the file is absent; a thrown error when it exists and is broken. */
+function readExistingJson(file, label) {
+  if (!fs.existsSync(file)) return {};
+  const parsed = readJson(file);
+  if (parsed === null) {
+    throw new Error(
+      `${label} exists but is not valid JSON. Refusing to overwrite it — ` +
+        "fix or move it, then run install again.",
+    );
+  }
+  return parsed;
+}
+
+const UNSAFE_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
 function mergeHooks(existing, incoming) {
   // Incoming keys first so a manifest format that requires one — Cursor's
@@ -202,6 +226,7 @@ function mergeHooks(existing, incoming) {
     hooks: { ...(existing.hooks ?? {}) },
   };
   for (const [event, entries] of Object.entries(incoming.hooks ?? {})) {
+    if (UNSAFE_KEYS.has(event)) continue;
     const current = Array.isArray(merged.hooks[event]) ? merged.hooks[event] : [];
     const kept = current.filter((entry) => !isDocbound(entry));
     merged.hooks[event] = [...kept, ...entries];

@@ -5,6 +5,138 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 — Ship only verified providers, and close three security findings
+
+Agent: claude · Branch: main
+
+### Intent
+
+This repository is about to be public. Two classes of problem make that unsafe
+in its current state.
+
+The first is provider entries that were written from assumption rather than from
+evidence. Correcting the Cursor entry earlier today showed the method — read
+what the harness itself ships — and applying that method to the rest shows the
+table is largely fiction. Codex's own skill-creator places skills under its own
+home directory and describes no project-level location, so the path and the
+hook schema in the Codex entry are both wrong. No project puts
+skills under the GitHub directory; that holds Copilot instructions, workflows,
+and issue templates, so the GitHub entry was invented, and it is the one entry
+that writes into a directory people treat as security-critical. Gemini and
+opencode have no evidence behind them at all. A supported-providers list whose
+entries silently do nothing is the first thing a reader will test and the first
+thing they will report.
+
+The second is three findings from reading the code as an attacker would. The
+configuration merge assigns keys straight from parsed JSON, so a repository
+carrying a crafted config file can reach `Object.prototype` through a hook that
+runs automatically after every file edit. Merging a hook manifest
+treats an unparseable existing file as an empty one, which silently replaces a
+developer's entire harness settings with docbound's two hooks. And the hook is
+documented as never emitting file contents, which is false: two checks quote a
+truncated line from the file they are about.
+
+### Expected to touch
+
+- `scripts/providers.mjs` — remove every entry not verified against a harness
+- `skill/docbound/scripts/lib/config.mjs` — prototype-safe merge
+- `cli/install.mjs` — refuse to overwrite a config or a manifest that will not
+  parse
+- `skill/docbound/scripts/hook.mjs` and the hooks reference — an accurate
+  claim about what hook output can contain
+- `docs/providers.md` — new: what each candidate needs before it can ship
+- `dist/`, `plugin/`, and this repository's own harness directories — rebuilt
+  and pruned
+- `README.md`, `docs/`, `CHANGELOG.md` — the supported list, honestly
+
+### Unknowns going in
+
+- Whether removing the generic Agent Skills layout costs more than it gains. It
+  is the layout the skill's own text recommends, but the one independent project
+  on this machine uses that directory for plugin metadata and puts its skills
+  elsewhere, so it is a claim I cannot check either.
+- Whether a prototype-pollution guard is enough, or whether the config merge
+  should reject unknown keys outright.
+
+### Outcome
+
+**Five provider entries removed; two ship.** `scripts/providers.mjs` now holds
+Claude Code and Cursor, each carrying the evidence it was verified against.
+Codex, Gemini CLI, GitHub Copilot, opencode, and the generic Agent Skills layout
+are documented as candidates in `docs/providers.md` with the four questions each
+still has to answer. The policy is recorded in
+`docs/decisions/0008-verified-providers-only.md`.
+
+Two of the five were demonstrably wrong rather than merely unconfirmed. Codex's
+own skill-creator describes a location under the user's home directory and no
+project-level one, and the removed entry's hook manifest used another harness's
+event vocabulary. The GitHub entry was invented: no project examined puts skills
+or hooks under that directory, which holds instructions files, workflows, and
+access configuration — and writing there on a guess is the part of this that was
+worst.
+
+`install` with nothing detected now refuses and names the options instead of
+falling back to an unverified path, exiting 1 rather than 2, because the flags
+were fine. `dist/payload/` is the skill with no directory wrapped around it, for
+vendoring by hand where nobody has checked what the path should be. The build
+removes its whole output tree first, so a dropped entry stops shipping instead
+of lingering in the package: the GitHub distribution was still on disk after the
+table lost its entry.
+
+**Three security findings, all fixed and all with a regression test.**
+
+The configuration merge assigned keys straight from parsed JSON, so a cloned
+repository carrying a crafted config could reach `Object.prototype` through a
+hook that runs automatically after every file edit. Unsafe keys are refused, and
+an object whose prototype has been reassigned is no longer treated as plain and
+recursed into.
+
+Installing treated a harness configuration that would not parse as an absent
+one and replaced it — a trailing comma in a settings file was enough to lose all
+of it. Install now refuses, says which file and why, and leaves it untouched.
+The CLI catches that refusal and prints one line instead of a stack trace.
+
+The hook was documented in four places as never emitting file contents. That was
+false: `todo-shape` quotes up to seventy characters of the line holding the
+marker and `stale-marker` up to eighty of the line it matched, and those
+messages pass through hook output. The claim is now precise about which checks
+and what limits, rather than weakened or quietly dropped. Redacting instead was
+considered and rejected: the agent reading the output already has the file open,
+so redaction would cost the findings their usefulness to prevent nothing.
+
+The frozen Python reference no longer travels in the npm package either. It
+stays in the repository for one release as the specification
+(`docs/decisions/0002-node-runtime.md`) and is nobody's business to download.
+
+**This repository's own harness directories.** The symlinks and hook manifests
+for removed providers are deleted, so nothing here writes into the GitHub
+directory but CI. Cursor is dogfooded alongside Claude Code, and both payload
+paths are excluded from this repository's audit in `.docbound/config.json`.
+
+### Still open
+
+- The two waivers below are the only ones standing, and both are about docs
+  whose subject is paths outside this repository. If `dead-ref` ever learns to
+  tell a path claim from a path mention, both can go.
+- Four candidate providers remain undocumented in the harness sense — someone
+  with Codex, Gemini CLI, Copilot, or opencode in front of them can answer the
+  four questions in `docs/providers.md` and promote one.
+- The check candidate stands from two entries ago: `comment-sentence` reads the
+  continuation lines of a wrapped sentence as fragments.
+
+### Waivers
+
+waiver: dead-ref docs/providers.md — this file's subject is where other tools
+read skills from, so by construction none of the paths it names exist in this
+repository. Removing the backticks would make a reference document about paths
+unable to typeset a path.
+
+waiver: dead-ref docs/decisions — records 0002 and 0007 name provider paths that
+existed when they were written and were removed by
+`docs/decisions/0008-verified-providers-only.md`. An accepted record is an
+archive; editing it to match the present is the thing `adr-immutable` exists to
+prevent.
+
 ## 2026-08-26 — Correct the Cursor provider entry and cut dead surface
 
 Agent: claude · Branch: main
@@ -149,8 +281,8 @@ this tree is the last acceptance test, not a formality.
 
 - Whether the skill payload's own prose (SKILL.md, `references/`, `templates/`)
   can live inside an audited tree without tripping `template-residue` and
-  `dead-ref`. In a consumer repository the payload sits under `.agents/` or
-  `.claude/`, both of which the audit already excludes by name; here it does
+  `dead-ref`. In a consumer repository the payload sits under a harness
+  directory the audit already excludes by name; here it does
   not, and the check set is fixed for this pass.
 - Whether the Python's change detection has any behaviour the fixtures do not
   pin, which the port would silently drop.
@@ -204,7 +336,7 @@ comparison.
 
 **Two reporting defects found while verifying the acceptance steps.** `doctor`
 called Cursor and universal installed whenever Codex was, because three
-providers read the same `.agents/skills/docbound` path; it now reports one line
+providers read the same generic skills path; it now reports one line
 per payload and the hook state per provider, which is what actually differs
 between them. And `--providers` rejected `claude`, which is the name the
 documented install command uses; `scripts/providers.mjs` now carries a small

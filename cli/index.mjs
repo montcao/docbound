@@ -129,7 +129,21 @@ function resolveTargets(options, root) {
   }
   const detected = detectProviders(root);
   if (detected.length > 0) return { providers: detected, detected: true };
-  return { providers: [providerByName("universal")], detected: true };
+  // Guessing here would install the payload somewhere unverified, report
+  // success, and load nothing. Naming a provider is the user's call.
+  return {
+    notFound:
+      `no supported harness detected in ${root} or your home directory.\n` +
+      `  Name one explicitly:  --providers=${PROVIDER_NAMES.join(",")}\n` +
+      "  Or copy dist/payload into wherever your tool reads skills from.\n" +
+      "  Candidates not yet supported are listed in docs/providers.md.",
+  };
+}
+
+/** A failed operation, not malformed usage: the flags were fine. */
+function notFound(message) {
+  process.stderr.write(`docbound: ${message}\n`);
+  return 1;
 }
 
 function targetRoot(options) {
@@ -143,6 +157,7 @@ async function commandInstall(options) {
   if (root === null) return fail(`unknown scope: ${options.scope}`);
   const resolved = resolveTargets(options, root);
   if (resolved.error) return fail(resolved.error);
+  if (resolved.notFound) return notFound(resolved.notFound);
 
   process.stdout.write(`docbound ${readLock(PACKAGE_ROOT).version} into ${root}\n`);
   if (resolved.detected) process.stdout.write("detected from this project:\n");
@@ -207,6 +222,7 @@ async function commandLink(options) {
   if (root === null) return fail(`unknown scope: ${options.scope}`);
   const resolved = resolveTargets(options, root);
   if (resolved.error) return fail(resolved.error);
+  if (resolved.notFound) return notFound(resolved.notFound);
 
   for (const provider of resolved.providers) {
     const target = linkDist(source, root, provider);
@@ -343,5 +359,12 @@ export { PROVIDERS };
 
 if (isEntryPoint(import.meta.url)) {
   ignoreEpipe();
-  process.exitCode = await main(process.argv.slice(2));
+  try {
+    process.exitCode = await main(process.argv.slice(2));
+  } catch (err) {
+    // A refusal to touch a file the user owns is an ordinary outcome here, not
+    // a crash, and it reads as one.
+    process.stderr.write(`docbound: ${err.message}\n`);
+    process.exitCode = 1;
+  }
 }

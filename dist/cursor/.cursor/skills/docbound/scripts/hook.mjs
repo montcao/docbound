@@ -19,9 +19,13 @@
 // each field; nothing here reads that payload beyond looking for a working
 // directory, because the audit derives everything else from the repository.
 //
-// Output carries findings only — check id, path, message. It never carries the
-// text of the user's code: a hook runs on every edit, and an edit is the most
-// sensitive moment in a session to be quoting a buffer back into a transcript.
+// Output carries findings only — check id, path, message — and never the buffer
+// that was edited: a hook runs on every edit, and that is the most sensitive
+// moment in a session to be echoing a file back into a transcript.
+//
+// Two checks quote a truncated line inside their own message, `todo-shape` and
+// `stale-marker`, and those messages pass through here like any other. That is
+// the whole of the file content that can reach a transcript by this route.
 
 import path from "node:path";
 import process from "node:process";

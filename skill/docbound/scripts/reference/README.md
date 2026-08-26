@@ -24,8 +24,9 @@ node   skill/docbound/scripts/audit.mjs          --root /some/repo --json
 - Must not be edited. A change here is a change to the specification the port
   was verified against, which makes the verification worthless. Behaviour
   changes go into the Node implementation and into a fixture.
-- Must not be shipped. `scripts/build.mjs` excludes this directory, and
-  `tests/build.test.mjs` asserts that no Python file reaches any distribution.
+- Must not be shipped. `scripts/build.mjs` excludes this directory,
+  `tests/build.test.mjs` asserts that no Python file reaches any distribution,
+  and `package.json` excludes it from the npm package.
 
 ## Where the behaviour is pinned now
 

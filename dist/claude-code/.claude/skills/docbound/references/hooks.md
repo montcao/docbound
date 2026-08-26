@@ -4,10 +4,15 @@ The audit is the definition of done. An instruction that says so competes with
 every other instruction in the agent's context and loses whenever the agent's
 own sense of completion arrives first. A hook does not compete.
 
-`scripts/hook.mjs` is the entry point. It reads no file contents and emits
-findings only — check id, path, message — because it runs after every edit and
-an edit is the worst moment in a session to be quoting a buffer back into a
+`scripts/hook.mjs` is the entry point. It emits findings only — check id, path,
+message — and never the buffer that was edited, because it runs after every edit
+and that is the worst moment in a session to be echoing a file back into a
 transcript.
+
+Two checks put a fragment of a file into their own message: `todo-shape` quotes
+up to seventy characters of the line holding the marker, and `stale-marker`
+quotes up to eighty characters of the line it matched. Those messages reach hook
+output like any other. Nothing else in a finding contains file content.
 
 ## Two events
 

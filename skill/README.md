@@ -34,8 +34,10 @@ dependencies (`docs/decisions/0002-node-runtime.md`).
   from here; the reverse would make the skill undistributable.
 - Must not read or write outside the repository root it is given. The audit is
   handed a root and stays inside it.
-- Must not emit file contents from the hook. Findings carry a check ID, a path,
-  and a message, and nothing else — see `skill/docbound/scripts/hook.mjs`.
+- Must not put a file's contents into hook output beyond what a finding's own
+  message carries. A finding is a check ID, a path, and that message; two
+  checks quote a truncated line from the file they are about, and that is the
+  whole of what reaches a transcript. See `skill/docbound/scripts/hook.mjs`.
 - Must not gain a runtime dependency. The install paths that matter most are the
   ones with no package manager in them.
 
