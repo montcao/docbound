@@ -22,7 +22,7 @@
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/package.test.mjs tests/scaffold.test.mjs tests/summary.test.mjs",
+    "test": "node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/package.test.mjs tests/scaffold.test.mjs tests/start.test.mjs tests/summary.test.mjs",
     "audit": "node cli/index.mjs audit",
     "check-dist": "node scripts/check-dist-fresh.mjs"
   },

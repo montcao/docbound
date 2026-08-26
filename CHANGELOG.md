@@ -10,6 +10,11 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- `docbound start "Add rate limiting"`: writes the worklog entry skeleton so an agent
+  composes the Intent and nothing else. Sections come from the template, their
+  guidance text does not, and it refuses to stack on an entry that has no
+  Outcome yet. `docs/decisions/0014-retroactive-slugs.md` has the reasoning.
+
 - Open items in a worklog entry can carry a slug: `- [retry-jitter] the backoff
   has no jitter`. An item with one is declared once and stays open until a later
   entry writes `- [retry-jitter] closed: ...`, so carrying work forward costs

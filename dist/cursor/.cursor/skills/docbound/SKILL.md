@@ -82,7 +82,7 @@ While reading, note anything already false. Stale docs you encounter are in scop
 
 ### 2. Declare — open the worklog entry before the first edit
 
-Prepend a new entry to `docs/WORKLOG.md` from `templates/WORKLOG-entry.md`. It records intent *before* you know how it turns out: what you are trying to do, which modules you expect to touch, what you do not yet know. Its value is that it is written before the code.
+Run `node scripts/start.mjs "Add rate limiting"`, or prepend an entry to `docs/WORKLOG.md` from `templates/WORKLOG-entry.md` by hand. It records intent *before* you know how it turns out: what you are trying to do, which modules you expect to touch, what you do not yet know. Its value is that it is written before the code.
 
 Leave `Outcome` and `Still open` empty until step 5.
 

@@ -5,6 +5,99 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 - Open an entry by command, and tag the items already open
+
+Agent: claude · Branch: main
+
+### Intent
+
+Two pieces of clerical work are still going through a language model every task.
+
+The first is the entry skeleton. An agent hand-writes the heading, the date, the
+agent line, and five section headers before it writes anything worth reading.
+That is structure, not judgement, and hand-writing it is why one heading in this
+worklog uses an em dash where every other uses a hyphen, which the summary
+parser had to be made lenient about. `docbound start` writes the skeleton so the
+agent fills Intent and nothing else.
+
+The second is the backlog this repository is carrying. Thirty-five untagged
+notes sit in eleven entries, describing perhaps a dozen real pieces of
+unfinished work, several of them already done. The slug convention landed one
+entry ago and nothing has used it, so `summary --open` is still a list nobody
+would act on.
+
+Tagging them means annotating closed entries, which the previous record ruled
+out. That ruling was mine and it was wrong: adding a slug in front of a bullet
+changes no word of what the entry said, and it makes the history read more
+accurately rather than less, because one item restated six times becomes one
+item mentioned six times. Reversing it needs a superseding record rather than an
+edit, which is what this repository's own check enforces.
+
+### Expected to touch
+
+- `skill/docbound/scripts/start.mjs` - new
+- `cli/index.mjs` - the pass-through
+- `docs/WORKLOG.md` - slugs added in front of existing bullets, wording untouched
+- `docs/decisions/` - a record superseding 0013, and 0013's Status line
+- `tests/` - the command, and the retagged history aggregating correctly
+
+### Unknowns going in
+
+- How many of the thirty-five are genuinely still open. Some were closed by
+  later work and never marked, which is the backlog problem this is meant to
+  expose rather than a reason not to do it.
+- Whether `start` should refuse when the previous entry is unclosed. Refusing
+  protects the discipline and blocks a legitimate second task in one day.
+
+### Outcome
+
+**`docbound start "Add rate limiting"`** writes the entry skeleton:
+`skill/docbound/scripts/start.mjs`, with the usual pass-through in
+`cli/index.mjs`. The sections come from `skill/docbound/templates/WORKLOG-entry.md`,
+so the template stays the one place deciding what an entry contains, and their
+guidance text is stripped rather than carried in. Creating a `template-residue`
+finding at the start of every task only to make the agent clear it is busywork.
+
+It refuses when the newest entry has no Outcome, because that entry is a task
+nobody closed and stacking on top of it is how a worklog stops being a record.
+`--force` says you meant it. Eleven tests, one of which asserts the heading uses
+a hyphen, since a hand-written em dash in one heading is what the summary parser
+had to be made lenient about in the first place.
+
+**The backlog was retagged.** Thirty-five bullets across eleven entries turned
+out to be twenty-six distinct items and three notes that say nothing is open.
+`provider-coverage` had been restated five times and
+`comment-sentence-wrapping` six. Only a slug was added in front of each bullet;
+not one word of any entry changed, which is why this annotates the history
+rather than rewriting it.
+
+**Three items were already done and never marked.** They are closed below. That
+is the backlog problem this was meant to expose: without identity, finishing
+something leaves no trace on the record of it being open.
+
+**A record superseded rather than edited.** ADR 0013 said this repository's own
+history would stay untagged. That was mine and it was wrong, so
+`docs/decisions/0014-retroactive-slugs.md` replaces it and 0013's Status line
+changed to say so, which is the only edit an accepted record allows. First
+supersession in this repository, and the mechanism it demonstrates is the point
+of having it.
+
+### Still open
+
+- [lock-per-provider] closed: the per-provider payload hashes came out of
+  `skills-lock.json` when the CLI moved to comparing the single top-level hash.
+- [doc-path-waivers] closed: both became entries in `audit.exclude` rather than
+  waivers, since they were standing facts about two documents rather than
+  exceptions scoped to one task.
+- [register-conflict] closed: settled by
+  `docs/decisions/0011-two-registers.md`, which splits the register by reader.
+- [start-agent-name] `docbound start` defaults the agent name to "agent"
+  because nothing tells it which agent is running. A harness that set an
+  environment variable would fix it, and none of them do.
+- [nothing-notes] Three untagged notes say some version of "nothing from this",
+  which reads as an open item in `summary --open`. They are honest prose and
+  editing closed entries to remove them would cost more than they do.
+
 ## 2026-08-26 - Give open items an identity so they stop being retyped
 
 Agent: claude · Branch: main
@@ -187,18 +280,18 @@ and drops the why.
 
 ### Still open
 
-- The summary is exactly as good as the documentation under it, with no
+- [summary-fallback] The summary is exactly as good as the documentation under it, with no
   fallback. On a repository part-way through adopting the discipline it will be
   partial, and nothing distinguishes "this module has no must-not list" from
   "this module's must-not list is empty on purpose".
-- Nothing checks the summary stays useful. The fixtures assert it reads no
+- [summary-usefulness] Nothing checks the summary stays useful. The fixtures assert it reads no
   source and parses what is there, which is not the same as the output being
   worth reading. That gap is the same shape as the one in the check set: the
   audit measures truth, and neither measures usefulness.
-- `--entries` defaults to five, chosen without evidence. On a repository with
+- [entries-default] `--entries` defaults to five, chosen without evidence. On a repository with
   two hundred entries the right default is probably different, and there is no
   data yet to pick it from.
-- Token figures are estimates at four characters per token. Good enough for a
+- [token-estimates] Token figures are estimates at four characters per token. Good enough for a
   ratio this large, wrong enough that nobody should budget from them.
 
 ## 2026-08-26 - Bound what the audit claims to decide
@@ -373,15 +466,15 @@ the first two code blocks and leave.
 
 ### Still open
 
-- The register conflicts with `skill/docbound/references/style.md`, which forbids
+- [register-conflict] The register conflicts with `skill/docbound/references/style.md`, which forbids
   second person and prefers dry declaration. Resolved in a later entry by
   `docs/decisions/0011-two-registers.md`: the split is by reader, and the two
   READMEs are the only files on the adoption side.
-- The audit's own FAIL line contains an em dash, so the quoted terminal output in
+- [audit-output-dash] The audit's own FAIL line contains an em dash, so the quoted terminal output in
   the README carries one. Faking program output would be worse. Changing the
   message means updating `docs/checks.md` and the table in the skill, which is a
   separate change.
-- Nothing measures whether this works. Adoption is the metric and there is no way
+- [adoption-metric] Nothing measures whether this works. Adoption is the metric and there is no way
   to see it from here.
 
 ## 2026-08-26 - Rewrite the repository's prose to read as human writing
@@ -452,14 +545,14 @@ unchanged, because none of these files ships in a distribution.
 
 ### Still open
 
-- `docs/WORKLOG.md` keeps 71 em dashes in its closed entries, and
+- [archive-dashes] `docs/WORKLOG.md` keeps 71 em dashes in its closed entries, and
   `docs/decisions/` keeps its own. Both are archives, and the rule that an
   accepted record is not edited for style is the same rule `adr-immutable`
   enforces. Anyone reading the repository will see them.
-- `skill/docbound/` is untouched. Its prose belongs to its author and a build
+- [skill-prose-register] `skill/docbound/` is untouched. Its prose belongs to its author and a build
   copies it verbatim into every distribution, so a decision to restyle it is a
   decision about the product rather than about this repository.
-- Nothing checks for this. A `prose-style` check could catch dash density the
+- [prose-style-check] Nothing checks for this. A `prose-style` check could catch dash density the
   way `stale-marker` catches changelog phrasing, and it would be the first check
   in the set that is about taste rather than truth. That is an argument against
   it as much as for it.
@@ -569,16 +662,16 @@ holds to the same standard as everyone else's.
 
 ### Still open
 
-- The seeded diagram's instructional placeholders begin with a capital letter,
+- [diagram-placeholders] The seeded diagram's instructional placeholders begin with a capital letter,
   so `template-residue` does not see them and an agent can leave the section
   half-filled. That is true of most of the template's prose and is not new here,
   but the diagram is the place it would be least noticed.
-- `dead-ref` still cannot see a dead trailing-slash directory in prose —
+- [dead-ref-trailing-slash] `dead-ref` still cannot see a dead trailing-slash directory in prose —
   `worker/` in a paragraph goes uncaught. Fixing it means changing a frozen
   check's behaviour, which wants its own decision and its own fixture.
-- `diagram-refs` reads labels, not structure. A diagram whose boxes all exist
+- [diagram-structure] `diagram-refs` reads labels, not structure. A diagram whose boxes all exist
   but whose arrows are wrong passes, and nothing but a reader will catch that.
-- The check candidates from earlier entries stand: `frontmatter-limits` for the
+- [comment-sentence-wrapping] The check candidates from earlier entries stand: `frontmatter-limits` for the
   eighteen characters of headroom in the skill's description, and the
   wrapped-sentence handling in `comment-sentence`.
 
@@ -703,20 +796,20 @@ commit on main passes the audit, including the one that cuts the release.
 
 ### Still open
 
-- The skill's frontmatter description has eighteen characters of headroom before
+- [frontmatter-limits] The skill's frontmatter description has eighteen characters of headroom before
   Cursor rejects it. Nothing checks that, and the next edit to it is likely to
   be the one that breaks a provider silently. A `frontmatter-limits` check is
   the strongest candidate for the next pass at the check set.
-- Four candidate providers still need someone with the harness in front of them;
+- [provider-coverage] Four candidate providers still need someone with the harness in front of them;
   `docs/providers.md` has the four questions each has to answer.
-- `comment-sentence` reads the continuation lines of a wrapped sentence as
+- [comment-sentence-wrapping] `comment-sentence` reads the continuation lines of a wrapped sentence as
   fragments, and the warnings it leaves on this repository are the record of
   that. Unchanged for three entries now.
-- Excluding two decision records from the audit costs them `adr-immutable`
+- [adr-exclusion-coverage] Excluding two decision records from the audit costs them `adr-immutable`
   coverage. A narrower mechanism — an exclusion that suppresses one check rather
   than every check — would be better, and is a candidate rather than a change to
   make while cutting a release.
-- The packaging test shells out to `npm`, so the suite now needs npm on the
+- [npm-dependency] The packaging test shells out to `npm`, so the suite now needs npm on the
   path. `docs/decisions/0009-package-is-the-artifact.md` says what would move it
   to a release-only step.
 
@@ -831,13 +924,13 @@ paths are excluded from this repository's audit in `.docbound/config.json`.
 
 ### Still open
 
-- The two waivers below are the only ones standing, and both are about docs
+- [doc-path-waivers] The two waivers below are the only ones standing, and both are about docs
   whose subject is paths outside this repository. If `dead-ref` ever learns to
   tell a path claim from a path mention, both can go.
-- Four candidate providers remain undocumented in the harness sense — someone
+- [provider-coverage] Four candidate providers remain undocumented in the harness sense — someone
   with Codex, Gemini CLI, Copilot, or opencode in front of them can answer the
   four questions in `docs/providers.md` and promote one.
-- The check candidate stands from two entries ago: `comment-sentence` reads the
+- [comment-sentence-wrapping] The check candidate stands from two entries ago: `comment-sentence` reads the
   continuation lines of a wrapped sentence as fragments.
 
 ### Waivers
@@ -952,11 +1045,11 @@ Four tests added, 70 passing.
 
 ### Still open
 
-- Four provider entries remain unverified against a running harness: gemini,
+- [provider-coverage] Four provider entries remain unverified against a running harness: gemini,
   github, opencode, and the generic layout. Each needs the harness present, and
   the same method that fixed Cursor — read what the harness itself ships —
   applies to each.
-- The check candidate from the previous entry stands: `comment-sentence` reads
+- [comment-sentence-wrapping] The check candidate from the previous entry stands: `comment-sentence` reads
   the continuation lines of a wrapped sentence as fragments. Unchanged here.
 
 ## 2026-08-26 — Turn the canonical skill folder into a distributable repository
@@ -1081,7 +1174,8 @@ hook run does not see it.
 
 ### Still open
 
-- `comment-sentence` reads the continuation lines of a wrapped sentence as
+- [comment-sentence-wrapping] `comment-sentence` reads the continuation lines
+  of a wrapped sentence as
   fragments, because it compares line by line. Every file in this repository
   whose header is a wrapped paragraph trips it — `scripts/build.mjs`,
   `scripts/release.mjs`, `cli/providers.mjs`, `cli/index.mjs`, and
@@ -1090,33 +1184,33 @@ hook run does not see it.
   lines as one unit before judging it a sentence — is a candidate for the next
   pass at the check set, and it is the single most useful change to the check
   set this task found.
-- The provider paths and hook event names in `cli/providers.mjs` are taken
+- [provider-coverage] The provider paths and hook event names in `cli/providers.mjs` are taken
   from each harness's documentation and verified against none of them. A wrong
   path installs a skill where its harness will not look, silently. Verifying
   them needs each harness present, and `docs/ARCHITECTURE.md` lists this as a
   known gap.
-- Nothing checks automatically that the Node audit and the frozen Python still
+- [python-reference-drift] Nothing checks automatically that the Node audit and the frozen Python still
   agree; the diff was run by hand for every fixture in this task. The Python is
   deleted next release, at which point `tests/fixtures/` is the only
   specification, so this closes itself.
-- Other check candidates noted and deliberately not added in this pass: a check
+- [check-candidates] Other check candidates noted and deliberately not added in this pass: a check
   that a module README's `Must not` section is non-empty, and a check that a
   `Supersedes` line names a record that exists.
-- The Claude Code hook is not wired in this repository, so contributors' local
+- [hook-not-wired] The Claude Code hook is not wired in this repository, so contributors' local
   sessions are not gated; CI is. `docs/ARCHITECTURE.md` records the reasoning
   and the condition that would reverse it.
-- `skills-lock.json` records a payload hash per provider, and every one of them
+- [lock-per-provider] `skills-lock.json` records a payload hash per provider, and every one of them
   is the same value, because the payload is identical by construction. The
   per-provider entries are redundant until a provider needs a transformed
   payload.
-- Opening a decision record with only its Context, as this task was asked to do,
+- [adr-context-first] Opening a decision record with only its Context, as this task was asked to do,
   collides with `adr-immutable` as soon as the record is completed in a later
   commit and both commits land in one diff. Either the check learns that a
   record with an empty Decision section is not yet an archive, or the guidance
   says to write the record whole at the moment the decision is made. The second
   is closer to what the skill already says, and neither is a change to make
   without a decision record of its own.
-- `todo-shape` and `comment-sentence` both fire on prose *about* themselves —
+- [self-referential-checks] `todo-shape` and `comment-sentence` both fire on prose *about* themselves —
   the header of `skill/docbound/scripts/lib/checks/todo-shape.mjs` names the
   markers it looks for, and is read as containing one. Warnings, and harmless
   here, but a repository whose subject matter is documentation vocabulary will

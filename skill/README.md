@@ -9,6 +9,8 @@ edited; everything under `dist/` and `plugin/` is a copy of it produced by
 - `skill/docbound/SKILL.md`: the skill itself, and the check table agents read.
 - `skill/docbound/scripts/audit.mjs`: the audit; the definition of done.
 - `skill/docbound/scripts/lib/checks/`: one module per check, named for its ID.
+- `skill/docbound/scripts/start.mjs`: step 2 of the loop as a command. Writes
+  the entry skeleton so the agent writes only the Intent.
 - `skill/docbound/scripts/summary.mjs`: step 1 of the loop as a command. Reads
   the documentation set and no source at all; see
   `docs/decisions/0012-summary-from-docs.md`.

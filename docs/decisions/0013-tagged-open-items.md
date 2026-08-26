@@ -1,7 +1,7 @@
 # 0013. Give an open item a slug so it is declared once
 
 - Date: 2026-08-26
-- Status: accepted
+- Status: superseded by 0014
 - Supersedes: none
 
 ## Context
