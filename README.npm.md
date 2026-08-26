@@ -4,8 +4,11 @@ Documentation is a work product of every task, not a byproduct of finishing one.
 
 docbound is a skill for coding agents. It puts a worklog entry before the first
 edit, records decisions at the moment they are made, moves docs in the same
-change as the code, and ends every task with a deterministic audit that either
-exits 0 or says what is missing.
+change as the code, and ends every task with a deterministic audit over the
+documentation that either exits 0 or names what is missing.
+
+It reads documentation and nothing else. A green audit means the change is
+explained, not that the code is correct; your tests still own that half.
 
 Agent-written code has a specific failure: the author does not persist. Every
 session is a new engineer with no memory of why anything is shaped the way it

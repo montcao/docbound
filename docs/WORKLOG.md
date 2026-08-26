@@ -5,6 +5,63 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 - Bound what the audit claims to decide
+
+Agent: claude · Branch: main
+
+### Intent
+
+The README's first sentence calls docbound "a documentation discipline for
+coding agents, with a checker that decides when a task is finished." A reader
+asked what that means, and the sentence is the reason they had to ask.
+
+It overclaims. The audit reads documentation. It cannot tell whether a feature
+works, whether a bug is fixed, or whether a test passes. Saying it decides when
+a task is finished invites exactly one question, which is how a documentation
+tool could possibly know that, and the README never answers it because the claim
+was never true in that form.
+
+Under-explaining compounds it. The sentence says the checker decides something
+without saying what it reads, so a reader has no way to size the claim for
+themselves.
+
+The fix is to say what it checks, say plainly what it does not, and repair the
+two later sentences that inherit the same ambiguity. Bounding a claim makes it
+more persuasive rather than less, because an unbounded one has to be taken on
+trust.
+
+### Expected to touch
+
+- `README.md` - the opening claim and the two sentences that repeat it
+
+### Outcome
+
+The opening sentence now names what the audit reads: whether the change you just
+made was written down. Two short blocks follow it. **What it checks** lists the
+three questions in plain language, and **What it does not check** says the audit
+has no opinion on whether the code works, that tests own that half, and that the
+two gates are independent in both directions.
+
+Two inherited sentences repaired. "docbound makes that happen by making it the
+condition for finishing" said nothing about which condition, and now says the
+explanation moves inside the task rather than after it. The gate section repeats
+the bound at the point a reader is most likely to mistake the tool for an
+authority on their work, and points out that wiring tests into the same stop
+hook is available if they want that gate too.
+
+`README.npm.md` carried a quieter version of the same claim, that docbound "ends
+every task" with an audit. Bounded there in two lines, since the npm page earns
+its length differently.
+
+The skill's own phrasing is untouched. `skill/docbound/SKILL.md` says a task is
+not done until the audit exits 0, and its reader is an agent already inside a
+documentation skill, for whom the subject of that sentence is not in doubt.
+
+### Still open
+
+- Nothing from this. The claim now matches what the code does, and
+  `tests/fixtures/` is what would catch it drifting again.
+
 ## 2026-08-26 - Settle which writing register applies where
 
 Agent: claude · Branch: main

@@ -1,7 +1,17 @@
 # docbound
 
-A documentation discipline for coding agents, with a checker that decides when a
-task is finished.
+A documentation discipline for coding agents. It checks one thing, whether the
+change you just made was written down, and your agent cannot call the task
+finished until it was.
+
+**What it checks.** The documentation for the change in front of it. Did a
+decision get recorded when it was made. Did the doc covering a changed file
+change with it. Does every path a doc mentions still exist.
+
+**What it does not check.** Whether your code works. That is what your tests are
+for. A green audit means the change is explained, not that it is correct, and
+the two gates are independent: your tests can pass while the audit fails, and
+the reverse.
 
 ## The problem it solves
 
@@ -17,7 +27,9 @@ to be written down at the moment the decision is made. An hour later you are
 reconstructing, and a confident reconstruction that happens to be wrong is worse
 than no explanation at all.
 
-docbound makes that happen by making it the condition for finishing.
+docbound makes that happen by moving the explanation inside the task instead of
+after it. Writing it down stops being something the agent gets to later, because
+the agent is not allowed to finish without it.
 
 ## Try it without installing anything
 
@@ -98,6 +110,11 @@ working.
 That is the entire value of the tool. An instruction that says "please document
 this" competes with everything else in the agent's context and loses. An exit
 code does not compete.
+
+Worth repeating here, because this is the point where a gate starts to feel like
+an authority on your work: the audit is reading documentation and nothing else.
+It has no opinion on whether the code is right. Wire your tests into the same
+stop hook if you want that gate too.
 
 **What it feels like in practice:** the agent adds a paragraph to a README,
 writes two sentences in the worklog, and continues. Usually under a minute,
