@@ -8,8 +8,6 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
-Nothing has been published yet. This section describes the first release.
-
 ### Added
 
 - The skill: `skill/docbound/SKILL.md`, five reference files, five templates,

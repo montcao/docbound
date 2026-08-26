@@ -38,6 +38,46 @@ export function setVersion(relative, version) {
   return next !== text;
 }
 
+/**
+ * Prepend a worklog entry for the release.
+ *
+ * A release changes a manifest, a changelog, and a lock file, and the audit asks
+ * every change what task it belongs to. Cutting a release is a task; it just
+ * happens to be a mechanical one. Without this, the release commit is the one
+ * commit on main that cannot pass the repository's own audit.
+ */
+export function rollWorklog(version, today) {
+  const file = path.join(REPO_ROOT, "docs", "WORKLOG.md");
+  const text = fs.readFileSync(file, "utf8");
+  const firstEntry = text.indexOf("\n## ");
+  if (firstEntry === -1) throw new Error("docs/WORKLOG.md has no entries");
+
+  const entry = [
+    `## ${today} — Release ${version}`,
+    "",
+    "Agent: release script · Branch: main",
+    "",
+    "### Intent",
+    "",
+    `Cut ${version}. Written by \`scripts/release.mjs\`, which refuses to run`,
+    "unless the tests, the audit, and the freshness check pass against a clean",
+    "tree first.",
+    "",
+    "### Outcome",
+    "",
+    `Set the version in \`package.json\`, \`.claude-plugin/plugin.json\`, and`,
+    "`.claude-plugin/marketplace.json`; rolled `CHANGELOG.md`; rebuilt `dist/`,",
+    "`plugin/`, and `skills-lock.json`; tagged.",
+    "",
+    "### Still open",
+    "",
+    "- Nothing from the release itself. Open work is in the entries below.",
+    "",
+  ].join("\n");
+
+  fs.writeFileSync(file, `${text.slice(0, firstEntry + 1)}${entry}${text.slice(firstEntry + 1)}`);
+}
+
 export function rollChangelog(version, today) {
   const file = path.join(REPO_ROOT, "CHANGELOG.md");
   const text = fs.readFileSync(file, "utf8");
@@ -80,19 +120,13 @@ function main(argv) {
     return 1;
   }
 
-  for (const file of VERSIONED_FILES) {
-    const changed = setVersion(file, version);
-    process.stdout.write(`  ${file}: ${changed ? version : "already " + version}\n`);
-  }
-  rollChangelog(version, new Date().toISOString().slice(0, 10));
-
-  writeLock(build({ quiet: true }));
-  const problems = checkDistFresh();
-  if (problems.length > 0) {
-    process.stderr.write(`release.mjs: dist is stale after rebuild: ${problems[0]}\n`);
-    return 1;
-  }
-
+  // Verify before touching anything. A dry run has to leave the tree exactly as
+  // it found it, and a failed release should not need cleaning up after.
+  //
+  // The audit runs here, against the content being released, rather than after
+  // the version bump: the release commit itself changes a manifest, a changelog,
+  // and a lock file with no worklog entry behind it, which the audit would be
+  // right to reject and which is not what it is being asked about.
   // `npm test` rather than a list of files: package.json owns which tests exist,
   // and a second copy of that list here went stale the first time one was added.
   const tests = spawnSync("npm", ["test", "--silent"], {
@@ -100,7 +134,7 @@ function main(argv) {
     stdio: "inherit",
   });
   if (tests.status !== 0) {
-    process.stderr.write("release.mjs: tests failed; nothing committed\n");
+    process.stderr.write("release.mjs: tests failed; nothing written\n");
     return 1;
   }
 
@@ -109,16 +143,46 @@ function main(argv) {
     stdio: "inherit",
   });
   if (audit.status !== 0) {
-    process.stderr.write("release.mjs: the audit failed; nothing committed\n");
+    process.stderr.write("release.mjs: the audit failed; nothing written\n");
+    return 1;
+  }
+
+  const stale = checkDistFresh();
+  if (stale.length > 0) {
+    process.stderr.write(`release.mjs: dist is stale: ${stale[0]}\n`);
     return 1;
   }
 
   if (dryRun) {
-    process.stdout.write(`dry run: ${version} is ready; nothing committed\n`);
+    process.stdout.write(
+      `dry run: ${version} is ready. Would set the version in ` +
+        `${VERSIONED_FILES.join(", ")}, roll the changelog and the worklog, ` +
+        `rebuild, commit, and tag v${version}. Nothing written.\n`,
+    );
     return 0;
   }
 
-  git(["add", "-A"]);
+  for (const file of VERSIONED_FILES) {
+    const changed = setVersion(file, version);
+    process.stdout.write(`  ${file}: ${changed ? version : "already " + version}\n`);
+  }
+  const today = new Date().toISOString().slice(0, 10);
+  rollChangelog(version, today);
+  rollWorklog(version, today);
+  writeLock(build({ quiet: true }));
+
+  const drifted = checkDistFresh();
+  if (drifted.length > 0) {
+    process.stderr.write(`release.mjs: dist is stale after rebuild: ${drifted[0]}\n`);
+    return 1;
+  }
+
+  // Only what this script writes. `git add -A` would sweep in whatever else
+  // happened to be in the tree, and a release commit should be legible.
+  git([
+    "add", ...VERSIONED_FILES, "CHANGELOG.md", "docs/WORKLOG.md",
+    "skills-lock.json", "dist", "plugin",
+  ]);
   git(["commit", "-m", `release: ${version}`]);
   git(["tag", "-a", `v${version}`, "-m", `docbound ${version}`]);
   process.stdout.write(`tagged v${version}. Push with: git push --follow-tags\n`);

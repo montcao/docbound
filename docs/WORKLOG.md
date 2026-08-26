@@ -78,6 +78,19 @@ them had silently not applied, which is its own argument for the audit.
 **Frontmatter headroom.** The skill's description is 1006 characters against
 Cursor's 1024 limit. Valid, and eighteen characters from not being.
 
+**The release script had the same shape of bug as the package.** `--dry-run`
+left `CHANGELOG.md` modified, and the audit ran after the version bump, so it
+saw a release commit with no worklog entry behind it and failed — correctly, and
+uselessly. Verification now runs against the clean tree before anything is
+written, a dry run writes nothing, and the release commit stages only the files
+the script touches instead of everything in the tree.
+
+Moving the audit earlier fixed the script and left the repository broken in a
+quieter way: the release commit would have been the one commit on main that
+fails `npx docbound audit`, and CI runs that on every push. A release is a task,
+so the release now writes its own worklog entry. The invariant holds — every
+commit on main passes the audit, including the one that cuts the release.
+
 ### Still open
 
 - The skill's frontmatter description has eighteen characters of headroom before

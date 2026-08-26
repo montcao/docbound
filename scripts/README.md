@@ -38,8 +38,19 @@ removed and rewritten on every run.
 ```
 node scripts/build.mjs
 node scripts/check-dist-fresh.mjs
+node scripts/release.mjs --version 0.2.0 --dry-run
 node scripts/release.mjs --version 0.2.0
 ```
+
+`release.mjs` verifies before it writes: tests, audit, and the freshness check
+run against the clean tree, and only then does it set the version, roll the
+changelog and the worklog, rebuild, commit, and tag. A dry run leaves the tree
+exactly as it found it.
+
+The audit runs *before* the version bump, against the content being released.
+The release also writes its own worklog entry, because a release is a task that
+changes a manifest, a changelog, and a lock file — and without an entry it would
+be the one commit on main that cannot pass this repository's own audit.
 
 ## Depended on by
 
