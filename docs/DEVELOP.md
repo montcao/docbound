@@ -26,6 +26,13 @@ The audit does not read the skill payload's prose in this repository
 `skill/docbound/scripts/`, `cli/`, `scripts/`, `tests/`, and `docs/`, which is
 where this repository's own code and documentation live.
 
+`audit.exclude` in `.docbound/config.json` also names three individual files.
+`docs/providers.md` is a reference to paths inside other people's repositories,
+so none of them exist here by construction; two decision records name paths that
+a later decision removed, and an accepted record is an archive rather than
+something to edit into agreement with the present. Adding a file to that list is
+a change to what this repository considers documented, and is reviewed as one.
+
 ## Where things are
 
 | Path | What it is |

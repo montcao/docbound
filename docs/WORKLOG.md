@@ -75,6 +75,20 @@ check table after it. Two install snippets were still naming a provider and a
 distribution directory that were removed earlier today; an edit meant to fix
 them had silently not applied, which is its own argument for the audit.
 
+**Two waivers became exclusions.** Cutting the release exposed them: the release
+writes its own worklog entry, waivers are scoped to the top entry by design, and
+a mechanical entry dropped both. That is the mechanism working — those two were
+never task-scoped exceptions. `docs/providers.md` names paths inside other
+people's repositories by construction, and records 0002 and 0007 name paths that
+this task's predecessor removed. Both are permanent, so both moved to
+`audit.exclude` in `.docbound/config.json`, where they are tracked and reviewed
+rather than restated every entry. That is the trade
+`docs/decisions/0007-audit-exclude-config.md` describes.
+
+The cost is real and small: the two excluded records lose `adr-immutable`
+coverage. They are accepted archives that should not change, and a change to
+either shows up in review as a diff to a file nothing else touches.
+
 **Frontmatter headroom.** The skill's description is 1006 characters against
 Cursor's 1024 limit. Valid, and eighteen characters from not being.
 
@@ -102,21 +116,14 @@ commit on main passes the audit, including the one that cuts the release.
 - `comment-sentence` reads the continuation lines of a wrapped sentence as
   fragments, and the warnings it leaves on this repository are the record of
   that. Unchanged for three entries now.
+- Excluding two decision records from the audit costs them `adr-immutable`
+  coverage. A narrower mechanism — an exclusion that suppresses one check rather
+  than every check — would be better, and is a candidate rather than a change to
+  make while cutting a release.
 - The packaging test shells out to `npm`, so the suite now needs npm on the
   path. `docs/decisions/0009-package-is-the-artifact.md` says what would move it
   to a release-only step.
 
-### Waivers
-
-waiver: dead-ref docs/providers.md — this file's subject is where other tools
-read skills from, so by construction none of the paths it names exist in this
-repository. Removing the backticks would leave a reference document about paths
-unable to typeset a path.
-
-waiver: dead-ref docs/decisions — records 0002 and 0007 name provider paths that
-existed when they were written and were removed by
-`docs/decisions/0008-verified-providers-only.md`. An accepted record is an
-archive; editing it to match the present is what `adr-immutable` exists to stop.
 
 ## 2026-08-26 — Ship only verified providers, and close three security findings
 

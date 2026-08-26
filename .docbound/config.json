@@ -2,6 +2,9 @@
   "audit": {
     "exclude": [
       ".cursor/**",
+      "docs/decisions/0002-node-runtime.md",
+      "docs/decisions/0007-audit-exclude-config.md",
+      "docs/providers.md",
       "plugin/**",
       "skill/docbound/SKILL.md",
       "skill/docbound/agents/**",
