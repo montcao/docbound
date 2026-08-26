@@ -1,0 +1,10 @@
+{
+  "audit": {
+    "exclude": []
+  },
+  "hook": {
+    "enabled": true,
+    "fast": true,
+    "blockOnStop": true
+  }
+}

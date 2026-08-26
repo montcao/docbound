@@ -1,0 +1,59 @@
+{
+  "version": "0.1.0",
+  "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+  "providers": {
+    "universal": {
+      "payload": ".agents/skills/docbound",
+      "hookFile": null,
+      "files": 45,
+      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+      "hash": "sha256:72fe2847bd6d6399969d24eeefebe6704275880c92a58119ba02b7b5077aaff8"
+    },
+    "claude-code": {
+      "payload": ".claude/skills/docbound",
+      "hookFile": ".claude/settings.json",
+      "files": 46,
+      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+      "hash": "sha256:68a822dc4d7706547609442c5a8121332671bc23f9f62017d2fa514be79c170c"
+    },
+    "codex": {
+      "payload": ".agents/skills/docbound",
+      "hookFile": ".codex/hooks.json",
+      "files": 46,
+      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+      "hash": "sha256:161f226b9d2552f0e4c05871073643d025bc7095bb6c2ef81a1c09b0ed7e4eff"
+    },
+    "cursor": {
+      "payload": ".agents/skills/docbound",
+      "hookFile": ".cursor/hooks.json",
+      "files": 46,
+      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+      "hash": "sha256:a08fa5d46831f141fcadc1de9e6a8f9ba8f4e00e50c0afeb76970357f95637ea"
+    },
+    "gemini": {
+      "payload": ".gemini/skills/docbound",
+      "hookFile": null,
+      "files": 45,
+      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+      "hash": "sha256:7eb170cab565607121f8bf299817c7f4f055e71ef74f702bb209320bf838211b"
+    },
+    "github": {
+      "payload": ".github/skills/docbound",
+      "hookFile": ".github/hooks/docbound.json",
+      "files": 46,
+      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+      "hash": "sha256:0099539698111d075a79228efee4d43821baacf6ea61affcb0a9a6d4945afa1a"
+    },
+    "opencode": {
+      "payload": ".opencode/skill/docbound",
+      "hookFile": null,
+      "files": 45,
+      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+      "hash": "sha256:bd35a89c3b9d8a022390878fca71d68411a7bb2ec4b1b5273eb25f8f6647bc25"
+    }
+  },
+  "plugin": {
+    "files": 45,
+    "hash": "sha256:27e11e4a2a9fe68111526270bd3924658760495c69b48f77961d9a8548204ce6"
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/skills/docbound/scripts/hook.mjs --event after-edit --provider claude-code"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node .claude/skills/docbound/scripts/hook.mjs --event stop --provider claude-code"
+          }
+        ]
+      }
+    ]
+  }
+}

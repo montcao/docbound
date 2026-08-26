@@ -1,0 +1,43 @@
+{
+  "name": "docbound",
+  "version": "0.1.0",
+  "description": "Continuous documentation discipline for AI coding agents, with a blocking audit that defines done.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "readme": "README.npm.md",
+  "bin": {
+    "docbound": "cli/index.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "files": [
+    "cli/",
+    "dist/",
+    "skill/",
+    "README.npm.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "test": "node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/scaffold.test.mjs",
+    "audit": "node cli/index.mjs audit",
+    "check-dist": "node scripts/check-dist-fresh.mjs"
+  },
+  "keywords": [
+    "documentation",
+    "agent-skills",
+    "claude-code",
+    "codex",
+    "adr",
+    "worklog"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/montcao/docbound.git"
+  },
+  "homepage": "https://github.com/montcao/docbound#readme",
+  "bugs": {
+    "url": "https://github.com/montcao/docbound/issues"
+  }
+}
