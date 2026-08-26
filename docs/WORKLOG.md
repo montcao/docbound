@@ -117,7 +117,13 @@ repository's documentation — the Unknown recorded above, resolved by
 remaining 37 were real defects in records written earlier the same day: bare
 filenames in backticks where the writing standard asks for a path from the
 repository root, and paths quoted before the file existed. Every one was fixed
-rather than waived. Zero waivers stand.
+rather than waived.
+
+One waiver stands, and it is an artifact of this task's shape rather than of the
+code: the decision records were opened with their Context in the first commit
+and completed later, which `adr-immutable` reads as editing an archive when all
+seven commits are audited as a single diff. The per-commit audit that CI and the
+hook run does not see it.
 
 ### Still open
 
@@ -149,3 +155,24 @@ rather than waived. Zero waivers stand.
   is the same value, because the payload is identical by construction. The
   per-provider entries are redundant until a provider needs a transformed
   payload.
+- Opening a decision record with only its Context, as this task was asked to do,
+  collides with `adr-immutable` as soon as the record is completed in a later
+  commit and both commits land in one diff. Either the check learns that a
+  record with an empty Decision section is not yet an archive, or the guidance
+  says to write the record whole at the moment the decision is made. The second
+  is closer to what the skill already says, and neither is a change to make
+  without a decision record of its own.
+- `todo-shape` and `comment-sentence` both fire on prose *about* themselves —
+  the header of `skill/docbound/scripts/lib/checks/todo-shape.mjs` names the
+  markers it looks for, and is read as containing one. Warnings, and harmless
+  here, but a repository whose subject matter is documentation vocabulary will
+  meet them constantly.
+
+### Waivers
+
+waiver: adr-immutable docs/decisions — records 0002, 0003, 0005, and 0006 were
+opened with their Context in this task's first commit, as the task required, and
+completed in a later commit of the same task. The edits repaired quoted paths
+and completed sections that were deliberately left empty; no reasoning recorded
+earlier was changed. Nothing had been released, so no reader had seen the
+earlier version. Applies only to auditing this task's seven commits as one diff.
