@@ -244,7 +244,8 @@ describe("docbound audit, scaffold, adr, doctor", () => {
     cli(repo, ["install", "--providers=claude-code", "--yes"]);
     const result = cli(repo, ["doctor"]);
     assert.equal(result.status, 0, result.stderr);
-    assert.match(result.stdout, /claude-code: current/);
+    assert.match(result.stdout, /\.claude\/skills\/docbound: current/);
+    assert.match(result.stdout, /claude-code: hook wired/);
     assert.match(result.stdout, /config: .*config\.json/);
     assert.match(result.stdout, /audit: PASS/);
   });

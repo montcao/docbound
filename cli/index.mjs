@@ -18,6 +18,7 @@ import {
   copyDist,
   detectProviders,
   ensureConfig,
+  installedPayloads,
   installedProviders,
   linkDist,
   mergeHookManifest,
@@ -272,18 +273,20 @@ function commandDoctor(options) {
   const lock = readLock(PACKAGE_ROOT);
   process.stdout.write(`docbound ${lock.version} · ${root}\n\n`);
 
-  const installed = installedProviders(root);
-  if (installed.length === 0) {
-    process.stdout.write("providers: none installed\n");
+  const payloads = installedPayloads(root);
+  if (payloads.length === 0) {
+    process.stdout.write("skill: not installed here\n");
   } else {
-    process.stdout.write("providers:\n");
-    for (const { provider, current } of installed) {
-      const expected = lock.providers[provider.name]?.payloadHash;
-      const state = current === expected ? "current" : "differs from this package";
-      const hook = provider.hookFile && fs.existsSync(path.join(root, provider.hookFile))
-        ? provider.hookFile
-        : "no hook manifest";
-      process.stdout.write(`  ${provider.name}: ${state} · ${hook}\n`);
+    process.stdout.write("skill:\n");
+    for (const { payload, current, providers } of payloads) {
+      const state = current === lock.payloadHash ? "current" : "differs from this package";
+      process.stdout.write(`  ${payload}: ${state}\n`);
+      for (const p of providers) {
+        const hook = p.hookFile
+          ? `${p.hooked ? "hook wired" : "no hook manifest"} (${p.hookFile})`
+          : "no hook mechanism";
+        process.stdout.write(`    ${p.name}: ${hook}\n`);
+      }
     }
   }
 

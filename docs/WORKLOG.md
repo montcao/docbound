@@ -96,6 +96,14 @@ manifest over whatever was there instead of merging into it. All three are
 fixed, and `skill/docbound/scripts/lib/entry.mjs` is now the one owner of that
 comparison.
 
+**Two reporting defects found while verifying the acceptance steps.** `doctor`
+called Cursor and universal installed whenever Codex was, because three
+providers read the same `.agents/skills/docbound` path; it now reports one line
+per payload and the hook state per provider, which is what actually differs
+between them. And `--providers` rejected `claude`, which is the name the
+documented install command uses; `scripts/providers.mjs` now carries a small
+alias table.
+
 **Documentation.** `docs/ARCHITECTURE.md`, `docs/checks.md`, `docs/subagent.md`,
 `docs/DEVELOP.md`, seven decision records, module READMEs for `skill/`, `cli/`,
 `scripts/`, `tests/`, and `skill/docbound/scripts/reference/`, a generated one
@@ -114,11 +122,14 @@ rather than waived. Zero waivers stand.
 ### Still open
 
 - `comment-sentence` reads the continuation lines of a wrapped sentence as
-  fragments, because it compares line by line. It fires on `scripts/build.mjs`
-  and `scripts/release.mjs`, whose file headers are wrapped prose, and the two
-  warnings are left on the record rather than answered by writing worse
-  comments. A refinement — treat a run of comment lines as one unit — is a
-  candidate for the next pass at the check set.
+  fragments, because it compares line by line. Every file in this repository
+  whose header is a wrapped paragraph trips it — `scripts/build.mjs`,
+  `scripts/release.mjs`, `scripts/providers.mjs`, `cli/index.mjs`, and
+  `cli/install.mjs` among them. The warnings are left on the record rather than
+  answered by writing worse comments. A refinement — treat a run of comment
+  lines as one unit before judging it a sentence — is a candidate for the next
+  pass at the check set, and it is the single most useful change to the check
+  set this task found.
 - The provider paths and hook event names in `scripts/providers.mjs` are taken
   from each harness's documentation and verified against none of them. A wrong
   path installs a skill where its harness will not look, silently. Verifying

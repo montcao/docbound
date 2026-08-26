@@ -38,6 +38,10 @@ npx docbound doctor
 npx docbound audit
 ```
 
+`--providers` accepts a few aliases for the names people reach for first —
+`claude` for `claude-code`, `copilot` for `github` — listed in
+`scripts/providers.mjs`. The canonical name is what is printed back.
+
 ## Depends on
 
 `scripts/providers.mjs` for the provider table, `dist/` for the payload to copy,

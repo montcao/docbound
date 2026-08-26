@@ -115,6 +115,18 @@ export const PROVIDERS = [
 
 export const PROVIDER_NAMES = PROVIDERS.map((p) => p.name);
 
+// Names people reach for that are not the canonical ones. Cheaper than an error
+// message, and the canonical name is what gets printed back either way.
+const ALIASES = {
+  claude: "claude-code",
+  claudecode: "claude-code",
+  copilot: "github",
+  "github-copilot": "github",
+  agents: "universal",
+  "gemini-cli": "gemini",
+};
+
 export function providerByName(name) {
-  return PROVIDERS.find((p) => p.name === name) ?? null;
+  const canonical = ALIASES[name] ?? name;
+  return PROVIDERS.find((p) => p.name === canonical) ?? null;
 }

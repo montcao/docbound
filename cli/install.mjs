@@ -45,6 +45,28 @@ export function installedProviders(root) {
 }
 
 /**
+ * Installed payloads, grouped by where they sit. Several providers read the
+ * same path — `.agents/skills/docbound` serves universal, Codex, and Cursor —
+ * so reporting per provider would claim three installs where there is one
+ * directory. What distinguishes them on disk is the hook manifest, so that is
+ * reported per provider.
+ */
+export function installedPayloads(root) {
+  const byPayload = new Map();
+  for (const { provider, current } of installedProviders(root)) {
+    if (!byPayload.has(provider.payload)) {
+      byPayload.set(provider.payload, { payload: provider.payload, current, providers: [] });
+    }
+    byPayload.get(provider.payload).providers.push({
+      name: provider.name,
+      hookFile: provider.hookFile ?? null,
+      hooked: Boolean(provider.hookFile) && fs.existsSync(path.join(root, provider.hookFile)),
+    });
+  }
+  return [...byPayload.values()];
+}
+
+/**
  * Hash of an installed skill payload, keyed by path within the payload so it is
  * comparable across providers and against `payloadHash` in the lock. The hook
  * manifest is deliberately not part of it: a merged manifest carries the

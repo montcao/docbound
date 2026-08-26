@@ -6,9 +6,10 @@ the provider table.
 
 ## Start here
 
-- `scripts/providers.mjs` — where each harness expects a skill, and what its
-  hook manifest looks like. The most-edited file here, because it encodes other
-  people's conventions rather than this repository's.
+- `scripts/providers.mjs` — where each harness expects a skill, what its hook
+  manifest looks like, and the alias table that maps the names people reach for
+  (`claude`, `copilot`) onto the canonical ones. The most-edited file here,
+  because it encodes other people's conventions rather than this repository's.
 - `scripts/build.mjs` — `skill/docbound/` into the seven directories under
   `dist/`, and into `plugin/`.
 - `scripts/check-dist-fresh.mjs` — rebuilds into a temporary directory and
