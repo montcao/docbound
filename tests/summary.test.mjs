@@ -11,7 +11,13 @@ import path from "node:path";
 import { after, describe, test } from "node:test";
 
 import { SKILL_DIR, buildFixture, removeTree, runNode, tempDir } from "./harness.mjs";
-import { bullets, leadParagraph, worklogEntries } from "../skill/docbound/scripts/lib/digest.mjs";
+import {
+  bullets,
+  leadParagraph,
+  openItems,
+  parseOpenItem,
+  worklogEntries,
+} from "../skill/docbound/scripts/lib/digest.mjs";
 
 const SUMMARY = path.join(SKILL_DIR, "scripts", "summary.mjs");
 const made = [];
@@ -102,6 +108,81 @@ describe("summary", () => {
     const result = runNode(SUMMARY, ["--nonsense"]);
     assert.equal(result.status, 2);
     assert.match(result.stderr, /unrecognized argument/);
+  });
+});
+
+describe("tracked open items", () => {
+  // Newest first, as worklogEntries returns them.
+  const history = [
+    {
+      title: "third task",
+      date: "2026-03-03",
+      stillOpen: ["[jitter] closed: added jitter and a fixture", "an untagged note"],
+    },
+    {
+      title: "second task",
+      date: "2026-02-02",
+      stillOpen: ["[jitter] the backoff still has no jitter", "[docs] rewrite the guide"],
+    },
+    {
+      title: "first task",
+      date: "2026-01-01",
+      stillOpen: ["[jitter] the backoff has no jitter"],
+    },
+  ];
+
+  test("a slug is parsed off the front of a bullet", () => {
+    assert.deepEqual(parseOpenItem("[check-set] wrapped comments read as fragments"), {
+      slug: "check-set",
+      text: "wrapped comments read as fragments",
+      closing: false,
+      note: "wrapped comments read as fragments",
+    });
+  });
+
+  test("closed, done, and resolved all close an item", () => {
+    for (const word of ["closed", "done", "resolved"]) {
+      const item = parseOpenItem(`[jitter] ${word}: shipped`);
+      assert.equal(item.closing, true, word);
+      assert.equal(item.note, "shipped");
+    }
+  });
+
+  test("one item mentioned three times is one open item", () => {
+    const { open } = openItems(history.slice(1));
+    const jitter = open.filter((i) => i.slug === "jitter");
+    assert.equal(jitter.length, 1, "not one row per mention");
+    assert.equal(jitter[0].mentions, 2);
+  });
+
+  test("it is opened by its first appearance in time, not its latest", () => {
+    const { open } = openItems(history.slice(1));
+    const jitter = open.find((i) => i.slug === "jitter");
+    assert.equal(jitter.date, "2026-01-01");
+    assert.equal(jitter.entry, "first task");
+  });
+
+  test("a later entry closes it, and it leaves the open list", () => {
+    const { open, closed } = openItems(history);
+    assert.ok(!open.some((i) => i.slug === "jitter"), "closed item is not open");
+    const done = closed.find((i) => i.slug === "jitter");
+    assert.equal(done.closed.note, "added jitter and a fixture");
+    assert.equal(done.closed.date, "2026-03-03");
+  });
+
+  test("an untagged bullet still counts, attributed to its entry", () => {
+    const { open } = openItems(history);
+    const note = open.find((i) => i.slug === null);
+    assert.equal(note.text, "an untagged note");
+    assert.equal(note.entry, "third task");
+  });
+
+  test("identical untagged bullets collapse, since nothing can tell them apart", () => {
+    const repeated = [
+      { title: "b", date: "2026-02-02", stillOpen: ["the same note"] },
+      { title: "a", date: "2026-01-01", stillOpen: ["the same note"] },
+    ];
+    assert.equal(openItems(repeated).open.length, 1);
   });
 });
 

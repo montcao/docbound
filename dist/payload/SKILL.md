@@ -131,7 +131,9 @@ Then, from the repo root:
 node scripts/audit.mjs
 ```
 
-Read every finding. Fix it, or add a waiver line with a reason a reviewer would accept. Then complete the worklog entry: `Outcome` with what actually changed by path — including what was deleted — and `Still open` with what is unfinished, unknown, or deferred. "Tests pass" is not an outcome; "replaced the in-memory queue with the Redis-backed one in `worker/queue.py`; retry policy unchanged; deleted the stale durability caveat from `worker/README.md`" is.
+Read every finding. Fix it, or add a waiver line with a reason a reviewer would accept. Then complete the worklog entry: `Outcome` with what actually changed by path — including what was deleted — and `Still open` with what is unfinished, unknown, or deferred.
+
+An item in `Still open` that will outlive this task gets a slug: `- [retry-jitter] the backoff has no jitter…`. Declare it once. It stays open until some later entry writes `- [retry-jitter] closed: …`, so carrying it forward costs nothing and never means retyping it in different words. Restating an untracked item is how one piece of work becomes five. "Tests pass" is not an outcome; "replaced the in-memory queue with the Redis-backed one in `worker/queue.py`; retry policy unchanged; deleted the stale durability caveat from `worker/README.md`" is.
 
 Re-run until it exits 0. Then stop (principle 4).
 

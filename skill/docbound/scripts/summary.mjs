@@ -29,6 +29,7 @@ import {
   cost,
   decisions,
   modules,
+  openItems,
   project,
   worklogEntries,
 } from "./lib/digest.mjs";
@@ -68,6 +69,7 @@ export function parseArgs(argv) {
 export function collect(root, { entries = DEFAULT_ENTRIES } = {}) {
   const excludes = loadConfig(root).audit?.exclude ?? [];
   const all = worklogEntries(root);
+  const tracked = openItems(all);
   return {
     root,
     project: project(root),
@@ -75,9 +77,8 @@ export function collect(root, { entries = DEFAULT_ENTRIES } = {}) {
     modules: modules(root, excludes),
     decisions: decisions(root),
     recent: all.slice(0, entries),
-    stillOpen: all.flatMap((entry) =>
-      entry.stillOpen.map((item) => ({ item, entry: entry.title, date: entry.date })),
-    ),
+    stillOpen: tracked.open,
+    closed: tracked.closed,
     entryCount: all.length,
     excludes,
   };
@@ -88,13 +89,10 @@ export function renderOpen(digest) {
     return "Nothing is recorded as open.\n";
   }
   const lines = ["# Open work", ""];
-  const seen = new Set();
-  for (const { item, entry, date } of digest.stillOpen) {
-    const key = item.replace(/\s+/g, " ").trim().toLowerCase().slice(0, 90);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    lines.push(`- ${item}`);
-    lines.push(`  (${date ?? "undated"}, ${entry})`);
+  for (const item of digest.stillOpen) {
+    lines.push(`- ${item.slug ? `[${item.slug}] ` : ""}${item.text}`);
+    const carried = item.mentions > 1 ? `, restated ${item.mentions} times` : "";
+    lines.push(`  (opened ${item.date ?? "undated"}: ${item.entry}${carried})`);
   }
   lines.push("");
   return lines.join("\n");
@@ -182,20 +180,29 @@ export function render(digest) {
     }
   }
 
-  // Only what the entries shown above left open, deduplicated. An item carried
-  // across five entries is one piece of unfinished work, not five, and the full
-  // history is what `--open` is for.
-  const recentOpen = dedupe(
-    digest.recent.flatMap((entry) => entry.stillOpen),
-  );
-  if (recentOpen.length > 0) {
+  // One line per piece of unfinished work, not one per time it was mentioned.
+  // A slug makes that exact. An untagged note cannot be followed across
+  // entries, so it is shown while its entry is still in view and counted after
+  // that, rather than being restated forever as a separate item.
+  const shown = new Set(digest.recent.map((entry) => entry.title));
+  const tracked = digest.stillOpen.filter((item) => item.slug !== null);
+  const notes = digest.stillOpen.filter((item) => item.slug === null);
+  const recentNotes = notes.filter((item) => shown.has(item.entry));
+
+  const older = notes.length - recentNotes.length;
+  if (tracked.length > 0 || recentNotes.length > 0 || older > 0) {
     say("## Still open");
     say();
-    for (const item of recentOpen) say(`- ${item}`);
-    say();
-    const older = digest.stillOpen.length - recentOpen.length;
+    for (const item of tracked) say(`- [${item.slug}] ${item.text}`);
+    for (const item of recentNotes) say(`- ${item.text}`);
+    if (tracked.length > 0 || recentNotes.length > 0) say();
     if (older > 0) {
-      say(`${older} more open item(s) in older entries. Run with --open for all.`);
+      say(
+        `${older} untagged note(s) in older entries, which cannot be followed ` +
+          "across entries. Run with --open for all of them, and see " +
+          "`docs/decisions/0013-tagged-open-items.md` for the convention that " +
+          "makes them trackable.",
+      );
       say();
     }
   }
@@ -213,18 +220,6 @@ export function render(digest) {
   }
 
   return lines.join("\n");
-}
-
-function dedupe(items) {
-  const seen = new Set();
-  const out = [];
-  for (const item of items) {
-    const key = item.replace(/\s+/g, " ").trim().toLowerCase().slice(0, 90);
-    if (seen.has(key)) continue;
-    seen.add(key);
-    out.push(item);
-  }
-  return out;
 }
 
 function thin(digest) {

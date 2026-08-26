@@ -57,6 +57,83 @@ export function bullets(body) {
   return out.filter(Boolean);
 }
 
+/**
+ * An open item, optionally carrying a slug that gives it an identity.
+ *
+ * `- [check-set] comment-sentence reads wrapped sentences as fragments`
+ * `- [check-set] closed: fixed by treating a run of comment lines as one unit`
+ *
+ * The slug is what stops the item being retyped. Without one, carrying work
+ * forward means writing the sentence again, and writing it again means writing
+ * it differently, which is why deduplicating prose never quite worked.
+ */
+const TAGGED = /^\[([a-z0-9][a-z0-9-]*)\]\s*(.*)$/;
+const CLOSING = /^(closed|done|resolved)\b[:\s]\s*(.*)$/i;
+
+export function parseOpenItem(text) {
+  const tagged = TAGGED.exec(text);
+  if (!tagged) return { slug: null, text, closing: false, note: text };
+  const body = tagged[2].trim();
+  const closing = CLOSING.exec(body);
+  return {
+    slug: tagged[1],
+    text: body,
+    closing: Boolean(closing),
+    note: closing ? closing[2].trim() : body,
+  };
+}
+
+/**
+ * What is open now, from the whole history.
+ *
+ * Entries arrive newest first. An item is opened by its first appearance in
+ * time and closed by any later entry that says so, which makes the log its own
+ * state: no second file to keep in step with it.
+ *
+ * An untagged bullet cannot be tracked across entries, so it is reported
+ * against the entry that wrote it and deduplicated by text as a fallback.
+ */
+export function openItems(entries) {
+  const bySlug = new Map();
+  const untagged = [];
+  const seenText = new Set();
+
+  // Oldest first, so the first sighting of a slug is the one that opened it.
+  for (const entry of [...entries].reverse()) {
+    for (const raw of entry.stillOpen) {
+      const item = parseOpenItem(raw);
+      if (item.slug === null) {
+        const key = item.text.replace(/\s+/g, " ").trim().toLowerCase().slice(0, 90);
+        if (seenText.has(key)) continue;
+        seenText.add(key);
+        untagged.push({ ...item, entry: entry.title, date: entry.date, mentions: 1 });
+        continue;
+      }
+      const known = bySlug.get(item.slug);
+      if (!known) {
+        bySlug.set(item.slug, {
+          slug: item.slug,
+          text: item.text,
+          entry: entry.title,
+          date: entry.date,
+          mentions: 1,
+          closed: item.closing ? { note: item.note, date: entry.date } : null,
+        });
+        continue;
+      }
+      known.mentions += 1;
+      if (item.closing) known.closed = { note: item.note, date: entry.date };
+      else if (known.closed === null) known.text = item.text;
+    }
+  }
+
+  const tracked = [...bySlug.values()];
+  return {
+    open: [...tracked.filter((i) => i.closed === null), ...untagged],
+    closed: tracked.filter((i) => i.closed !== null),
+  };
+}
+
 /** Every worklog entry, newest first, parsed into the fields a reader wants. */
 export function worklogEntries(root) {
   const text = readText(root, "docs/WORKLOG.md");

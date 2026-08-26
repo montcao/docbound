@@ -10,6 +10,14 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- Open items in a worklog entry can carry a slug: `- [retry-jitter] the backoff
+  has no jitter`. An item with one is declared once and stays open until a later
+  entry writes `- [retry-jitter] closed: ...`, so carrying work forward costs
+  nothing and never means retyping it in different words. `summary` aggregates
+  by slug, which is exact, rather than guessing whether two sentences mean the
+  same thing. Untagged bullets keep working and are shown while their entry is
+  in view. `docs/decisions/0013-tagged-open-items.md` has the reasoning.
+
 - `docbound summary`: what a project is, assembled from the documentation and
   no source at all. Purpose, shape, each module's contract and must-not list,
   every decision with its reversal condition, recent work, and what is still

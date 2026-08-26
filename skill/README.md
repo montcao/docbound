@@ -12,6 +12,11 @@ edited; everything under `dist/` and `plugin/` is a copy of it produced by
 - `skill/docbound/scripts/summary.mjs`: step 1 of the loop as a command. Reads
   the documentation set and no source at all; see
   `docs/decisions/0012-summary-from-docs.md`.
+- `skill/docbound/scripts/lib/digest.mjs`: the documentation set parsed as data.
+  Module contracts, decisions and their reversal conditions, worklog entries,
+  and the open items tracked across them
+  (`docs/decisions/0013-tagged-open-items.md`). Every check reads a repository
+  to judge it; this reads one to describe it.
 - `skill/docbound/scripts/lib/entry.mjs`: what every script does differently
   when it is run rather than imported: resolve its own path through symlinks,
   and treat a closed pipe as an ending rather than a crash. Both are also true

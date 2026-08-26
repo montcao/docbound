@@ -31,7 +31,10 @@ Agent: <claude | codex | gemini | copilot | other> · Branch: <branch or "n/a">
 
 <Filled at the end. What is not done, deferred, or discovered. Each item specific enough that someone else could pick it up.>
 
-- <item — `<path>` — <why it is open>>
+<Give an item a slug in square brackets and it becomes trackable: declared once, open until an entry closes it, never restated. Without one it is a note attached to this task, which is fine for something that will not outlive it.>
+
+- [<slug>] <item — `<path>` — <why it is open>>
+- [<slug from an earlier entry>] <closed: and what happened>
 
 ### Waivers
 

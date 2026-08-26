@@ -5,6 +5,100 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 - Give open items an identity so they stop being retyped
+
+Agent: claude · Branch: main
+
+### Intent
+
+Six bullets across five entries describe one unfinished piece of work. Each was
+correct when written, because each entry honestly reports what was open at that
+moment, and each was retyped from scratch in slightly different words. The
+summary then concatenated the history and presented it as a status, so a
+repository with about twenty loose ends looked like one with thirty-five.
+
+The deduplication that fixed the display compares the first ninety characters
+after normalising, which catches a restatement that opens the same way and
+misses one that buries the item behind a different clause. Three of the six
+matched, three did not. A heuristic over prose is the wrong instrument.
+
+The cause is upstream of the summary. An open item has no identity, so carrying
+it forward means writing it again, and writing it again means writing it
+differently. Give it a slug and the item is declared once, stays open until an
+entry closes it, and never needs restating. Aggregation becomes exact matching
+rather than fuzzy matching, and the agent stops spending judgement on
+bookkeeping.
+
+### Expected to touch
+
+- `skill/docbound/scripts/lib/digest.mjs` - parse and aggregate tagged items
+- `skill/docbound/scripts/summary.mjs` - report them with their history
+- `skill/docbound/templates/WORKLOG-entry.md` - the convention, demonstrated
+- `skill/docbound/SKILL.md` - one paragraph on declaring once
+- `tests/summary.test.mjs` - the aggregation, and untagged items still working
+- `docs/` - this entry and a decision record
+
+### Unknowns going in
+
+- Whether requiring a slug makes the section feel like a ticket tracker. The
+  convention has to stay optional, since an untagged bullet is the normal way
+  someone writes a note and refusing it would be worse than tracking it badly.
+- How to close an item without a second file format. Anything that needs a
+  parallel state file is a synchronisation problem, which is what an append-only
+  log exists to avoid.
+
+### Outcome
+
+**An open item can carry a slug**, and one that does is declared once:
+`- [check-set] comment-sentence reads wrapped sentences as fragments`. Any later
+entry closes it with `- [check-set] closed: ...`, and `closed`, `done`, and
+`resolved` are all accepted, because the cost of taking all three is one regular
+expression and the cost of refusing two is an item that silently stays open.
+
+`openItems` in `skill/docbound/scripts/lib/digest.mjs` walks the history oldest
+first, so an item is opened by its first appearance rather than its most recent
+one, and reports how many entries have mentioned it. Aggregation is exact
+matching on the slug. The prose deduplication it replaces matched three of six
+restatements of the same item and missed the three that opened with a different
+clause.
+
+**Untagged bullets keep working.** A note that will not outlive its task should
+not need an identity, and refusing one would push people into tagging things
+that do not deserve tracking. It cannot be followed across entries, so it is
+shown while its entry is still in view and counted afterwards rather than
+restated as a fresh item forever.
+
+**This repository's own history stays untagged.** Retagging closed entries would
+edit the record of what was written when, and that record is worth more than the
+convention. The summary reports the older notes as a count with a pointer to
+`docs/decisions/0013-tagged-open-items.md`.
+
+**The convention is not enforced.** A check requiring a slug would be a check
+about form rather than truth, and the check set has stayed on one side of that
+line on purpose. The record names the check that would be legitimate: a warning
+listing slugs that appear exactly once, which is a likely typo rather than a
+rule.
+
+Nineteen tests in `tests/summary.test.mjs`, seven of them on the aggregation.
+
+### Still open
+
+- [slug-typos] A mistyped slug opens a second item instead of continuing the
+  first, and nothing catches it. Visible in `summary --open` as two nearly
+  identical rows. The warning described in
+  `docs/decisions/0013-tagged-open-items.md` is the fix, once there is evidence
+  that it happens.
+- [summary-usefulness] Nothing measures whether the summary is worth reading.
+  The tests assert it reads no source and parses what is there, which is truth
+  rather than usefulness. Same gap the check set has.
+- [entries-default] `--entries` defaults to five, chosen without evidence.
+- [comment-sentence-wrapping] `comment-sentence` reads the continuation lines of
+  a wrapped sentence as fragments, so every file here with a wrapped header
+  comment trips it. Treating a run of comment lines as one unit is the fix.
+- [provider-coverage] Four provider entries are unverified against a running
+  harness: gemini, github, opencode, and the generic layout.
+  `docs/providers.md` has the four questions each needs answered.
+
 ## 2026-08-26 - Add a summary that reads the docs instead of the code
 
 Agent: claude · Branch: main
