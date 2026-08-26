@@ -106,6 +106,9 @@ export function buildPlugin(payload) {
     "${CLAUDE_PLUGIN_ROOT}/skills/docbound",
   );
   files.set("hooks/hooks.json", Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`));
+  // The directory is removed and rewritten on every build, so its own README
+  // has to be an output of the build rather than a file sitting in it.
+  files.set("README.md", fs.readFileSync(path.join(HERE, "plugin-README.md")));
   return files;
 }
 

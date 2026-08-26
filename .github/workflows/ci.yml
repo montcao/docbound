@@ -1,0 +1,34 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: ["20", "22", "24"]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The audit diffs against the merge base, and a shallow clone does not
+          # have one. Without full history every change looks like the whole
+          # repository changed.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Tests
+        run: node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/scaffold.test.mjs
+
+      - name: dist is current
+        run: node scripts/check-dist-fresh.mjs
+
+      - name: docbound audits itself
+        run: node cli/index.mjs audit
