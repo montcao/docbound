@@ -5,6 +5,85 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 - Rewrite the README for a reader who has not adopted the tool yet
+
+Agent: claude · Branch: main
+
+### Intent
+
+The README is written for someone who already agrees that documentation
+discipline is worth enforcing. It opens with a thesis, states the loop as five
+imperatives, and reaches the install instructions after the argument is already
+won. A reader who has never felt the problem has no reason to keep going.
+
+The audience that matters for adoption is a junior engineer who uses an AI
+assistant daily, has been burned by code nobody can explain, and has never
+installed a tool that can block them from finishing. That last part is the
+obstacle. A gate sounds like an obstacle until you have seen what it actually
+prints, so the rewrite shows real output rather than describing it.
+
+Ordering changes with the audience. `audit` comes before `install`, because it
+reads and changes nothing, so the first run costs nothing to try and produces a
+real answer about their own repository.
+
+### Expected to touch
+
+- `README.md` - rewritten for a reader deciding whether to adopt
+- `docs/WORKLOG.md` - this entry
+
+### Unknowns going in
+
+- Whether teaching register conflicts with the writing standard the skill
+  itself sets in `skill/docbound/references/style.md`, which forbids second
+  person and prefers dry declaration. That standard governs documentation
+  inside a repository being documented. A front door that has to convince
+  someone is a different genre, and the two may not be reconcilable.
+- How much length a teaching README can carry before it stops being scanned.
+
+### Outcome
+
+**Reordered around the reader's first decision, not the author's argument.**
+`audit` now comes before `install`, because it reads and writes nothing, so
+trying it costs nothing and returns a real answer about the reader's own
+repository. The old opening was a thesis about documentation being a work
+product, which is true and persuades nobody who has not already been burned. It
+opens on the specific failure instead: good code merged fast, and three weeks
+later nobody can explain it.
+
+**Real output, not a description of output.** The audit sample is copied
+verbatim from `tests/fixtures/undocumented-change`. The blocking behaviour is
+the single thing most likely to stop someone adopting this, and describing it
+reads as a warning while showing it reads as five fixable lines.
+
+**A section for the objection rather than a mention of it.** "The gate, and why
+it is not as bad as it sounds" says what the agent does when blocked and how
+long it takes. "Turning it down, or off" gives four supported positions, from no
+hooks through CI-only, framed as choices rather than escapes. A reader who
+believes they cannot back out does not start.
+
+**The checks table says what each one means to the reader** rather than what it
+detects internally, and points at `doc-coverage` as the one to read first, since
+it produces most of both the value and the friction.
+
+The file grew from 171 lines to 290. That is the cost of teaching rather than
+stating, and it stays scannable because a reader who wants the commands can take
+the first two code blocks and leave.
+
+### Still open
+
+- The register conflicts with `skill/docbound/references/style.md`, which forbids
+  second person and prefers dry declaration. That standard governs documentation
+  inside a repository being documented, and a front door that has to convince a
+  stranger is a different genre. Worth resolving explicitly if anyone reads the
+  two side by side and takes the README as an example of the skill's own
+  standard, because it is not one.
+- The audit's own FAIL line contains an em dash, so the quoted terminal output in
+  the README carries one. Faking program output would be worse. Changing the
+  message means updating `docs/checks.md` and the table in the skill, which is a
+  separate change.
+- Nothing measures whether this works. Adoption is the metric and there is no way
+  to see it from here.
+
 ## 2026-08-26 - Rewrite the repository's prose to read as human writing
 
 Agent: claude · Branch: main

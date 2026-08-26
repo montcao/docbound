@@ -1,133 +1,208 @@
 # docbound
 
-Documentation is a work product of every task, not a byproduct of finishing one.
+A documentation discipline for coding agents, with a checker that decides when a
+task is finished.
 
-docbound is a skill for coding agents. It puts a worklog entry before the first
-edit, records decisions at the moment they are made, moves docs in the same
-change as the code, and ends every task with a deterministic audit that either
-exits 0 or says exactly what is missing.
+## The problem it solves
 
-Agent-written code has a specific failure: the author does not persist. Every
-session is a new engineer with no memory of why anything is shaped the way it
-is. If the *why* is not written down in the moment it is decided, it is gone.
+You ask an AI assistant for a feature. It writes 300 good lines in four minutes.
+You read them, they look right, you merge.
 
-## Quickstart
+Three weeks later something breaks in that code. You open it and cannot work out
+why it was built that way. Neither can the assistant, because that session is
+gone and nothing about the reasoning survived it.
+
+This is not a memory problem you can prompt your way out of. The reasoning has
+to be written down at the moment the decision is made. An hour later you are
+reconstructing, and a confident reconstruction that happens to be wrong is worse
+than no explanation at all.
+
+docbound makes that happen by making it the condition for finishing.
+
+## Try it without installing anything
+
+This reads your repository and changes nothing in it. Run it on something real:
 
 ```
 cd your-repo
-npx docbound install      # detects your harness, copies the skill, wires the hook
-npx docbound audit        # see where you stand
+npx docbound audit
 ```
 
-On a repository with no docs yet, lay down the structure first:
+You get either `PASS` or a list. On a repository with an undocumented change,
+the list looks like this:
+
+```
+docbound audit · mode=author · root=your-repo · git=yes · 3 changed file(s), 2 source
+
+ERROR (5)
+  [worklog-entry] docs/WORKLOG.md
+      not modified in this change set; open a new entry for this task before editing code
+  [doc-coverage] billing/charge.py
+      changed with no covering doc in the diff: touch its module README, or a system doc
+      (root README, ARCHITECTURE, an ADR) that names this file or its directory
+  [new-dir-readme] billing
+      new directory with source and no README.md (templates/MODULE.md)
+  [dep-adr] requirements.txt
+      dependency manifest changed with no Architecture Decision Record (ADR) in the diff
+
+FAIL — 5 error(s). Fix them or add a waiver line to the worklog entry, then re-run.
+```
+
+Every finding names a file and says what would satisfy it. Nothing is a style
+opinion. Each one is a claim that a specific piece of reasoning was not written
+down.
+
+If your repository has no docs at all, lay down the structure first:
 
 ```
 npx docbound scaffold
 ```
 
-The scaffold writes files full of placeholders, and the audit fails on them **on
-purpose**. Structure is not documentation. Fill them in and the audit goes green.
+That writes template files full of placeholders, and the audit fails on those
+placeholders on purpose. An empty heading is not documentation, and a tool that
+accepted one would be helping you lie to yourself.
 
-That is the whole loop: your agent opens a worklog entry, does the work, updates
-the docs that cover it, and cannot call the task done until `audit` exits 0.
+## What changes about your day
 
-## What your agent does differently
+Five steps. Your agent runs them, not you, once the skill is installed.
 
-1. **Orient.** Read the README, ARCHITECTURE, the last three worklog entries,
-   and the module READMEs it expects to touch. Note what is already false.
-2. **Declare.** Open a worklog entry before the first edit. Intent written
-   before you know how it turns out is what makes it worth reading later.
-3. **Work.** The doc that covers a change moves in the same change as the code.
-4. **Decide.** The instant you reject option B is the only time you fully know
-   why. Structural decisions become a record; local ones become a table row.
-5. **Reconcile.** Delete what has stopped being true, then run the audit. When
-   it exits 0, stop.
+1. **Orient.** Before writing code, read the docs that already exist for the
+   area being touched, and notice anything that has stopped being true.
+2. **Declare.** Open an entry in `docs/WORKLOG.md` saying what you are about to
+   do, before the first edit. Written beforehand it is a prediction. Written
+   afterwards it is a summary of a diff, which nobody needs.
+3. **Work.** When a change alters behaviour or a contract, the doc covering it
+   changes in the same commit. Not batched to the end.
+4. **Decide.** The moment you pick option A over option B is the only moment you
+   fully know why. Big choices get a file in `docs/decisions/`. Small ones get a
+   row in a table.
+5. **Reconcile.** Delete what has stopped being true, run the audit, and when it
+   exits 0, stop. There is no extra credit for polishing past that.
 
-## The gate
+The parts that feel unfamiliar are steps 2 and 4. Both exist for the same
+reason: they capture something that is only available before the work is
+finished.
 
-The audit is the definition of done. Not "mostly passes", not "warnings only".
+## The gate, and why it is not as bad as it sounds
 
-With hooks installed it runs inside the agent loop: four cheap checks after
-every file edit, the full set when the agent tries to stop. A failing stop hook
-exits 2, which every supported harness reads as *do not stop, and here is why*.
-The agent is handed the findings at the moment it believed it was finished.
+Installing wires two hooks into your editor.
 
-A finding you disagree with becomes one line in the worklog entry:
+After every file edit, four cheap checks run and print anything they find. They
+never block.
+
+When your agent tries to end its turn, the full set runs. If it fails, the hook
+exits with code 2, which your editor reads as *do not stop, here is why*. The
+agent gets the findings at the exact moment it believed it was done, and keeps
+working.
+
+That is the entire value of the tool. An instruction that says "please document
+this" competes with everything else in the agent's context and loses. An exit
+code does not compete.
+
+**What it feels like in practice:** the agent adds a paragraph to a README,
+writes two sentences in the worklog, and continues. Usually under a minute,
+because it still has the reasoning loaded. The cost lands on the agent, not on
+you.
+
+## When you think a finding is wrong
+
+Sometimes it is. A generated file has no meaningful doc to write. Say so, in one
+line in the worklog entry:
 
 ```
 waiver: doc-coverage src/generated/api_types.ts - emitted by the codegen step;
 the contract lives in the schema, not in this file.
 ```
 
-Waivers are honoured for the current entry only, and the human sees them. They
-record a considered exception; they are not a way to skip work.
+The finding stops blocking, and it stays visible in the output under `WAIVED`
+so a reviewer sees the exception and the reason next to it.
 
-Turn blocking off per developer in the gitignored local override beside
-`.docbound/config.json`, or install without the gate using `--no-hooks`.
+Two things to understand about waivers. They apply to the current worklog entry
+only, so one does not quietly outlive the task that justified it. And they need
+a reason a reviewer would accept, because "not relevant" teaches everyone to
+skim the section that most needs reading.
+
+If you find yourself writing waivers in more than one task out of five, the
+checks are wrong for your repository, not you. That threshold is written into
+the adoption record the tool generates.
 
 ## The checks
 
-| ID | Level | Catches |
+Errors block. Warnings print and do not block, but leaving one is a choice
+recorded in the output.
+
+| ID | Level | What it means |
 |---|---|---|
-| `worklog-entry` | error | A task that began without an intent written first |
-| `worklog-closed` | error | An entry with no Outcome or no Still open |
-| `doc-coverage` | error | A changed source file with no covering doc in the same diff |
-| `new-dir-readme` | error | A new package with no README |
-| `dead-ref` | error | A doc pointing at a path that does not exist |
-| `dep-adr` | error | A dependency change with no decision record |
-| `adr-shape` | error | A decision record with no reversal condition |
-| `adr-immutable` | error | An accepted record edited below its Status line |
-| `template-residue` | error | An unfilled placeholder in a doc |
+| `worklog-entry` | error | You started work without saying what you were about to do |
+| `worklog-closed` | error | The entry has no outcome, or nothing under Still open |
+| `doc-coverage` | error | A source file changed and no doc covering it changed with it |
+| `new-dir-readme` | error | A new package arrived with no README |
+| `dead-ref` | error | A doc points at a file path that does not exist |
+| `diagram-refs` | error | A Mermaid diagram has a box naming a path that does not exist |
+| `dep-adr` | error | A dependency changed with no record of why |
+| `adr-shape` | error | A decision record does not say what would reverse it |
+| `adr-immutable` | error | An accepted decision record was edited below its Status line |
+| `template-residue` | error | A scaffolded placeholder was left in a doc |
 | `orphan-doc` | warn | A doc nothing links to |
-| `duplicate-block` | warn | A paragraph with two owners |
+| `duplicate-block` | warn | The same paragraph has two owners |
 | `stale-marker` | warn | Changelog phrasing where current truth belongs |
-| `restating-comments` | warn | Comments that say what the code already says |
+| `restating-comments` | warn | Comments repeating what the code already says |
 | `todo-shape` | warn | A TODO with no problem, no action, or no owner |
-| `comment-sentence` | warn | Commented-out code, and comments that are notes to self |
-| `line-length` | warn | Lines past the limit the repository sets |
+| `comment-sentence` | warn | Commented-out code, or comments written as notes to self |
+| `line-length` | warn | Lines past the limit your repository configures |
 | `mixed-indent` | warn | Tabs and spaces in one file |
 
-Errors block; warnings print and do not block, but leaving one is a choice made
-on the record. Four more apply in subagent mode. `docs/checks.md` documents every
-one of them, what is exempt, and a waiver a reviewer would accept.
+Four more apply in subagent mode. `docs/checks.md` covers every check: what it
+detects, what is exempt from it, and a waiver a reviewer would accept.
 
-## Supported tools
+**If you read only one:** `doc-coverage`. It is the check that produces most of
+the value and most of the friction, and understanding what counts as covering a
+file explains the shape of everything else.
 
-**Claude Code** and **Cursor**. Both were verified against the harness itself,
-against its own bundled files rather than a description of them. Each entry in
-`cli/providers.mjs` records what that evidence was.
-
-Nothing else ships. A provider entry written from inference fails silently: the
-payload lands where the harness never reads, the install reports success, and
-the skill never loads. `docs/providers.md` lists the candidates, what is known
-about each, and the four questions to answer before one can be added.
-
-Any other tool can still use docbound. `dist/payload/` is the skill with no path
-claim attached, ready to copy wherever that tool reads skills from. It is plain
-Markdown plus Node scripts (Node 20 or later) with no dependencies, and the
-audit degrades to a whole-tree scan without git.
-
-## Other ways to install
-
-**Claude Code plugin**:
+## Installing it
 
 ```
-/plugin marketplace add montcao/docbound
-/plugin install docbound@montcao
+npx docbound install
 ```
 
-**Submodule.** The skill stays a checkout you update with git:
+It looks for the editors your project already uses, copies the skill where each
+one reads skills from, and merges its hook into whatever config is there
+already. It will not overwrite settings you have. If it cannot find a supported
+editor it stops and says so, rather than guessing at a path.
+
+Name one explicitly if you prefer:
 
 ```
-git submodule add https://github.com/montcao/docbound .docbound-src
-npx --prefix .docbound-src docbound link --source=.docbound-src
+npx docbound install --providers=claude-code,cursor
 ```
 
-**Copy.** No toolchain at all:
+Check what happened:
 
 ```
-cp -R dist/payload .claude/skills/docbound
+npx docbound doctor
 ```
+
+## Turning it down, or off
+
+Adopt this in the order that suits you. All four of these are supported
+positions, not workarounds.
+
+**Run the checks by hand, no hooks:**
+
+```
+npx docbound install --no-hooks
+```
+
+**Keep the hooks but stop the blocking.** Set `hook.blockOnStop` to `false` in
+the gitignored local override beside `.docbound/config.json`. That file is per
+developer and nobody reviews it.
+
+**Ignore a whole directory.** Add it to `audit.exclude` in
+`.docbound/config.json`, which is tracked, so the exclusion is reviewed like any
+other change to what the repository considers documented.
+
+**Run it in CI only.** `npx docbound audit` exits 0, 1, or 2, so it drops into a
+workflow without the editor integration.
 
 Keep the per-developer override out of git with a marker block in `.gitignore`:
 
@@ -138,33 +213,77 @@ Keep the per-developer override out of git with a marker block in `.gitignore`:
 # docbound-ignore-end
 ```
 
-`.docbound/config.json` stays tracked, because it is the policy the team shares.
+## Supported editors
+
+**Claude Code** and **Cursor**. Both were verified against the editor itself,
+against the files it ships rather than a description of them, and each entry in
+`cli/providers.mjs` records what that evidence was.
+
+Nothing else ships, and the reason is worth knowing before you go looking for
+your editor in that list. A provider entry written from a guess fails silently:
+the files copy, the install prints success, the editor reads a different path,
+and the skill never loads. There is no error to search for. A missing editor is
+a feature request; a broken one wastes an afternoon.
+
+`docs/providers.md` lists the candidates and the four questions each needs
+answered before it can be added. Answering them for your editor is a good first
+contribution.
+
+Any other tool can still use docbound by hand. `dist/payload/` is the skill with
+no path claim attached, ready to copy wherever that tool reads skills from.
+
+## Other ways to install
+
+**Claude Code plugin:**
+
+```
+/plugin marketplace add montcao/docbound
+/plugin install docbound@montcao
+```
+
+**Submodule,** if you want the skill to stay a checkout you update with git:
+
+```
+git submodule add https://github.com/montcao/docbound .docbound-src
+npx --prefix .docbound-src docbound link --source=.docbound-src
+```
+
+**Copy,** with no toolchain at all:
+
+```
+cp -R dist/payload .claude/skills/docbound
+```
 
 ## Subagent mode
 
-When a documentation agent runs after a coding agent, it never had the moment
-where the decision was made. So in subagent mode every reconstructed reason is
-marked `Inferred:` and queued for confirmation, decision records cite their
-source class, the documenter may edit docstrings and comments but never logic or
-names, and a missing `### Handoff` section from the coder is an error the
-documenter cannot fix, because the fix is upstream. `docs/subagent.md` has the
-wiring.
+For when one agent writes code and a second agent documents it afterwards. The
+second one never had the moment where the decision was made, so it works under
+stricter rules: every reconstructed reason is marked `Inferred:` and queued for
+a human to confirm, and it may edit comments but never logic or names. A missing
+handoff from the first agent is an error the second one is not allowed to paper
+over. `docs/subagent.md` has the wiring.
+
+## What this is built on
+
+Node 20 or later. No dependencies at runtime and none for development. The skill
+is plain Markdown plus a few scripts, and the audit falls back to scanning the
+whole tree if there is no git repository.
 
 ## Status
 
-0.1.0. The skill, the audit, the hooks, and the CLI are exercised by a test
-suite that includes packing the real npm tarball and installing from it.
-Supported-provider coverage is deliberately narrow; see `docs/providers.md`.
+0.1.0. The audit, the hooks, and the CLI are covered by a test suite that packs
+the real npm tarball and installs from it. Editor support is deliberately
+narrow; see `docs/providers.md`.
 
 ## Where to go next
 
-- `docs/checks.md`: every check, what it detects, and a waiver example
-- `docs/providers.md`: supported harnesses, and what a candidate still needs
-- `docs/ARCHITECTURE.md`: how the pieces fit
+- `docs/checks.md`: every check, what satisfies it, and a waiver example
+- `docs/ARCHITECTURE.md`: how the pieces fit, with a diagram
+- `docs/providers.md`: supported editors, and what a candidate still needs
 - `docs/subagent.md`: wiring the documentation subagent
-- `docs/DEVELOP.md`: building, testing, releasing, adding a check
-- `docs/decisions/`: why things are shaped this way
-- `skill/docbound/SKILL.md`: the skill itself
+- `docs/DEVELOP.md`: building, testing, releasing, and how to add a check
+- `docs/decisions/`: why things are shaped this way, oldest first
+- `skill/docbound/SKILL.md`: the skill your agent reads
 
 ## License
 
