@@ -1,0 +1,13 @@
+{
+  "note": "Scaffold output left unfilled. Two identical module templates are a real duplicate block.",
+  "git": true,
+  "errors": {
+    "template-residue": 5,
+    "worklog-closed": 2
+  },
+  "warnings": {
+    "duplicate-block": 1
+  },
+  "waived": {},
+  "exit": 1
+}

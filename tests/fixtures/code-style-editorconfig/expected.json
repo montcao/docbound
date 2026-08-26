@@ -1,0 +1,12 @@
+{
+  "note": "The repository's own limit silences line-length without the code changing.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "comment-sentence": 2,
+    "mixed-indent": 1,
+    "todo-shape": 1
+  },
+  "waived": {},
+  "exit": 0
+}

@@ -1,0 +1,10 @@
+{
+  "note": "An accepted record is an archive; editing the body is the finding.",
+  "git": true,
+  "errors": {
+    "adr-immutable": 1
+  },
+  "warnings": {},
+  "waived": {},
+  "exit": 1
+}

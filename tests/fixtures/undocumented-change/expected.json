@@ -1,0 +1,13 @@
+{
+  "note": "Feature branch with no commits, so only the working tree is the change set.",
+  "git": true,
+  "errors": {
+    "dep-adr": 1,
+    "doc-coverage": 2,
+    "new-dir-readme": 1,
+    "worklog-entry": 1
+  },
+  "warnings": {},
+  "waived": {},
+  "exit": 1
+}

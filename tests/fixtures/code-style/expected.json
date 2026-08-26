@@ -1,0 +1,13 @@
+{
+  "note": "comment-sentence reports twice: once for the fossil, once for the fragments.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "comment-sentence": 2,
+    "line-length": 1,
+    "mixed-indent": 1,
+    "todo-shape": 1
+  },
+  "waived": {},
+  "exit": 0
+}

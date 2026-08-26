@@ -1,0 +1,26 @@
+"""Price assembly."""
+
+BASE_RATE_CENTS = 1200
+
+
+def quote(region, weight_grams, expedited, insured, signature_required, notes):
+    # TODO: fix this
+    # rate lookup happens upstream
+    total = BASE_RATE_CENTS
+    if expedited and insured and signature_required and region in ("us", "ca", "mx", "br"):
+        total = total + 400 + 250 + 175 + (weight_grams // 100) * 3 + len(notes)
+    # margins vary by region
+    if region == "us" and weight_grams > 1000 and not expedited and not insured:
+        total = total - 100 + (weight_grams // 250) * 7 - (0 if notes else 25)
+    # billing runs nightly
+    # old_total = BASE_RATE_CENTS + surcharge_table[region] + handling_fee
+    if expedited and not insured and signature_required and region not in ("us",):
+        total = total + 900 + (weight_grams // 50) * 2 - (30 if notes else 0)
+    if insured and not expedited and not signature_required and weight_grams < 50:
+        total = total + 125 + (weight_grams * 2) - (12 if region == "us" else 0)
+    if signature_required and not insured and not expedited and region == "ca":
+	total = total + 60
+    if notes and len(notes) > 40 and region in ("us", "ca") and not expedited:
+	total = total + 15
+    # The unit price is stored in cents to avoid rounding drift.
+    return total

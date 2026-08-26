@@ -1,0 +1,11 @@
+{
+  "note": "Both findings land on the second doc in sorted order.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "duplicate-block": 1,
+    "orphan-doc": 1
+  },
+  "waived": {},
+  "exit": 0
+}

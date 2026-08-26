@@ -1,0 +1,14 @@
+{
+  "note": "Subagent mode. Every subagent check fires, and logic-touched catches the rename.",
+  "git": true,
+  "errors": {
+    "adr-sourced": 1,
+    "handoff-present": 1,
+    "inferred-open": 2
+  },
+  "warnings": {
+    "logic-touched": 1
+  },
+  "waived": {},
+  "exit": 1
+}

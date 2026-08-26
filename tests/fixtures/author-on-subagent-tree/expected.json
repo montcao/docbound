@@ -1,0 +1,8 @@
+{
+  "note": "The subagent checks must not run without --mode subagent.",
+  "git": true,
+  "errors": {},
+  "warnings": {},
+  "waived": {},
+  "exit": 0
+}

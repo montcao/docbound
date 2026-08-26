@@ -1,0 +1,10 @@
+{
+  "note": "A new record with no reversal condition.",
+  "git": true,
+  "errors": {
+    "adr-shape": 1
+  },
+  "warnings": {},
+  "waived": {},
+  "exit": 1
+}

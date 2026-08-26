@@ -1,0 +1,9 @@
+node_modules/
+.DS_Store
+
+# docbound-ignore-start
+# Managed by `npx docbound install`. Edits inside this block are overwritten;
+# `.docbound/config.json` stays tracked so the team shares one hook policy.
+.docbound/config.local.json
+.docbound/cache/
+# docbound-ignore-end

@@ -1,0 +1,10 @@
+{
+  "note": "Clean tree on the base branch, so HEAD~1..HEAD is the change set.",
+  "git": true,
+  "errors": {
+    "doc-coverage": 1
+  },
+  "warnings": {},
+  "waived": {},
+  "exit": 1
+}
