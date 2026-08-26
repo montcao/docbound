@@ -12,7 +12,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
-import { PROVIDERS } from "../scripts/providers.mjs";
+import { PROVIDERS } from "./providers.mjs";
 import { DEFAULT_CONFIG } from "../skill/docbound/scripts/lib/config.mjs";
 
 export function readLock(packageRoot) {

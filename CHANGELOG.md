@@ -33,7 +33,7 @@ Nothing has been published yet. This section describes the first release.
 ### Supported providers
 
 Claude Code and Cursor, each verified against the harness itself and each
-recording that evidence in `scripts/providers.mjs`.
+recording that evidence in `cli/providers.mjs`.
 
 Codex, Gemini CLI, GitHub Copilot, opencode, and the generic Agent Skills layout
 are **not** supported. Entries for them existed during development and were
@@ -43,6 +43,16 @@ installs the payload where the harness never reads, reports success, and loads
 nothing, so none of them ship. `docs/providers.md` records what each candidate
 still needs, and `docs/decisions/0008-verified-providers-only.md` records the
 policy.
+
+### Packaging
+
+The published package is what `tests/package.test.mjs` checks: it packs the real
+tarball, unpacks it, installs from it, and runs the installed audit and stop
+hook. Two files the CLI reads at runtime were missing from the npm whitelist and
+would have made the first command fail; the test now covers every future
+omission rather than those two. `docs/decisions/0009-package-is-the-artifact.md`
+records the rule that came with it — nothing under `cli/` imports from
+`scripts/`, which is not published.
 
 ### Security
 

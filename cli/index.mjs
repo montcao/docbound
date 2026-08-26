@@ -13,7 +13,7 @@ import readline from "node:readline";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
-import { PROVIDERS, PROVIDER_NAMES, providerByName } from "../scripts/providers.mjs";
+import { PROVIDERS, PROVIDER_NAMES, providerByName } from "./providers.mjs";
 import {
   copyDist,
   detectProviders,
@@ -52,11 +52,23 @@ options:
   --title=TEXT      adr only
   --no-hooks        install without the blocking gate
   --yes             take the defaults, ask nothing
+  --help, --version
 `;
 
+const HELP_FLAGS = new Set(["-h", "--help", "help"]);
+const VERSION_FLAGS = new Set(["-v", "--version", "version"]);
+
 export function parseCliArgs(argv) {
+  const first = argv[0];
+  // `docbound --help` and `docbound --version` are what people type first, and
+  // a flag in the command position is not a command.
+  const leading = HELP_FLAGS.has(first)
+    ? "help"
+    : VERSION_FLAGS.has(first)
+      ? "version"
+      : (first ?? null);
   const options = {
-    command: argv[0] ?? null,
+    command: leading,
     providers: null,
     scope: "project",
     source: null,
@@ -345,6 +357,9 @@ export async function main(argv) {
       return 0;
     case "help":
       process.stdout.write(USAGE);
+      return 0;
+    case "version":
+      process.stdout.write(`${readLock(PACKAGE_ROOT).version}\n`);
       return 0;
     case null:
       process.stdout.write(USAGE);

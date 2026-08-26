@@ -41,7 +41,7 @@ file inside the fixture would join the change set and move the findings.
 ## Use
 
 ```
-node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/scaffold.test.mjs
+npm test
 ```
 
 `docs/DEVELOP.md` covers adding a fixture for a new check.

@@ -24,7 +24,7 @@ on a guess deserves the review it would get.
 
 ## What each candidate still needs
 
-An entry moves into `scripts/providers.mjs` when someone can answer all four
+An entry moves into `cli/providers.mjs` when someone can answer all four
 questions from the harness itself, and records the answers in the entry's
 `verified` field.
 

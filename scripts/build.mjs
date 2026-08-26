@@ -15,7 +15,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
-import { PROVIDERS } from "./providers.mjs";
+import { PROVIDERS } from "../cli/providers.mjs";
 import { DEFAULT_CONFIG } from "../skill/docbound/scripts/lib/config.mjs";
 import { isEntryPoint } from "../skill/docbound/scripts/lib/entry.mjs";
 

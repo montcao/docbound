@@ -18,7 +18,8 @@ copy is faithful.
 
 ### build — `scripts/`
 
-- Owns: `dist/`, `plugin/`, `skills-lock.json`, and the provider table.
+- Owns: `dist/`, `plugin/`, and `skills-lock.json`. Reads the provider table
+  from `cli/providers.mjs`, which ships and therefore lives with the package.
 - Must not: transform the payload, or read anything outside `skill/docbound/`
   when deciding what to emit. The build is a pure function of its input and
   `tests/build.test.mjs` asserts it.
@@ -26,10 +27,10 @@ copy is faithful.
 
 ### cli — `cli/`
 
-- Owns: what lands in a user's project, and how an existing project's config
-  survives an install.
+- Owns: what lands in a user's project, how an existing project's config
+  survives an install, and the provider table.
 - Must not: implement a check, or overwrite what the project already owns.
-- Talks to: `scripts/providers.mjs` for placement, `dist/` for the payload,
+- Talks to: `cli/providers.mjs` for placement, `dist/` for the payload,
   `skills-lock.json` to tell current from stale, and the skill's scripts as
   subprocesses.
 
@@ -68,7 +69,8 @@ edit or a stop, `npx docbound audit`, and CI.
 | Audit JSON: `root`, `git`, `changed`, `errors`, `warnings`, `waived` | `skill/docbound/scripts/lib/report.mjs` | The hook, the CLI, the test suite | Architecture Decision Record |
 | Audit exit codes: 0 pass, 1 errors, 2 usage | `skill/docbound/scripts/audit.mjs` | CI, pre-commit hooks, the CLI | Architecture Decision Record |
 | The check module contract, `{ id, level, run(ctx) }` | `skill/docbound/scripts/audit.mjs` | Every check module | Architecture Decision Record |
-| Provider placement and hook manifests | `scripts/providers.mjs` | The build and the CLI | Evidence from the harness itself, recorded in the entry |
+| Provider placement and hook manifests | `cli/providers.mjs` | The build and the CLI | Evidence from the harness itself, recorded in the entry |
+| The npm `files` whitelist | `package.json` | Everyone who runs `npx docbound` | A passing `tests/package.test.mjs` |
 | Fixture contract: a setup script and an expected-findings file | `tests/harness.mjs` | Every fixture | Nothing |
 
 ## Invariants

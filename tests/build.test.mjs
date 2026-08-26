@@ -13,7 +13,7 @@ import { after, describe, test } from "node:test";
 import { REPO_ROOT, removeTree, tempDir } from "./harness.mjs";
 import { build, buildPlugin, collectPayload, hashFiles } from "../scripts/build.mjs";
 import { checkDistFresh, compareTrees, listTree } from "../scripts/check-dist-fresh.mjs";
-import { PROVIDERS } from "../scripts/providers.mjs";
+import { PROVIDERS } from "../cli/providers.mjs";
 
 const made = [];
 after(() => {

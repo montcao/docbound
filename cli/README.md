@@ -8,6 +8,10 @@ pre-commit hook, a human.
 
 - `cli/index.mjs` — argument parsing and one function per command.
 - `cli/install.mjs` — everything that touches the filesystem.
+- `cli/providers.mjs` — the provider table. It lives here rather than in
+  `scripts/` because it ships: everything the published package imports has to
+  be inside the npm `files` whitelist, and `tests/package.test.mjs` enforces
+  that by installing from the real tarball.
 
 ## Contract
 
@@ -45,13 +49,13 @@ npx docbound audit
 
 `--providers` accepts a few aliases for the names people reach for first —
 `claude` for `claude-code`, `copilot` for `github` — listed in
-`scripts/providers.mjs`. The canonical name is what is printed back.
+`cli/providers.mjs`. The canonical name is what is printed back.
 
 ## Depends on
 
-`scripts/providers.mjs` for the provider table, `dist/` for the payload to copy,
-`skills-lock.json` to tell a current install from a stale one, and
-`skill/docbound/scripts/` for the audit and the scaffold.
+`dist/` for the payload to copy, `skills-lock.json` to tell a current install
+from a stale one, and `skill/docbound/scripts/` for the audit and the scaffold.
+Nothing here imports from `scripts/`, which is not published.
 
 ## Decisions
 

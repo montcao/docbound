@@ -8,7 +8,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { after, describe, test } from "node:test";
 
-import { PROVIDERS } from "../scripts/providers.mjs";
+import { PROVIDERS } from "../cli/providers.mjs";
 import {
   CLI,
   buildFixture,

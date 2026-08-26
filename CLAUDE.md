@@ -44,7 +44,7 @@ Claude Code reads as "do not stop, and here is why".
 Use the repository scripts rather than remembering flags:
 
 ```
-npm test          # node --test over the four test files
+npm test          # every test file; package.json owns the list
 npm run build     # skill/docbound/ into dist/ and plugin/
 npm run check-dist
 npm run audit
@@ -52,6 +52,11 @@ npm run audit
 
 `npm test` runs an explicit list of test files rather than a directory, because
 directory discovery behaves differently across the Node versions in `engines`.
+That list lives only in `package.json`; CI and `scripts/release.mjs` both call
+`npm test` rather than restating it.
+
+`tests/package.test.mjs` shells out to `npm pack`, so it is the one test that
+needs npm on the path and the one that takes a second or two.
 
 ## The documenter subagent
 

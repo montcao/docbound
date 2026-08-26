@@ -25,7 +25,7 @@ jobs:
           node-version: ${{ matrix.node }}
 
       - name: Tests
-        run: node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/scaffold.test.mjs
+        run: npm test
 
       - name: dist is current
         run: node scripts/check-dist-fresh.mjs

@@ -4,7 +4,7 @@ Node 20 or later. No dependencies to install — there are none, including for
 development.
 
 ```
-node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/scaffold.test.mjs
+npm test
 node scripts/build.mjs
 node scripts/check-dist-fresh.mjs
 node cli/index.mjs audit
@@ -109,7 +109,9 @@ updated in the same change when they are.
 
 ## Adding or correcting a provider
 
-`scripts/providers.mjs` is the only place a provider's conventions appear. An
+`cli/providers.mjs` is the only place a provider's conventions appear. It sits
+in `cli/` rather than `scripts/` because the published package imports it, and
+anything the package imports must be inside the npm `files` whitelist. An
 entry names where the payload lands, which directories imply that harness is in
 use, and what its hook manifest looks like:
 

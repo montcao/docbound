@@ -5,6 +5,106 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 — Make the published package actually installable, and cut 0.1.0
+
+Agent: claude · Branch: main
+
+### Intent
+
+Everything so far has been exercised from a git checkout. Nobody has run the
+path a user will actually take: `npx docbound`, which downloads a tarball built
+from the `files` whitelist in `package.json` and runs the CLI out of it.
+
+That path is broken. Both files in `cli/` import the provider table from
+`scripts/`, and `scripts/` is not in the whitelist, so the published package
+would fail to resolve a module on its first command. The bug is not the missing
+entry so much as the absence of anything that would have caught it: no test
+opens the artifact that gets published.
+
+This task fixes that, treats the current scope as the MVP, and cuts 0.1.0. No
+features are added or removed. The work is the last mile: make the artifact
+correct, prove it with a test that packs and installs it, and put the README in
+front of someone who has five minutes.
+
+### Expected to touch
+
+- `cli/providers.mjs` — the provider table moves into the package that ships it
+- `tests/package.test.mjs` — new: pack, unpack, install, assert
+- `README.md` — reordered around a first run rather than around the design
+- `docs/`, `CHANGELOG.md` — the paths that move, and the release notes
+- `package.json` — version and the whitelist
+
+### Unknowns going in
+
+- Whether anything else in the whitelist is missing. The packaging test is
+  written to answer that for every future change rather than this one.
+- Whether the skill's frontmatter description, at 1006 characters against
+  Cursor's 1024 limit, leaves enough room to survive an edit.
+
+### Outcome
+
+**The published package was broken, and two things were missing rather than
+one.** Both files in `cli/` imported the provider table from `scripts/`, which
+the npm `files` whitelist does not include, and `skills-lock.json` — read by
+`install`, `update`, and `doctor` — was not in it either. Either one would have
+made `npx docbound` fail on its first command with a module resolution error.
+
+The table moved to `cli/providers.mjs`, because it is product data that ships;
+`scripts/build.mjs` imports it now rather than owning it. `skills-lock.json`
+joined the whitelist. The rule that came out of it — nothing under `cli/` may
+import from `scripts/` — is in `cli/README.md` and in
+`docs/decisions/0009-package-is-the-artifact.md`.
+
+**A test that opens the artifact.** `tests/package.test.mjs` packs the real
+tarball, unpacks it where no checkout is reachable, installs from it into a
+fixture repository, and then runs the *installed* audit and the *installed* stop
+hook out of that project. It also asserts the package carries no test suite, no
+build scripts, and no frozen Python, so the whitelist is checked in both
+directions. Six tests; the suite is 73.
+
+This is the check that was missing. Seventy tests passed while the package was
+unusable, because none of them opened it.
+
+**`docbound --help` exited non-zero.** A flag in the command position was read
+as a command, so the first thing anyone types printed usage to stderr and exited
+2. Both it and `--version` are commands now.
+
+**The README is reordered around a first run.** Quickstart is at the top —
+three commands and what to expect from them — with the loop, the gate, and the
+check table after it. Two install snippets were still naming a provider and a
+distribution directory that were removed earlier today; an edit meant to fix
+them had silently not applied, which is its own argument for the audit.
+
+**Frontmatter headroom.** The skill's description is 1006 characters against
+Cursor's 1024 limit. Valid, and eighteen characters from not being.
+
+### Still open
+
+- The skill's frontmatter description has eighteen characters of headroom before
+  Cursor rejects it. Nothing checks that, and the next edit to it is likely to
+  be the one that breaks a provider silently. A `frontmatter-limits` check is
+  the strongest candidate for the next pass at the check set.
+- Four candidate providers still need someone with the harness in front of them;
+  `docs/providers.md` has the four questions each has to answer.
+- `comment-sentence` reads the continuation lines of a wrapped sentence as
+  fragments, and the warnings it leaves on this repository are the record of
+  that. Unchanged for three entries now.
+- The packaging test shells out to `npm`, so the suite now needs npm on the
+  path. `docs/decisions/0009-package-is-the-artifact.md` says what would move it
+  to a release-only step.
+
+### Waivers
+
+waiver: dead-ref docs/providers.md — this file's subject is where other tools
+read skills from, so by construction none of the paths it names exist in this
+repository. Removing the backticks would leave a reference document about paths
+unable to typeset a path.
+
+waiver: dead-ref docs/decisions — records 0002 and 0007 name provider paths that
+existed when they were written and were removed by
+`docs/decisions/0008-verified-providers-only.md`. An accepted record is an
+archive; editing it to match the present is what `adr-immutable` exists to stop.
+
 ## 2026-08-26 — Ship only verified providers, and close three security findings
 
 Agent: claude · Branch: main
@@ -38,7 +138,7 @@ truncated line from the file they are about.
 
 ### Expected to touch
 
-- `scripts/providers.mjs` — remove every entry not verified against a harness
+- `cli/providers.mjs` — remove every entry not verified against a harness
 - `skill/docbound/scripts/lib/config.mjs` — prototype-safe merge
 - `cli/install.mjs` — refuse to overwrite a config or a manifest that will not
   parse
@@ -60,7 +160,7 @@ truncated line from the file they are about.
 
 ### Outcome
 
-**Five provider entries removed; two ship.** `scripts/providers.mjs` now holds
+**Five provider entries removed; two ship.** `cli/providers.mjs` now holds
 Claude Code and Cursor, each carrying the evidence it was verified against.
 Codex, Gemini CLI, GitHub Copilot, opencode, and the generic Agent Skills layout
 are documented as candidates in `docs/providers.md` with the four questions each
@@ -145,7 +245,7 @@ Agent: claude · Branch: main
 
 A user working in Cursor questioned a claim in the previous task's report that
 `doctor` had called Cursor installed when it was not. Checking it turned up a
-real defect underneath: the Cursor entry in `scripts/providers.mjs` places the
+real defect underneath: the Cursor entry in `cli/providers.mjs` places the
 skill in the generic agent-skills directory, and Cursor reads project skills
 from its own. Installing for Cursor has been putting the payload where
 Cursor never looks, silently — the exact failure the previous task recorded as a
@@ -166,7 +266,7 @@ times.
 
 ### Expected to touch
 
-- `scripts/providers.mjs` — the Cursor entry, its hook manifest, and detection
+- `cli/providers.mjs` — the Cursor entry, its hook manifest, and detection
 - `cli/install.mjs`, `cli/index.mjs` — dead imports, dead option, lock shape
 - `skill/docbound/scripts/lib/` — un-export helpers with one internal caller
 - `scripts/build.mjs`, `scripts/check-dist-fresh.mjs` — one owner for the
@@ -185,19 +285,19 @@ times.
 ### Outcome
 
 **The Cursor entry was wrong, and worse than reported.** Cursor reads project
-skills from its own directory, and the entry in `scripts/providers.mjs` named
+skills from its own directory, and the entry in `cli/providers.mjs` named
 the generic agent-skills one, so `install --providers=cursor` had been writing
 the payload where Cursor never looks. Corrected, along with two faults in the same
 entry: its hook manifest now carries `version: 1`, which that format requires,
 and drops a key the format does not define. `cursorHooks` in
-`scripts/providers.mjs` is separate from `genericHooks` for that reason. The
+`cli/providers.mjs` is separate from `genericHooks` for that reason. The
 event names and the exit-code-2 blocking contract the stop gate depends on were
 already right.
 
 The correction is sourced from the harness's own bundled documentation rather
 than from a third-party summary, so Claude Code, Codex, and Cursor are now
 verified entries and the remaining four are not. `docs/ARCHITECTURE.md` carries
-that split, and `scripts/providers.mjs` says it per entry.
+that split, and `cli/providers.mjs` says it per entry.
 
 **Detection read only the project directory.** A harness writes its project
 directory only once it has something to keep there, so working in Cursor on a
@@ -317,7 +417,7 @@ edit, the full audit on stop, exit 2 with findings on stderr
 plugin payload from one source; `scripts/check-dist-fresh.mjs` and
 `skills-lock.json` make drift a red build
 (`docs/decisions/0004-dist-committed.md`).
-`scripts/providers.mjs` is the single place a provider's conventions appear.
+`cli/providers.mjs` is the single place a provider's conventions appear.
 `cli/` is `npx docbound`, and `.claude-plugin/` plus `plugin/` are the plugin.
 `scripts/release.mjs` cuts a release.
 
@@ -339,7 +439,7 @@ called Cursor and universal installed whenever Codex was, because three
 providers read the same generic skills path; it now reports one line
 per payload and the hook state per provider, which is what actually differs
 between them. And `--providers` rejected `claude`, which is the name the
-documented install command uses; `scripts/providers.mjs` now carries a small
+documented install command uses; `cli/providers.mjs` now carries a small
 alias table.
 
 **Documentation.** `docs/ARCHITECTURE.md`, `docs/checks.md`, `docs/subagent.md`,
@@ -368,13 +468,13 @@ hook run does not see it.
 - `comment-sentence` reads the continuation lines of a wrapped sentence as
   fragments, because it compares line by line. Every file in this repository
   whose header is a wrapped paragraph trips it — `scripts/build.mjs`,
-  `scripts/release.mjs`, `scripts/providers.mjs`, `cli/index.mjs`, and
+  `scripts/release.mjs`, `cli/providers.mjs`, `cli/index.mjs`, and
   `cli/install.mjs` among them. The warnings are left on the record rather than
   answered by writing worse comments. A refinement — treat a run of comment
   lines as one unit before judging it a sentence — is a candidate for the next
   pass at the check set, and it is the single most useful change to the check
   set this task found.
-- The provider paths and hook event names in `scripts/providers.mjs` are taken
+- The provider paths and hook event names in `cli/providers.mjs` are taken
   from each harness's documentation and verified against none of them. A wrong
   path installs a skill where its harness will not look, silently. Verifying
   them needs each harness present, and `docs/ARCHITECTURE.md` lists this as a

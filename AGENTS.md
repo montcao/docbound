@@ -20,7 +20,7 @@ fastest way to find out what you are not allowed to do.
 Both of these exit 0:
 
 ```
-node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/scaffold.test.mjs
+npm test
 node cli/index.mjs audit
 ```
 

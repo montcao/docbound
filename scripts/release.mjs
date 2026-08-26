@@ -22,12 +22,6 @@ const VERSIONED_FILES = [
   ".claude-plugin/plugin.json",
   ".claude-plugin/marketplace.json",
 ];
-const TEST_FILES = [
-  "tests/audit.test.mjs",
-  "tests/build.test.mjs",
-  "tests/cli.test.mjs",
-  "tests/scaffold.test.mjs",
-];
 const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
 
 function git(args) {
@@ -99,7 +93,9 @@ function main(argv) {
     return 1;
   }
 
-  const tests = spawnSync(process.execPath, ["--test", ...TEST_FILES], {
+  // `npm test` rather than a list of files: package.json owns which tests exist,
+  // and a second copy of that list here went stale the first time one was added.
+  const tests = spawnSync("npm", ["test", "--silent"], {
     cwd: REPO_ROOT,
     stdio: "inherit",
   });
