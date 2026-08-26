@@ -14,26 +14,26 @@ breaking change to any of them is a major version and carries a decision record.
   directories holding source and drawn the rest of the way by whoever knows why
   the edges are there.
 - `diagram-refs` (error): a node label that names a path must name a path that
-  exists. Only path-shaped tokens count — a file with a known extension, a
-  directory with a trailing slash — so an ordinary label stays prose.
+  exists. Only path-shaped tokens count: a file with a known extension, or a
+  directory with a trailing slash. An ordinary label stays prose.
   `docs/decisions/0010-mermaid-architecture-diagram.md` has the reasoning,
   including why the diagram is not generated from the code.
 
-## 0.1.0 — 2026-08-26
+## 0.1.0 (2026-08-26)
 
 ### Added
 
 - The skill: `skill/docbound/SKILL.md`, five reference files, five templates,
   and a documentation subagent definition.
-- `skill/docbound/scripts/audit.mjs` — twenty-one checks, seventeen in author
+- `skill/docbound/scripts/audit.mjs`: twenty-one checks, seventeen in author
   mode and four more in subagent mode, with a waiver grammar honoured for the
   current worklog entry.
-- `skill/docbound/scripts/scaffold.mjs` — bootstraps the doc structure from
+- `skill/docbound/scripts/scaffold.mjs`: bootstraps the doc structure from
   templates, never overwriting.
-- `skill/docbound/scripts/hook.mjs` — a fast subset after every edit, the full
+- `skill/docbound/scripts/hook.mjs`: a fast subset after every edit, the full
   audit on stop, exiting 2 with the findings so the agent is told why it is not
   done.
-- `npx docbound` — install, update, link, audit, scaffold, adr, doctor,
+- `npx docbound`: install, update, link, audit, scaffold, adr, doctor,
   detect-providers.
 - Distributions for Claude Code and Cursor, plus `dist/payload/` for vendoring
   by hand, built from one canonical source and committed so the submodule, copy,
@@ -62,7 +62,7 @@ tarball, unpacks it, installs from it, and runs the installed audit and stop
 hook. Two files the CLI reads at runtime were missing from the npm whitelist and
 would have made the first command fail; the test now covers every future
 omission rather than those two. `docs/decisions/0009-package-is-the-artifact.md`
-records the rule that came with it — nothing under `cli/` imports from
+records the rule that came with it: nothing under `cli/` imports from
 `scripts/`, which is not published.
 
 ### Security
@@ -75,7 +75,7 @@ Three findings from a pre-release review, each fixed with a regression test:
   are refused, and an object with a reassigned prototype is no longer recursed
   into.
 - Installing treated a harness configuration that would not parse as an absent
-  one and replaced it — a trailing comma was enough to lose a settings file. It
+  one and replaced it. A trailing comma was enough to lose a settings file. It
   now refuses, names the file, and leaves it untouched.
 - The hook was documented as never emitting file contents. Two checks quote a
   truncated line inside their own message; the documentation now says which

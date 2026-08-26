@@ -35,8 +35,8 @@ that reads the Agent Skills format. Node 20 or later, zero runtime dependencies.
 Twenty-one checks. Errors block; warnings go on the record. A changed source
 file with no covering doc in the same diff, a doc pointing at a path that no
 longer exists, an accepted decision record edited below its Status line, a
-dependency change with no reasoning behind it — each has an ID, and a finding
-you disagree with becomes one waiver line in the worklog entry with a reason.
+dependency change with no reasoning behind it. Each has an ID, and a finding you
+disagree with becomes one waiver line in the worklog entry with a reason.
 
 With hooks installed, the audit runs inside the agent loop: a cheap subset after
 every edit, the full set when the agent tries to stop.

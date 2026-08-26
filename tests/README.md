@@ -1,15 +1,15 @@
 # tests
 
 Fixture-based. Every check has a scenario that produces it, and the assertion is
-an exact match on the set of check IDs the audit reports — not a subset, so a
+an exact match on the set of check IDs the audit reports. Not a subset, so a
 check that fires where the scenario does not call for it is a failure.
 
 ## Start here
 
-- `tests/harness.mjs` — builds a fixture into a temporary repository and runs
+- `tests/harness.mjs`: builds a fixture into a temporary repository and runs
   the audit against it.
-- `tests/fixtures/_base.sh` — the documented baseline most fixtures start from.
-- `tests/audit.test.mjs` — the fixture table.
+- `tests/fixtures/_base.sh`: the documented baseline most fixtures start from.
+- `tests/audit.test.mjs`: the fixture table.
 
 ## Contract
 
@@ -48,7 +48,7 @@ npm test
 
 ## Depends on
 
-`skill/docbound/scripts/`, `cli/`, and `scripts/` — the suite runs the real
+`skill/docbound/scripts/`, `cli/`, and `scripts/`. The suite runs the real
 executables rather than importing pieces of them, except in
 `tests/build.test.mjs`, where the build's functions are called directly so a
 comparison can be made against a tree that was never written to disk.

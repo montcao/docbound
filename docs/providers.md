@@ -1,7 +1,7 @@
 # Providers
 
 docbound ships support for two harnesses. Both were verified against the harness
-itself — its own bundled files, not a description of them.
+itself, against its own bundled files rather than a description of them.
 
 | Provider | Skill lands at | Hook manifest | How it was verified |
 |---|---|---|---|
@@ -29,7 +29,7 @@ questions from the harness itself, and records the answers in the entry's
 `verified` field.
 
 1. Where does the harness read a **project-level** skill from? Not a personal
-   one — docbound is installed per repository.
+   one, because docbound is installed per repository.
 2. What file holds its hook manifest, and what is that file's schema?
 3. What are the event names for "a file was edited" and "the agent is stopping"?
 4. What does a hook do to block a stop? The gate depends on a specific answer;
@@ -45,9 +45,9 @@ Codex skills also carry an `agents/openai.yaml` next to `SKILL.md`, which the
 docbound payload does not produce.
 
 Open question 1, and question 2 with it: a hooks file found in a published
-plugin uses the Claude Code shape — `SessionStart`, a `matcher`, and
-`{ type, command }` entries — not the lowercase event names the removed entry
-used.
+plugin uses the Claude Code shape, with `SessionStart`, a `matcher`, and
+`{ type, command }` entries, rather than the lowercase event names the removed
+entry used.
 
 ### GitHub Copilot
 
@@ -91,5 +91,5 @@ the harness, add the entry with its evidence, add it to the install matrix in
 `tests/cli.test.mjs`, rebuild, and delete that candidate's section here.
 
 The test can only assert that the payload lands where the entry says. It cannot
-assert that the entry is right about the world — only the harness can, which is
+assert that the entry is right about the world. Only the harness can, which is
 how the Cursor entry was found to be wrong after it had already shipped once.

@@ -8,7 +8,7 @@ before reporting done. This file adds only what is specific to Claude Code.
 
 `.claude/skills/docbound` points at `dist/claude-code/.claude/skills/docbound`,
 which is build output. Reading it is reading the built copy of
-`skill/docbound/`. Edit the source, never the link's target — the next
+`skill/docbound/`. Edit the source, never the link's target. The next
 `node scripts/build.mjs` overwrites it.
 
 `.cursor/skills/docbound` is the same arrangement for the other shipped
@@ -28,7 +28,7 @@ node cli/index.mjs install --providers=claude-code --scope=project
 ```
 
 That writes an untracked settings file under `.claude/`. Remove it when you are
-done, or leave it — it affects nobody else.
+done, or leave it, since it affects nobody else.
 
 To run the hook once by hand, without installing anything:
 

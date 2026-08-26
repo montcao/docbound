@@ -6,10 +6,10 @@ edited; everything under `dist/` and `plugin/` is a copy of it produced by
 
 ## Start here
 
-- `skill/docbound/SKILL.md` — the skill itself, and the check table agents read.
-- `skill/docbound/scripts/audit.mjs` — the audit; the definition of done.
-- `skill/docbound/scripts/lib/checks/` — one module per check, named for its ID.
-- `skill/docbound/scripts/lib/entry.mjs` — what every script does differently
+- `skill/docbound/SKILL.md`: the skill itself, and the check table agents read.
+- `skill/docbound/scripts/audit.mjs`: the audit; the definition of done.
+- `skill/docbound/scripts/lib/checks/`: one module per check, named for its ID.
+- `skill/docbound/scripts/lib/entry.mjs`: what every script does differently
   when it is run rather than imported: resolve its own path through symlinks,
   and treat a closed pipe as an ending rather than a crash. Both are also true
   of `cli/index.mjs`, which is why they live here and not in each script.

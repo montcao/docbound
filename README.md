@@ -33,14 +33,14 @@ the docs that cover it, and cannot call the task done until `audit` exits 0.
 
 ## What your agent does differently
 
-1. **Orient** — read the README, ARCHITECTURE, the last three worklog entries,
+1. **Orient.** Read the README, ARCHITECTURE, the last three worklog entries,
    and the module READMEs it expects to touch. Note what is already false.
-2. **Declare** — open a worklog entry before the first edit. Intent written
+2. **Declare.** Open a worklog entry before the first edit. Intent written
    before you know how it turns out is what makes it worth reading later.
-3. **Work** — the doc that covers a change moves in the same change as the code.
-4. **Decide** — the instant you reject option B is the only time you fully know
+3. **Work.** The doc that covers a change moves in the same change as the code.
+4. **Decide.** The instant you reject option B is the only time you fully know
    why. Structural decisions become a record; local ones become a table row.
-5. **Reconcile** — delete what has stopped being true, then run the audit. When
+5. **Reconcile.** Delete what has stopped being true, then run the audit. When
    it exits 0, stop.
 
 ## The gate
@@ -49,13 +49,13 @@ The audit is the definition of done. Not "mostly passes", not "warnings only".
 
 With hooks installed it runs inside the agent loop: four cheap checks after
 every file edit, the full set when the agent tries to stop. A failing stop hook
-exits 2, which every supported harness reads as *do not stop, and here is why* —
-so the agent is handed the findings at the moment it believed it was finished.
+exits 2, which every supported harness reads as *do not stop, and here is why*.
+The agent is handed the findings at the moment it believed it was finished.
 
 A finding you disagree with becomes one line in the worklog entry:
 
 ```
-waiver: doc-coverage src/generated/api_types.ts — emitted by the codegen step;
+waiver: doc-coverage src/generated/api_types.ts - emitted by the codegen step;
 the contract lives in the schema, not in this file.
 ```
 
@@ -93,8 +93,8 @@ one of them, what is exempt, and a waiver a reviewer would accept.
 
 ## Supported tools
 
-**Claude Code** and **Cursor**. Both were verified against the harness itself —
-its own bundled files, not a description of them — and each entry in
+**Claude Code** and **Cursor**. Both were verified against the harness itself,
+against its own bundled files rather than a description of them. Each entry in
 `cli/providers.mjs` records what that evidence was.
 
 Nothing else ships. A provider entry written from inference fails silently: the
@@ -102,10 +102,10 @@ payload lands where the harness never reads, the install reports success, and
 the skill never loads. `docs/providers.md` lists the candidates, what is known
 about each, and the four questions to answer before one can be added.
 
-Any other tool can still use docbound — `dist/payload/` is the skill with no
-path claim attached, ready to copy wherever that tool reads skills from. It is
-plain Markdown plus Node scripts (Node 20 or later) with no dependencies, and
-the audit degrades to a whole-tree scan without git.
+Any other tool can still use docbound. `dist/payload/` is the skill with no path
+claim attached, ready to copy wherever that tool reads skills from. It is plain
+Markdown plus Node scripts (Node 20 or later) with no dependencies, and the
+audit degrades to a whole-tree scan without git.
 
 ## Other ways to install
 
@@ -116,14 +116,14 @@ the audit degrades to a whole-tree scan without git.
 /plugin install docbound@montcao
 ```
 
-**Submodule** — the skill stays a checkout you update with git:
+**Submodule.** The skill stays a checkout you update with git:
 
 ```
 git submodule add https://github.com/montcao/docbound .docbound-src
 npx --prefix .docbound-src docbound link --source=.docbound-src
 ```
 
-**Copy** — no toolchain at all:
+**Copy.** No toolchain at all:
 
 ```
 cp -R dist/payload .claude/skills/docbound
@@ -138,7 +138,7 @@ Keep the per-developer override out of git with a marker block in `.gitignore`:
 # docbound-ignore-end
 ```
 
-`.docbound/config.json` stays tracked — it is the policy the team shares.
+`.docbound/config.json` stays tracked, because it is the policy the team shares.
 
 ## Subagent mode
 
@@ -147,7 +147,7 @@ where the decision was made. So in subagent mode every reconstructed reason is
 marked `Inferred:` and queued for confirmation, decision records cite their
 source class, the documenter may edit docstrings and comments but never logic or
 names, and a missing `### Handoff` section from the coder is an error the
-documenter cannot fix — because the fix is upstream. `docs/subagent.md` has the
+documenter cannot fix, because the fix is upstream. `docs/subagent.md` has the
 wiring.
 
 ## Status
@@ -158,13 +158,13 @@ Supported-provider coverage is deliberately narrow; see `docs/providers.md`.
 
 ## Where to go next
 
-- `docs/checks.md` — every check, what it detects, and a waiver example
-- `docs/providers.md` — supported harnesses, and what a candidate still needs
-- `docs/ARCHITECTURE.md` — how the pieces fit
-- `docs/subagent.md` — wiring the documentation subagent
-- `docs/DEVELOP.md` — building, testing, releasing, adding a check
-- `docs/decisions/` — why things are shaped this way
-- `skill/docbound/SKILL.md` — the skill itself
+- `docs/checks.md`: every check, what it detects, and a waiver example
+- `docs/providers.md`: supported harnesses, and what a candidate still needs
+- `docs/ARCHITECTURE.md`: how the pieces fit
+- `docs/subagent.md`: wiring the documentation subagent
+- `docs/DEVELOP.md`: building, testing, releasing, adding a check
+- `docs/decisions/`: why things are shaped this way
+- `skill/docbound/SKILL.md`: the skill itself
 
 ## License
 

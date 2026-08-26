@@ -28,7 +28,7 @@ failure, never as a success with caveats.
 ## Claude Code
 
 `skill/docbound/agents/docbound-documenter.md` is a subagent definition. It
-arrives in a project through any of the install paths — the plugin puts it at
+arrives in a project through any of the install paths. The plugin puts it at
 `plugin/agents/docbound-documenter.md`, and `npx docbound install` puts it
 inside the skill payload, where Claude Code discovers it.
 
@@ -98,7 +98,7 @@ structural problem into a silent one.
 
 ## Granularity
 
-"Docs move in the same step as the code" is violated by construction here — the
+"Docs move in the same step as the code" is violated by construction here: the
 subagent *is* the batch. Two mitigations, both the parent's to apply:
 
 - Invoke the documenter per commit or per logical change, not once per task.
@@ -108,5 +108,5 @@ subagent *is* the batch. Two mitigations, both the parent's to apply:
 
 ## Where to go next
 
-- `skill/docbound/references/subagent-mode.md` — the contract itself
-- `docs/checks.md` — the four checks this mode adds, with waiver examples
+- `skill/docbound/references/subagent-mode.md`: the contract itself
+- `docs/checks.md`: the four checks this mode adds, with waiver examples

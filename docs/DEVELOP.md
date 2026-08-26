@@ -1,6 +1,6 @@
 # Developing docbound
 
-Node 20 or later. No dependencies to install — there are none, including for
+Node 20 or later. There are no dependencies to install, including for
 development.
 
 ```
@@ -18,7 +18,7 @@ change lands.
 Open a worklog entry in `docs/WORKLOG.md` before the first edit. Record
 structural decisions in `docs/decisions/` when you make them. Close the entry
 with what actually changed, by path, and what is still open. The audit is the
-definition of done — `docs/decisions/0001-adopt-docbound.md` says why it applies
+definition of done. `docs/decisions/0001-adopt-docbound.md` says why it applies
 here in particular.
 
 The audit does not read the skill payload's prose in this repository
@@ -74,7 +74,7 @@ The context object carries `root`, `changed`, `added`, `addedDirs`, `git`,
 `ref`, `mode`, `since`, `excludes`, `topEntry`, `waivers`, `docs()` (the
 memoised list of Markdown files), and `beforeVersion(path)` (a file's content at
 the reference commit, or null). Anything a check needs that is not there goes on
-the context, which is a shared surface on purpose — see
+the context, which is a shared surface on purpose. See
 `docs/decisions/0006-check-plugin-architecture.md`.
 
 Register it in the `AUTHOR_CHECKS` or `SUBAGENT_CHECKS` list in
@@ -88,14 +88,14 @@ defect.
 
 Then add a second fixture, or extend an existing one, for the case where the
 check must **not** fire. The suite asserts exact check-ID sets, so the negative
-case is already covered by every other fixture — but the near-miss is not, and
-the near-miss is where a check goes wrong.
+case is already covered by every other fixture. The near-miss is not, and the
+near-miss is where a check goes wrong.
 
 **3. Add a row to the check table** in `skill/docbound/SKILL.md`. That table is
 what an agent reads; a check missing from it is a check nobody knows how to
 satisfy.
 
-**4. Add an entry to `docs/checks.md`** — what it detects, why, what is exempt,
+**4. Add an entry to `docs/checks.md`.** what it detects, why, what is exempt,
 and a waiver example a reviewer would accept.
 
 Then rebuild, because the skill text changed:
@@ -137,8 +137,8 @@ Omit `hookFile` and `hookManifest` for a harness with no file-edit hook; the
 skill installs and the audit becomes something the agent has to remember to run.
 
 **An entry needs evidence, not inference.** Answer all four questions from the
-harness itself — its bundled documentation, the skills it ships, its files on
-disk — and record what you used in the entry's `verified` field:
+harness itself, from its bundled documentation, the skills it ships, or its
+files on disk. Record what you used in the entry's `verified` field:
 
 1. Where does it read a **project-level** skill from?
 2. What file holds its hook manifest, and what is that file's schema?
@@ -150,9 +150,9 @@ the install reports success, and the skill never loads. `docs/providers.md`
 holds the candidates that do not ship and what each still needs; promoting one
 means moving it from there to here with its evidence, then deleting its section.
 
-Then `node scripts/build.mjs` — the install matrix in `tests/cli.test.mjs`
-iterates the table, so a new entry is covered without editing the test — and
-commit `dist/` and `skills-lock.json` with the change. Correcting an entry
+Then run `node scripts/build.mjs` and commit `dist/` and `skills-lock.json` with
+the change. The install matrix in `tests/cli.test.mjs` iterates the table, so a
+new entry is covered without editing the test. Correcting an entry
 against better evidence is welcome and needs no decision record.
 
 ## Changing the skill's prose
@@ -162,7 +162,7 @@ copies; editing one is reverted by the next build and caught by the freshness
 check.
 
 Keep `skill/docbound/SKILL.md` under 300 lines. New instruction goes in a file
-under `skill/docbound/references/` and is linked from SKILL.md — the skill's own
+under `skill/docbound/references/` and is linked from SKILL.md. The skill's own
 rule against duplication applies to itself.
 
 ## The Python reference
@@ -202,6 +202,6 @@ repository's source, so the standard the skill describes is one it is held to.
 
 ## Where to go next
 
-- `docs/ARCHITECTURE.md` — how the pieces fit and what crosses between them
-- `docs/checks.md` — the check reference
-- `docs/subagent.md` — wiring the documentation subagent
+- `docs/ARCHITECTURE.md`: how the pieces fit and what crosses between them
+- `docs/checks.md`: the check reference
+- `docs/subagent.md`: wiring the documentation subagent

@@ -44,7 +44,7 @@ that writes into a user's repository.
 
 ## Components
 
-### skill — `skill/docbound/`
+### skill: `skill/docbound/`
 
 - Owns: the skill text, the reference prose, the templates, the audit, the
   scaffold, the hook, and the documenter agent definition.
@@ -54,7 +54,7 @@ that writes into a user's repository.
 - Talks to: git, through `skill/docbound/scripts/lib/git.mjs`, and the
   filesystem below whichever root it is handed. Nothing else.
 
-### build — `scripts/`
+### build: `scripts/`
 
 - Owns: `dist/`, `plugin/`, and `skills-lock.json`. Reads the provider table
   from `cli/providers.mjs`, which ships and therefore lives with the package.
@@ -63,7 +63,7 @@ that writes into a user's repository.
   `tests/build.test.mjs` asserts it.
 - Talks to: the filesystem. It is the only writer of the three outputs above.
 
-### cli — `cli/`
+### cli: `cli/`
 
 - Owns: what lands in a user's project, how an existing project's config
   survives an install, and the provider table.
@@ -72,7 +72,7 @@ that writes into a user's repository.
   `skills-lock.json` to tell current from stale, and the skill's scripts as
   subprocesses.
 
-### tests — `tests/`
+### tests: `tests/`
 
 - Owns: the definition of correct behaviour for the check set.
 - Must not: assert a subset of findings, or depend on the order fixtures run in.
@@ -117,9 +117,9 @@ edit or a stop, `npx docbound audit`, and CI.
   edited; `dist/` and `plugin/` are outputs, enforced by
   `scripts/check-dist-fresh.mjs` in CI.
 - The build is deterministic. Same input, byte-identical output, no timestamps
-  and no machine paths — enforced by `tests/build.test.mjs`.
+  and no machine paths. Enforced by `tests/build.test.mjs`.
 - The skill payload is byte-identical across providers. Only placement and the
-  hook manifest differ — enforced by `tests/build.test.mjs`.
+  hook manifest differ. Enforced by `tests/build.test.mjs`.
 - Zero runtime dependencies, anywhere. Not enforced by a check; enforced by
   `package.json` having no `dependencies` key and a reviewer noticing one appear.
 - The hook emits findings and never the edited buffer. Enforced by
@@ -132,7 +132,7 @@ edit or a stop, `npx docbound audit`, and CI.
 ## Decisions
 
 Structural decisions are in `docs/decisions/`. Local ones are in the `Decisions`
-table of the module README that owns them — `cli/README.md` and
+table of the module README that owns them. `cli/README.md` and
 `scripts/README.md` both have one.
 
 | Decision | Rejected | Why | Reverse if |
@@ -145,12 +145,12 @@ table of the module README that owns them — `cli/README.md` and
 
 - Only a harness can confirm a provider entry. `tests/cli.test.mjs` asserts the
   payload lands where the entry says, which does not make the entry right about
-  the world — that is how the Cursor entry shipped wrong once. Both shipped
+  the world, and that is how the Cursor entry shipped wrong once. Both shipped
   entries were checked against the harness's own files, and everything else is
   a candidate in `docs/providers.md` rather than an entry here.
 - Two implementations of the audit exist for one release. The Python under
   `skill/docbound/scripts/reference/` is frozen and unmaintained, and nothing
-  automatically checks that the two still agree — the diff is run by hand, and
+  automatically checks that the two still agree. The diff is run by hand, and
   `tests/fixtures/` is what actually pins behaviour.
 - The `logic-touched` check strips comments with a line-based approximation, so
   a comment marker inside a string literal can be misread. It is a warning for

@@ -1,14 +1,14 @@
 # cli
 
 `npx docbound`. Installs the skill into a project, keeps it current, and runs
-the audit and the scaffold for anyone without an agent in the loop — CI, a
-pre-commit hook, a human.
+the audit and the scaffold for anyone without an agent in the loop: CI, a
+pre-commit hook, or a human at a terminal.
 
 ## Start here
 
-- `cli/index.mjs` — argument parsing and one function per command.
-- `cli/install.mjs` — everything that touches the filesystem.
-- `cli/providers.mjs` — the provider table. It lives here rather than in
+- `cli/index.mjs`: argument parsing and one function per command.
+- `cli/install.mjs`: everything that touches the filesystem.
+- `cli/providers.mjs`: the provider table. It lives here rather than in
   `scripts/` because it ships: everything the published package imports has to
   be inside the npm `files` whitelist, and `tests/package.test.mjs` enforces
   that by installing from the real tarball.
@@ -20,8 +20,9 @@ operation, 2 usage. Every interactive prompt has a flag equivalent, so no
 command needs a terminal.
 
 Output is safe to pipe. Every command is one someone will send through `head` or
-`grep`, and a closed pipe is a normal end to that, not a crash — `cli/index.mjs`
-calls `ignoreEpipe` from the skill's entry module when it is run directly.
+`grep`, and a closed pipe is a normal end to that rather than a crash.
+`cli/index.mjs` calls `ignoreEpipe` from the skill's entry module when it is run
+directly.
 
 `audit` and `scaffold` are pass-throughs: they hand their arguments to the
 skill's own scripts unchanged and return the exit code unchanged. The CLI adds
@@ -47,9 +48,9 @@ npx docbound doctor
 npx docbound audit
 ```
 
-`--providers` accepts a few aliases for the names people reach for first —
-`claude` for `claude-code`, `copilot` for `github` — listed in
-`cli/providers.mjs`. The canonical name is what is printed back.
+`--providers` accepts a few aliases for the names people reach for first, such
+as `claude` for `claude-code`. They are listed in `cli/providers.mjs`, and the
+canonical name is what is printed back.
 
 ## Depends on
 

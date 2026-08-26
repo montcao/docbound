@@ -8,7 +8,7 @@ repository that does not run that audit, is an untested claim.
 
 Open a worklog entry in `docs/WORKLOG.md`, from
 `skill/docbound/templates/WORKLOG-entry.md`. Intent is written before you know
-how the task turns out — that is what makes it worth reading later.
+how the task turns out, and that is what makes it worth reading later.
 
 Read first: this file, `README.md`, `docs/ARCHITECTURE.md`, the last three
 worklog entries, and the README of every directory you expect to touch. Every
@@ -33,7 +33,7 @@ node scripts/check-dist-fresh.mjs
 
 A failing audit means the task is open. Fix the docs. If a finding is genuinely
 wrong, write a waiver line in the worklog entry with a reason a reviewer would
-accept — never to get past a check you did not understand.
+accept. Never to get past a check you did not understand.
 
 ## What is easy to get wrong here
 
@@ -56,9 +56,9 @@ accept — never to get past a check you did not understand.
 
 ## Decisions
 
-The moment you choose between alternatives, record it. Structural — a
-dependency, a schema, an interface, a module boundary, anything expensive to
-reverse — is a file in `docs/decisions/`, from
+The moment you choose between alternatives, record it. A structural decision
+(a dependency, a schema, an interface, a module boundary, anything expensive to
+reverse) is a file in `docs/decisions/`, from
 `skill/docbound/templates/ADR.md`, including a concrete reversal condition.
 Local and cheap is one row in the `Decisions` table of the nearest module
 README. When unsure, it is structural.
@@ -78,6 +78,6 @@ summary means step 3 of the loop was skipped.
 
 ## Where to go next
 
-- `docs/DEVELOP.md` — build, test, release, and how to add a check
-- `docs/checks.md` — every check and what satisfies it
-- `docs/ARCHITECTURE.md` — the components and what crosses between them
+- `docs/DEVELOP.md`: build, test, release, and how to add a check
+- `docs/checks.md`: every check and what satisfies it
+- `docs/ARCHITECTURE.md`: the components and what crosses between them

@@ -5,6 +5,86 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 - Rewrite the repository's prose to read as human writing
+
+Agent: claude · Branch: main
+
+### Intent
+
+This repository goes public, and its documentation carries a cluster of
+patterns that read as machine-written. The dominant one is punctuation: 207 em
+and en dashes across the prose, roughly one every eleven lines. Vocabulary is
+already clean, so the work is punctuation, sentence rhythm, and the rule-of-three
+constructions that show up when a writer reaches for symmetry it has not earned.
+
+Credibility is the whole reason to care. A tool that tells agents how to write
+documentation, whose own documentation reads as generated, loses the argument
+before anyone reads the checks.
+
+Two directories stay untouched. `docs/decisions/` holds accepted records, and
+this repository's own rule is that an accepted record is an archive; rewriting
+ten of them for style is exactly what `adr-immutable` exists to stop.
+`skill/docbound/` is the canonical skill, whose prose belongs to its author and
+which a build copies verbatim into every distribution. `docs/WORKLOG.md` keeps
+its closed entries for the same reason the records keep theirs.
+
+### Expected to touch
+
+- `README.md`, `README.npm.md` - the front door, rewritten rather than patched
+- `AGENTS.md`, `CLAUDE.md`, `CHANGELOG.md`, `NOTICE.md`
+- `docs/ARCHITECTURE.md`, `docs/DEVELOP.md`, `docs/checks.md`,
+  `docs/providers.md`, `docs/subagent.md`
+- `cli/README.md`, `scripts/README.md`, `tests/README.md`, `skill/README.md`
+
+### Unknowns going in
+
+- Whether the waiver examples survive losing their em dash. The grammar accepts
+  a plain hyphen, and `docs/checks.md` is full of examples that have to keep
+  parsing.
+- Whether removing dashes costs clarity anywhere the sentence was doing real
+  work with them. Where it does, the sentence gets restructured instead of
+  repunctuated.
+
+### Outcome
+
+**Sixteen files, 136 em dashes, zero left.** `README.md` and `README.npm.md`
+first, since they are what a stranger reads. Then `AGENTS.md`, `CLAUDE.md`,
+`CHANGELOG.md`, the five files under `docs/` that are not archives, and the four
+module READMEs.
+
+**Three shapes, three fixes, not one substitution.** A glossary line
+(``- `docs/checks.md` - every check``) takes a colon. A bold lead-in
+(`**Copy** -`) takes a period and folds into the sentence. A genuine
+parenthetical mid-sentence takes commas, parentheses, or a full stop, depending
+on whether the clause was doing structural work. Replacing all 136 with commas
+would have produced grammatical mush, which is the tell it was supposed to
+remove.
+
+About a quarter of them were pattern-uniform enough to convert with four
+regular expressions. The rest needed a sentence rewritten, and several were
+sentences that had been leaning on the dash to avoid choosing between two ideas.
+
+**Waivers still parse.** The grammar accepts `[—-]{1,2}`, so the examples in
+`docs/checks.md` work with a plain hyphen. Checked against the live regex before
+converting them rather than after.
+
+**Nothing else moved.** 74 tests, the freshness check, and the audit are
+unchanged, because none of these files ships in a distribution.
+
+### Still open
+
+- `docs/WORKLOG.md` keeps 71 em dashes in its closed entries, and
+  `docs/decisions/` keeps its own. Both are archives, and the rule that an
+  accepted record is not edited for style is the same rule `adr-immutable`
+  enforces. Anyone reading the repository will see them.
+- `skill/docbound/` is untouched. Its prose belongs to its author and a build
+  copies it verbatim into every distribution, so a decision to restyle it is a
+  decision about the product rather than about this repository.
+- Nothing checks for this. A `prose-style` check could catch dash density the
+  way `stale-marker` catches changelog phrasing, and it would be the first check
+  in the set that is about taste rather than truth. That is an argument against
+  it as much as for it.
+
 ## 2026-08-26 — Add an architecture diagram, tethered to real paths
 
 Agent: claude · Branch: main

@@ -6,11 +6,11 @@ the provider table.
 
 ## Start here
 
-- `scripts/build.mjs` — `skill/docbound/` into the seven directories under
+- `scripts/build.mjs`: `skill/docbound/` into the seven directories under
   `dist/`, and into `plugin/`.
-- `scripts/check-dist-fresh.mjs` — rebuilds into a temporary directory and
+- `scripts/check-dist-fresh.mjs`: rebuilds into a temporary directory and
   compares, so drift is a red build.
-- `scripts/release.mjs` — version, build, verify, tag.
+- `scripts/release.mjs`: version, build, verify, tag.
 
 ## Contract
 
@@ -49,8 +49,8 @@ exactly as it found it.
 
 The audit runs *before* the version bump, against the content being released.
 The release also writes its own worklog entry, because a release is a task that
-changes a manifest, a changelog, and a lock file — and without an entry it would
-be the one commit on main that cannot pass this repository's own audit.
+changes a manifest, a changelog, and a lock file. Without an entry it would be
+the one commit on main that cannot pass this repository's own audit.
 
 ## Depended on by
 
@@ -61,7 +61,7 @@ be the one commit on main that cannot pass this repository's own audit.
 | Decision | Rejected | Why | Reverse if |
 |---|---|---|---|
 | No formatter or linter | `biome` with a committed config | A dev dependency in a repository whose whole claim is zero dependencies is a claim the reader has to qualify; the style here is small enough to hold by reading | A second regular contributor arrives and style review starts costing more than a config would |
-| `.editorconfig` sets 100 columns | The audit's 80-column default | The repository's own convention wins over the skill's default — that rule is in `skill/docbound/references/code-style.md` — and 100 fits the check modules without wrapping every message string | The code stops fitting, in either direction |
+| `.editorconfig` sets 100 columns | The audit's 80-column default | The repository's own convention wins over the skill's default, a rule set in `skill/docbound/references/code-style.md`, and 100 fits the check modules without wrapping every message string | The code stops fitting, in either direction |
 | One provider table, read by build and CLI | A table per consumer | Adding a provider is one entry, and an entry that is wrong is wrong in one place | A provider needs different placement for install than for distribution |
 | `skills-lock.json` records the payload hash once | Once per provider | The payload is byte-identical across providers by construction, so seven copies were seven chances to compare against the wrong one | A provider needs a transformed payload rather than a copy |
 
