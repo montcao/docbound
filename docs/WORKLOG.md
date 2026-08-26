@@ -5,6 +5,55 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 - Settle which writing register applies where
+
+Agent: claude · Branch: main
+
+### Intent
+
+The README rewrite in the entry below left an unresolved conflict: the front
+door addresses the reader directly and argues a case, and the standard the skill
+publishes in `skill/docbound/references/style.md` forbids exactly that. Read
+side by side, the project looks like it does not follow the discipline it sells.
+
+Settle it rather than leave it noted. The resolution is that the split is by
+reader and not by taste, so it can be stated as a rule and applied without
+judgement each time.
+
+### Expected to touch
+
+- `docs/decisions/0011-two-registers.md` - the record
+- `docs/DEVELOP.md` - where a contributor looks before editing prose
+- `docs/WORKLOG.md` - this entry, and the open question it closes
+
+### Outcome
+
+`docs/decisions/0011-two-registers.md` records the split. The adoption register
+covers `README.md` and `README.npm.md` and nothing else; the skill's standard
+covers `docs/`, the module READMEs, the decision records, the worklog, and every
+doc an agent writes through the skill in any repository.
+
+The line is the reader's commitment. A reader who already works here wants the
+fastest true answer and is slowed down by persuasion. A reader deciding whether
+to try the tool has committed nothing, and dry declaration gives them no reason
+to continue.
+
+`docs/DEVELOP.md` says so under Style, because that is where a contributor looks
+before editing prose. `skill/docbound/references/style.md` is unchanged: it names
+its reader in its first section, which is already its scope, and nothing in it
+claims to govern a project's front door.
+
+The record also names the failure mode the standard was preventing on the
+adoption side. A register that persuades can persuade past what is true. The
+guard is that the README's sample output is copied from a fixture rather than
+written by hand, and that it claims nothing the test suite does not cover.
+
+### Still open
+
+- Nothing from this decision. The reversal conditions are in the record: the
+  front door starting to carry reference material, or a claim in it turning out
+  to be unsupported by a test.
+
 ## 2026-08-26 - Rewrite the README for a reader who has not adopted the tool yet
 
 Agent: claude · Branch: main
@@ -72,11 +121,9 @@ the first two code blocks and leave.
 ### Still open
 
 - The register conflicts with `skill/docbound/references/style.md`, which forbids
-  second person and prefers dry declaration. That standard governs documentation
-  inside a repository being documented, and a front door that has to convince a
-  stranger is a different genre. Worth resolving explicitly if anyone reads the
-  two side by side and takes the README as an example of the skill's own
-  standard, because it is not one.
+  second person and prefers dry declaration. Resolved in a later entry by
+  `docs/decisions/0011-two-registers.md`: the split is by reader, and the two
+  READMEs are the only files on the adoption side.
 - The audit's own FAIL line contains an em dash, so the quoted terminal output in
   the README carries one. Faking program output would be worse. Changing the
   message means updating `docs/checks.md` and the table in the skill, which is a

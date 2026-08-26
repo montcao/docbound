@@ -195,6 +195,22 @@ do not overlap.
 
 ## Style
 
+Two registers, and which one applies depends on who is reading. The full
+reasoning is `docs/decisions/0011-two-registers.md`.
+
+`README.md` and `README.npm.md` are the adoption register. Their reader has
+committed to nothing and is deciding whether to spend attention, so those two
+files address the reader directly, use worked examples, and answer the objection
+before it is raised.
+
+Everything else follows the standard in
+`skill/docbound/references/style.md`: declarative, present tense, dry, no second
+person. That includes `docs/`, the module READMEs, the decision records, and the
+worklog. Their reader is already here and wants a true answer quickly.
+
+Editing the front door and editing a module README are different jobs. Check
+which file you are in first.
+
 `.editorconfig` sets 100 columns. There is no linter and no formatter, and
 `scripts/README.md` records why. Comments explain why rather than what; the
 audit's own `comment-sentence` and `restating-comments` checks run over this
