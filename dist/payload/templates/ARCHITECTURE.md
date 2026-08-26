@@ -2,6 +2,21 @@
 
 <State of the system as it stands. Present tense. No history — that is the worklog. No "this change" — that is a PR description. Getting started, testing, debugging, and release live in the root README; this file is shape and seams.>
 
+## Diagram
+
+<One picture of the shape above. Boxes are the components; arrows are what
+crosses between them and by what mechanism. Draw only load-bearing edges — a
+diagram of every call is a call graph, and nobody reads it.>
+
+<Name a path the way you would in prose: a file with its extension, a directory
+with a trailing slash. The `diagram-refs` check reads those and fails when one
+stops existing, which is what keeps this picture from outliving the code.>
+
+```mermaid
+flowchart LR
+  a["module-a/"] -->|what crosses| b["module-b/"]
+```
+
 ## Components
 
 <One entry per process, service, or top-level package. For each: what it owns, what it must not do, what it talks to.>

@@ -4,6 +4,44 @@ One skill, copied outward. Everything in this repository is either the canonical
 skill, something that copies it somewhere, or something that checks that the
 copy is faithful.
 
+## Diagram
+
+One skill copied outward, and one audit run over whatever repository it lands
+in. The two flows share nothing but the payload.
+
+```mermaid
+flowchart LR
+  subgraph source [canonical]
+    skill["skill/docbound/"]
+  end
+
+  subgraph build [build, committed]
+    dist["dist/"]
+    plugin["plugin/"]
+    lock["skills-lock.json"]
+  end
+
+  subgraph ship [what a user gets]
+    cli["cli/"]
+    project["a user's repository"]
+  end
+
+  skill -->|"scripts/build.mjs copies, byte for byte"| dist
+  skill -->|"same payload, plugin layout"| plugin
+  dist -->|"content hash per provider"| lock
+  cli -->|"copies one provider's tree"| project
+  dist --> cli
+  lock -->|"current or stale"| cli
+  project -->|"hook.mjs on edit and on stop"| audit["the audit"]
+  skill -.->|"skill/docbound/scripts/audit.mjs is the audit"| audit
+  tests["tests/"] -.->|"fixtures pin every check"| audit
+  tests -.->|"packs the real tarball"| cli
+```
+
+Solid arrows are things that move; dotted arrows are things that check. The
+build is the only writer of `dist/` and `plugin/`, and `cli/` is the only thing
+that writes into a user's repository.
+
 ## Components
 
 ### skill — `skill/docbound/`

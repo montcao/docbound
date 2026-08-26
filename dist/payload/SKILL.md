@@ -94,7 +94,7 @@ Which doc, by kind of change:
 |---|---|
 | Public function/method signature, return, errors, restrictions | Its API docstring — the contract — and the test that verifies the documented behavior |
 | Entry point, setup, test/debug/release commands, top-level layout, status, ownership | Root `README.md` |
-| Anything crossing a module boundary, data flow, invariant, external interface | `docs/ARCHITECTURE.md` |
+| Anything crossing a module boundary, data flow, invariant, external interface | `docs/ARCHITECTURE.md`, including its diagram if the boundary is drawn there |
 | New directory or package | New `README.md` in it, from `templates/MODULE.md` |
 | A module's purpose, contract, or "must never do" list | That module's `README.md` |
 | A choice with a plausible alternative | A decision record — step 4 |
@@ -148,6 +148,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `doc-coverage` | error | Every changed source file is covered in the same diff: its own or an ancestor module README was touched, or a system doc (root README, ARCHITECTURE, an ADR) was touched *and names the file or its directory*. Tests and trivially small files are exempt |
 | `new-dir-readme` | error | Every new directory containing source has a `README.md` |
 | `dead-ref` | error | No doc references a file path that does not exist |
+| `diagram-refs` | error | No Mermaid diagram names a path that does not exist. A file is written with its extension, a directory with a trailing slash; anything else in a label is prose |
 | `dep-adr` | error | A changed dependency manifest has a new or superseding ADR in the same diff |
 | `adr-shape` | error | Every new ADR has Context, Decision, and "What would reverse this" sections with content |
 | `adr-immutable` | error | An existing ADR was not edited except its `Status` line |

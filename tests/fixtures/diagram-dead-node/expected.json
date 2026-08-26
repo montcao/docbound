@@ -1,0 +1,10 @@
+{
+  "note": "The rename reached every sentence and none of the boxes. diagram-refs is dead-ref for the picture.",
+  "git": true,
+  "errors": {
+    "diagram-refs": 1
+  },
+  "warnings": {},
+  "waived": {},
+  "exit": 1
+}

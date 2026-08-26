@@ -5,6 +5,124 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 — Add an architecture diagram, tethered to real paths
+
+Agent: claude · Branch: main
+
+### Intent
+
+`docs/ARCHITECTURE.md` describes components, seams, and invariants in prose. A
+reader arriving cold gets the shape faster from a picture, and every other tier
+of the taxonomy already has a home while the picture has none.
+
+Mermaid is the notation. It renders where people read code — GitHub, GitLab,
+most editors — with no toolchain, which is the constraint that rules out D2,
+PlantUML, and Graphviz whatever their layout engines are worth. It is plain text
+in a fenced block, so it diffs and an agent can write it.
+
+The risk is the reason this is not just a template change. A diagram is the
+easiest document in a repository to leave stale, and a stale architecture
+diagram is the most confidently wrong artifact a codebase can carry: it is read
+first, trusted most, and checked by nobody. Adding a place to draw one without
+adding a way to catch it rotting would make this repository's documentation
+worse, not better.
+
+So the feature is two halves. `scaffold` seeds a diagram from the top-level
+source directories it already discovers, and a new `diagram-refs` check requires
+that any node label naming a path is a path that exists.
+
+The seed stops at directories on purpose. Inferring edges means inferring
+semantics, and a generated import graph is the anti-pattern this skill already
+names — a README that is `ls` with prose, at architecture scale. The tool draws
+the boxes it can see; the arrows and the must-nots are the author's.
+
+### Expected to touch
+
+- `skill/docbound/scripts/lib/checks/diagram-refs.mjs` — new check
+- `skill/docbound/scripts/lib/refs.mjs` — the path heuristic `dead-ref` already
+  uses, extracted so both checks agree on what counts as a path
+- `skill/docbound/templates/ARCHITECTURE.md` and
+  `skill/docbound/scripts/scaffold.mjs` — the seeded block
+- `skill/docbound/SKILL.md` — the check table, and when the diagram is updated
+- `tests/fixtures/` — a fixture for the check, and the scaffold fixtures whose
+  placeholder counts move
+- `docs/` — this entry, a decision record, the check reference, and this
+  repository's own diagram
+
+### Unknowns going in
+
+- How many false positives a path heuristic produces against real Mermaid.
+  Arrow syntax, class definitions, and quoted labels all look nothing like
+  paths, but subgraph names and edge labels might.
+- Whether the check should block. `dead-ref` is an error and this is the same
+  defect class, but the parser is new and a false positive on a blocking check
+  is how a tool gets uninstalled.
+
+### Outcome
+
+**Mermaid, and the reasoning is in
+`docs/decisions/0010-mermaid-architecture-diagram.md`.** It renders where people
+read code with no toolchain, which is the constraint that decides it. D2 has the
+better layout engine, PlantUML the richer notation, Graphviz the better graph
+engine, and all three produce a picture that exists only where the toolchain
+does.
+
+**A `## Diagram` section** in `skill/docbound/templates/ARCHITECTURE.md`, seeded
+by `skill/docbound/scripts/scaffold.mjs` with the top-level directories holding
+source — which it already computes, because that is how it decides
+which directories get a module README. Boxes only. `seedDiagram` and
+`sourceDirs` are the new surface there.
+
+**`diagram-refs`**, error level, in
+`skill/docbound/scripts/lib/checks/diagram-refs.mjs`. Every fenced Mermaid block
+in every doc; a node label naming a path must name a path that exists.
+
+The path heuristic `dead-ref` used moved to
+`skill/docbound/scripts/lib/refs.mjs` so both checks agree on what a path is. `dead-ref` behaviour is unchanged and
+all seventeen existing fixtures produce identical output.
+
+**The false-positive problem, and the rule that solves it.** A naive
+slash-detector reads read/write, input/output, client/server, and 24/7 as paths,
+and a blocking check that fires on English is a blocking check somebody turns
+off. Only path-shaped tokens count: a file with a known extension, or a
+directory with a trailing slash. That is also the convention the template
+teaches — in a diagram, name a path the way you would in prose. A probe diagram
+built from the worst labels I could think of, plus a URL and a comment, produces
+zero findings.
+
+**The two checks disagree about one token, on purpose.** `dead-ref` skips a
+trailing-slash directory because stripping the slash leaves a bare word, and a
+bare word in a sentence is usually a symbol. Inside a diagram the trailing slash
+is the documented way to write a directory, so `diagram-refs` takes it
+literally. `pathClaim` carries the flag and the comment explaining it.
+
+**It caught its own author twice.** The diagram I wrote for this repository
+labelled an edge with a bare scripts path when that file lives under
+`skill/docbound/scripts/`, and
+`dead-ref` flagged the backticked examples in `docs/checks.md` that exist to
+explain which labels are *not* paths — backticking one makes it a path claim,
+and the check was right. Both fixed rather than waived.
+
+**Tests.** `tests/fixtures/diagram-dead-node` renames a package through every
+sentence and leaves the boxes alone, which is how diagrams actually rot. 74
+tests, and `docs/ARCHITECTURE.md` now carries a real diagram that the check
+holds to the same standard as everyone else's.
+
+### Still open
+
+- The seeded diagram's instructional placeholders begin with a capital letter,
+  so `template-residue` does not see them and an agent can leave the section
+  half-filled. That is true of most of the template's prose and is not new here,
+  but the diagram is the place it would be least noticed.
+- `dead-ref` still cannot see a dead trailing-slash directory in prose —
+  `worker/` in a paragraph goes uncaught. Fixing it means changing a frozen
+  check's behaviour, which wants its own decision and its own fixture.
+- `diagram-refs` reads labels, not structure. A diagram whose boxes all exist
+  but whose arrows are wrong passes, and nothing but a reader will catch that.
+- The check candidates from earlier entries stand: `frontmatter-limits` for the
+  eighteen characters of headroom in the skill's description, and the
+  wrapped-sentence handling in `comment-sentence`.
+
 ## 2026-08-26 — Release 0.1.0
 
 Agent: release script · Branch: main

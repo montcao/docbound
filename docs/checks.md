@@ -1,6 +1,6 @@
 # Checks
 
-Twenty-one checks. Errors block; warnings print and do not block, but leaving
+Twenty-two checks. Errors block; warnings print and do not block, but leaving
 one is a choice made on the record.
 
 Check IDs are a public interface. Agents write waiver lines against them in
@@ -112,6 +112,30 @@ resolved from the repository root and from the doc's own directory.
 ```
 waiver: dead-ref docs/ONBOARDING.md — the paths under vendor/ are created by the
 bootstrap script on first run and are absent in a fresh checkout.
+```
+
+### `diagram-refs`
+
+No node in a Mermaid diagram names a path that does not exist.
+
+A diagram is the first thing a reader trusts and the last thing anyone updates,
+which makes a stale one the most confidently wrong artifact a repository can
+carry. This is `dead-ref` for the boxes: prose and picture rot at different
+rates because a rename reaches every sentence and none of the labels.
+
+Only path-shaped tokens are read as paths — a file with a known extension, or a
+directory with a trailing slash. Labels like read/write, input/output, 24/7,
+and Node.js are prose, not references. That rule is also the convention: in a
+diagram, name a path the way you would in prose. URLs, comment lines beginning
+`%%`, and Mermaid's own syntax are skipped.
+
+Every fenced ```mermaid block in every doc is checked, not just the one in
+`docs/ARCHITECTURE.md`.
+
+```
+waiver: diagram-refs docs/ARCHITECTURE.md — the diagram shows the target
+topology from ADR 0012, not the current one; the boxes that do not resolve are
+the ones the migration creates.
 ```
 
 ### `dep-adr`

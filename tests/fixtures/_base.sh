@@ -200,6 +200,13 @@ MD
 Two packages in one process. Everything that crosses between them crosses the
 queue interface.
 
+## Diagram
+
+```mermaid
+flowchart LR
+  api["src/"] -->|enqueue| worker["worker/"]
+```
+
 ## Components
 
 ### src — `src/`

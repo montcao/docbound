@@ -157,10 +157,40 @@ export function worklogInitial(today) {
   );
 }
 
+/**
+ * Replace the template's example diagram with the top-level source directories
+ * that actually exist.
+ *
+ * Boxes only. Inferring the arrows means inferring semantics, and a generated
+ * call graph is the anti-pattern this skill already names — a README that is
+ * `ls` with prose, at architecture scale. The tool draws what it can see; the
+ * edges and the must-nots belong to whoever knows why they are there.
+ */
+export function seedDiagram(template, modules) {
+  if (modules.length === 0) return template;
+  const nodes = modules
+    .map((name, i) => `  n${i}["${name}/"]`)
+    .join("\n");
+  const example = /```mermaid\n[\s\S]*?\n```/;
+  return template.replace(
+    example,
+    "```mermaid\nflowchart LR\n" +
+      nodes +
+      "\n```\n\n" +
+      "<Seeded from the top-level directories holding source. Add the edges\n" +
+      "that matter, delete the boxes that do not, and say what crosses each\n" +
+      "arrow.>",
+  );
+}
+
 export function plan(root, today) {
+  const moduleDirs = sourceDirs(root);
   const items = [
     ["README.md", readTemplate("README.md")],
-    [path.join("docs", "ARCHITECTURE.md"), readTemplate("ARCHITECTURE.md")],
+    [
+      path.join("docs", "ARCHITECTURE.md"),
+      seedDiagram(readTemplate("ARCHITECTURE.md"), moduleDirs),
+    ],
     [path.join("docs", "WORKLOG.md"), worklogInitial(today)],
     [
       path.join("docs", "decisions", "0001-adopt-docbound.md"),
@@ -168,18 +198,21 @@ export function plan(root, today) {
     ],
   ];
 
-  const dirs = fs
+  for (const name of moduleDirs) {
+    items.push([path.join(name, "README.md"), readTemplate("MODULE.md")]);
+  }
+  return items;
+}
+
+/** Top-level directories holding source, which is what gets a module README. */
+export function sourceDirs(root) {
+  return fs
     .readdirSync(root, { withFileTypes: true })
     .filter((e) => e.isDirectory())
     .map((e) => e.name)
-    .sort();
-  for (const name of dirs) {
-    if (EXCLUDE_DIRS.has(name) || name.startsWith(".")) continue;
-    if (hasSource(path.join(root, name))) {
-      items.push([path.join(name, "README.md"), readTemplate("MODULE.md")]);
-    }
-  }
-  return items;
+    .sort()
+    .filter((name) => !EXCLUDE_DIRS.has(name) && !name.startsWith("."))
+    .filter((name) => hasSource(path.join(root, name)));
 }
 
 export function main(argv) {

@@ -8,6 +8,17 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Added
+
+- An architecture diagram, in Mermaid, seeded by `scaffold` from the top-level
+  directories holding source and drawn the rest of the way by whoever knows why
+  the edges are there.
+- `diagram-refs` (error): a node label that names a path must name a path that
+  exists. Only path-shaped tokens count — a file with a known extension, a
+  directory with a trailing slash — so an ordinary label stays prose.
+  `docs/decisions/0010-mermaid-architecture-diagram.md` has the reasoning,
+  including why the diagram is not generated from the code.
+
 ## 0.1.0 — 2026-08-26
 
 ### Added
