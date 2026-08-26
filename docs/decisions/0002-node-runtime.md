@@ -14,10 +14,11 @@ that installs, updates, and runs the audit outside an agent.
 
 Both of the new executables have a runtime forced on them. The CLI is
 distributed through npm, so it is Node. Every provider hook mechanism in scope —
-Claude Code `settings.json`, `.codex/hooks.json`, `.github/hooks/`,
-`.cursor/hooks.json` — invokes a command on a path and is documented against
-Node. A hook that shells out to `python3` inherits whatever interpreter the
-developer's shell resolves, on a machine the skill author never sees. The
+the Claude Code settings file, `.codex/hooks.json`,
+`.github/hooks/docbound.json`, and Cursor's hook manifest — invokes a command on
+a path and is documented against Node. A hook that shells out to `python3`
+inherits whatever interpreter the developer's shell resolves, on a machine the
+skill author never sees. The
 current one on this workstation is Python 3.9, which is older than most of the
 standard library idioms in `skill/docbound/scripts/reference/audit.py`.
 
@@ -42,9 +43,10 @@ that were bugs once and were fixed.
 
 ## Decision
 
-Port. `skill/docbound/scripts/audit.mjs` and `scaffold.mjs` are the
-implementation; Node 20 or later, ESM, `node:` imports only, zero runtime
-dependencies. The Python stays at `skill/docbound/scripts/reference/` for one
+Port. `skill/docbound/scripts/audit.mjs` and
+`skill/docbound/scripts/scaffold.mjs` are the implementation: Node 20 or later,
+ESM, `node:` imports only, zero runtime dependencies. The Python stays at
+`skill/docbound/scripts/reference/` for one
 release as the specification the port is diffed against, and is deleted in the
 release after this one.
 

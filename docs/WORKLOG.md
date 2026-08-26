@@ -11,8 +11,8 @@ Agent: claude · Branch: main
 
 ### Intent
 
-The docbound skill exists as a folder: `SKILL.md`, four reference files, five
-templates, and two Python scripts. It is usable by copying it into a repository
+The docbound skill exists as a folder: `skill/docbound/SKILL.md`, four reference
+files, five templates, and two Python scripts. It is usable by copying it into a repository
 and nothing else. This task turns it into a repository that ships the skill:
 one canonical source under `skill/docbound/`, a build that emits a per-provider
 distribution under `dist/`, an `npx docbound` CLI, a Claude Code plugin payload,

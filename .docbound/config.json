@@ -1,0 +1,16 @@
+{
+  "audit": {
+    "exclude": [
+      "plugin/**",
+      "skill/docbound/SKILL.md",
+      "skill/docbound/agents/**",
+      "skill/docbound/references/**",
+      "skill/docbound/templates/**"
+    ]
+  },
+  "hook": {
+    "enabled": true,
+    "fast": true,
+    "blockOnStop": true
+  }
+}

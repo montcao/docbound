@@ -41,9 +41,9 @@ with the findings on stderr when it fails.
 
 Three escapes, each cheaper than the last: a waiver line in the worklog entry,
 which is the skill's own mechanism and leaves the exception on the record;
-`hook.blockOnStop: false` in `.docbound/config.local.json`, which is gitignored
-and per-developer; and `npx docbound install --no-hooks`, which installs the
-skill with no gate at all.
+`hook.blockOnStop: false` in the gitignored per-developer override beside
+`.docbound/config.json`; and `npx docbound install --no-hooks`, which installs
+the skill with no gate at all.
 
 ## Consequences
 

@@ -1,0 +1,20 @@
+{
+  "name": "montcao",
+  "owner": {
+    "name": "Montcao Labs",
+    "url": "https://github.com/montcao"
+  },
+  "plugins": [
+    {
+      "name": "docbound",
+      "source": "./",
+      "description": "Documentation is a work product of every task, not a byproduct of finishing one. Adds a worklog, decision records, and a blocking documentation audit to every coding task.",
+      "version": "0.1.0",
+      "author": { "name": "Montcao Labs" },
+      "homepage": "https://github.com/montcao/docbound",
+      "license": "Apache-2.0",
+      "category": "workflow",
+      "keywords": ["documentation", "adr", "worklog", "audit"]
+    }
+  ]
+}
