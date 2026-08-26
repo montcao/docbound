@@ -5,6 +5,25 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 — Release 0.1.0
+
+Agent: release script · Branch: main
+
+### Intent
+
+Cut 0.1.0. Written by `scripts/release.mjs`, which refuses to run
+unless the tests, the audit, and the freshness check pass against a clean
+tree first.
+
+### Outcome
+
+Set the version in `package.json`, `.claude-plugin/plugin.json`, and
+`.claude-plugin/marketplace.json`; rolled `CHANGELOG.md`; rebuilt `dist/`,
+`plugin/`, and `skills-lock.json`; tagged.
+
+### Still open
+
+- Nothing from the release itself. Open work is in the entries below.
 ## 2026-08-26 — Make the published package actually installable, and cut 0.1.0
 
 Agent: claude · Branch: main
