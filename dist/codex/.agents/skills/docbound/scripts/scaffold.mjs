@@ -20,7 +20,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { SOURCE_EXT, suffixOf } from "./lib/paths.mjs";
-import { isEntryPoint } from "./lib/entry.mjs";
+import { ignoreEpipe, isEntryPoint } from "./lib/entry.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const SKILL_ROOT = path.dirname(HERE);
@@ -242,5 +242,6 @@ function isDirectory(target) {
 }
 
 if (isEntryPoint(import.meta.url)) {
+  ignoreEpipe();
   process.exitCode = main(process.argv.slice(2));
 }

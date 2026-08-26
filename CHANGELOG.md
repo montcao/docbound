@@ -19,6 +19,8 @@ breaking change to any of them is a major version and carries a decision record.
 - Provider detection read only the project directory, so a user working in a
   harness whose project directory did not exist yet was detected as nothing.
   It now reads the home directory as well.
+- Piping a command into `head` crashed with an unhandled EPIPE instead of
+  ending.
 
 ### Removed
 

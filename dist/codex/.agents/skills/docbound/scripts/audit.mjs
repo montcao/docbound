@@ -29,7 +29,7 @@ import { showFile, topLevel } from "./lib/git.mjs";
 import { allDocs } from "./lib/paths.mjs";
 import { applyWaivers, partition, toJson, toText } from "./lib/report.mjs";
 import { parseWorklog } from "./lib/worklog.mjs";
-import { isEntryPoint } from "./lib/entry.mjs";
+import { ignoreEpipe, isEntryPoint } from "./lib/entry.mjs";
 
 import * as worklogEntry from "./lib/checks/worklog-entry.mjs";
 import * as worklogClosed from "./lib/checks/worklog-closed.mjs";
@@ -226,5 +226,6 @@ export function main(argv) {
 }
 
 if (isEntryPoint(import.meta.url)) {
+  ignoreEpipe();
   process.exitCode = main(process.argv.slice(2));
 }

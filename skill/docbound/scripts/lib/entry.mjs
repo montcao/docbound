@@ -12,6 +12,21 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 
+/**
+ * Stop a closed pipe from crashing the process.
+ *
+ * `docbound audit | head` closes stdout while output is still being written,
+ * and the default reaction to EPIPE is an unhandled error event and a stack
+ * trace. Every command here is one someone will pipe.
+ */
+export function ignoreEpipe() {
+  for (const stream of [process.stdout, process.stderr]) {
+    stream.on("error", (err) => {
+      if (err.code !== "EPIPE") throw err;
+    });
+  }
+}
+
 export function isEntryPoint(importMetaUrl) {
   const entry = process.argv[1];
   if (!entry) return false;

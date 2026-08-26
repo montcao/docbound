@@ -86,12 +86,21 @@ it once. Deleted a re-export in `cli/install.mjs` that nothing imported, an
 option `copyDist` had stopped reading, and five exports whose only caller was
 the module that defined them.
 
+**A third bug, from piping the verification output.** Running
+`node cli/index.mjs doctor | head` crashed with an unhandled EPIPE and a stack
+trace where the output should have been, because `head` closes stdout while the
+command is still writing. Every command here is one someone will pipe.
+`ignoreEpipe` in `skill/docbound/scripts/lib/entry.mjs` is called by
+`cli/index.mjs`, `skill/docbound/scripts/audit.mjs`, and
+`skill/docbound/scripts/scaffold.mjs` when each is run directly.
+
 **Tests.** The install matrix now runs over the provider table itself rather
 than a hand-written list, and asserts the payload lands at each provider's
 declared path and that its hook command points there. That is the strongest
 assertion available from inside the repository: it catches a payload written to
 the wrong place, and cannot catch a declared path that is wrong about the world.
-Three tests added, 69 passing.
+A regression test pipes `doctor` into `head` and fails on an EPIPE in stderr.
+Four tests added, 70 passing.
 
 ### Still open
 

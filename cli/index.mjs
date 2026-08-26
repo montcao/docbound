@@ -25,7 +25,7 @@ import {
   readLock,
   recordHookChoice,
 } from "./install.mjs";
-import { isEntryPoint } from "../skill/docbound/scripts/lib/entry.mjs";
+import { ignoreEpipe, isEntryPoint } from "../skill/docbound/scripts/lib/entry.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const PACKAGE_ROOT = path.dirname(HERE);
@@ -342,5 +342,6 @@ export async function main(argv) {
 export { PROVIDERS };
 
 if (isEntryPoint(import.meta.url)) {
+  ignoreEpipe();
   process.exitCode = await main(process.argv.slice(2));
 }

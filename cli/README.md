@@ -15,6 +15,10 @@ Exit codes are the interface CI depends on: 0 success, 1 findings or a failed
 operation, 2 usage. Every interactive prompt has a flag equivalent, so no
 command needs a terminal.
 
+Output is safe to pipe. Every command is one someone will send through `head` or
+`grep`, and a closed pipe is a normal end to that, not a crash — `cli/index.mjs`
+calls `ignoreEpipe` from the skill's entry module when it is run directly.
+
 `audit` and `scaffold` are pass-throughs: they hand their arguments to the
 skill's own scripts unchanged and return the exit code unchanged. The CLI adds
 nothing to them, so a finding reported through `npx docbound audit` is the same

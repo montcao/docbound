@@ -3,6 +3,7 @@
 // checked against a tree the audit can also run on.
 
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { after, describe, test } from "node:test";
@@ -295,6 +296,18 @@ describe("docbound audit, scaffold, adr, doctor", () => {
     const result = cli(repo, ["detect-providers"]);
     assert.equal(result.status, 0);
     assert.match(result.stdout, /cursor/);
+  });
+
+  test("a closed pipe does not crash a command", () => {
+    const repo = project();
+    // `docbound doctor | head` closes stdout mid-write. The default reaction is
+    // an unhandled EPIPE and a stack trace where output should be.
+    const result = spawnSync("sh", ["-c", `"${process.execPath}" "${CLI}" doctor | head -2`], {
+      cwd: repo,
+      encoding: "utf8",
+    });
+    assert.equal(result.status, 0);
+    assert.ok(!result.stderr.includes("EPIPE"), result.stderr);
   });
 
   test("an unknown command is a usage error", () => {
