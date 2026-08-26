@@ -1,59 +1,52 @@
 {
   "version": "0.1.0",
-  "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
+  "payloadHash": "sha256:b7a6c46891c55e2fa86bdf5c6fe45d5ef478cee878bee950aba473c086031bd6",
   "providers": {
     "universal": {
       "payload": ".agents/skills/docbound",
       "hookFile": null,
       "files": 45,
-      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
-      "hash": "sha256:72fe2847bd6d6399969d24eeefebe6704275880c92a58119ba02b7b5077aaff8"
+      "hash": "sha256:b4ced19528abbf22717c9e793182be158de47e6875079d32a16a84d2a99db3d4"
     },
     "claude-code": {
       "payload": ".claude/skills/docbound",
       "hookFile": ".claude/settings.json",
       "files": 46,
-      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
-      "hash": "sha256:68a822dc4d7706547609442c5a8121332671bc23f9f62017d2fa514be79c170c"
+      "hash": "sha256:96808785b8bbbfd57b401a33d6ed770be43560da9f0f3a6845d3d3e8b9de7735"
     },
     "codex": {
       "payload": ".agents/skills/docbound",
       "hookFile": ".codex/hooks.json",
       "files": 46,
-      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
-      "hash": "sha256:161f226b9d2552f0e4c05871073643d025bc7095bb6c2ef81a1c09b0ed7e4eff"
+      "hash": "sha256:a52a5e2236382ff75af15aeeeab85eae8a3b2f590aa034ea025049f6af33afca"
     },
     "cursor": {
-      "payload": ".agents/skills/docbound",
+      "payload": ".cursor/skills/docbound",
       "hookFile": ".cursor/hooks.json",
       "files": 46,
-      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
-      "hash": "sha256:a08fa5d46831f141fcadc1de9e6a8f9ba8f4e00e50c0afeb76970357f95637ea"
+      "hash": "sha256:cae8f72d41b5dbbd9ec65703403a753aee1c036e8edc77de8f78f9552b877d8a"
     },
     "gemini": {
       "payload": ".gemini/skills/docbound",
       "hookFile": null,
       "files": 45,
-      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
-      "hash": "sha256:7eb170cab565607121f8bf299817c7f4f055e71ef74f702bb209320bf838211b"
+      "hash": "sha256:2a2d780a3f8af0d7c891a47568f493ca6706b7f205d354e6f14f4fe0494c3d9f"
     },
     "github": {
       "payload": ".github/skills/docbound",
       "hookFile": ".github/hooks/docbound.json",
       "files": 46,
-      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
-      "hash": "sha256:0099539698111d075a79228efee4d43821baacf6ea61affcb0a9a6d4945afa1a"
+      "hash": "sha256:6ebd4e3b59f7b23edd05b125af5c24d46d088d6fc49b8931d597e379fa177b17"
     },
     "opencode": {
       "payload": ".opencode/skill/docbound",
       "hookFile": null,
       "files": 45,
-      "payloadHash": "sha256:63e1190ecbdc0299eb95791f8068e8f16dff838e2b643842968898b5d0099b70",
-      "hash": "sha256:bd35a89c3b9d8a022390878fca71d68411a7bb2ec4b1b5273eb25f8f6647bc25"
+      "hash": "sha256:adf96a4b5dad62185c717d06320328655bae199b74662f84723727176011487e"
     }
   },
   "plugin": {
     "files": 46,
-    "hash": "sha256:b7c97c47addd478ef92bae9847ac607b209a2d10714bf604afa97a7e979a1062"
+    "hash": "sha256:1feea91be1754ec7a00df89e29883564e613c9c355c64e8e2580ab1398267a39"
   }
 }

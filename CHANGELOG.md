@@ -8,6 +8,26 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Fixed
+
+- Cursor installs went to the generic agent-skills directory, which Cursor does
+  not read. The payload lands in Cursor's own project skills directory, and the
+  hook manifest carries the schema version that format requires. Verified
+  against the harness rather than against a summary of it.
+- Merging a hook manifest discarded every top-level key the incoming manifest
+  declared, so a format with a required version field lost it.
+- Provider detection read only the project directory, so a user working in a
+  harness whose project directory did not exist yet was detected as nothing.
+  It now reads the home directory as well.
+
+### Removed
+
+- The default configuration was written out in three places; `DEFAULT_CONFIG` in
+  the skill's config module is now the only copy.
+- `skills-lock.json` recorded the same payload hash eight times.
+- A dead re-export in `cli/install.mjs`, an unread option on `copyDist`, and
+  five exports whose only caller was the module that defined them.
+
 ## 0.1.0 — 2026-08-26
 
 First release.

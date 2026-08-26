@@ -24,7 +24,7 @@ import { isEntryPoint } from "./lib/entry.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const SKILL_ROOT = path.dirname(HERE);
-export const TEMPLATES = path.join(SKILL_ROOT, "templates");
+const TEMPLATES = path.join(SKILL_ROOT, "templates");
 
 // Wider than the audit's exclusion list: a directory of docs or CI config is
 // not a module, so it gets no module README even though the audit reads it.

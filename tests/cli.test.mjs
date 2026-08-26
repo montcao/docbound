@@ -7,6 +7,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { after, describe, test } from "node:test";
 
+import { PROVIDERS } from "../scripts/providers.mjs";
 import {
   CLI,
   buildFixture,
@@ -35,23 +36,53 @@ function readJson(file) {
 }
 
 describe("docbound install", () => {
-  for (const provider of ["claude", "codex", "cursor", "gemini", "github", "opencode"]) {
-    const name = provider === "claude" ? "claude-code" : provider;
-    test(`installs for ${name}`, () => {
+  for (const provider of PROVIDERS) {
+    test(`installs for ${provider.name} at ${provider.payload}`, () => {
       const repo = project();
       const result = cli(repo, [
         "install",
-        `--providers=${name}`,
+        `--providers=${provider.name}`,
         "--scope=project",
         "--yes",
       ]);
       assert.equal(result.status, 0, result.stderr);
+      // The payload has to land where that harness reads it. A wrong path here
+      // installs a skill nothing will ever load, and nothing reports an error.
+      assert.ok(
+        fs.existsSync(path.join(repo, provider.payload, "SKILL.md")),
+        `payload is at ${provider.payload}`,
+      );
       assert.ok(
         fs.existsSync(path.join(repo, ".docbound", "config.json")),
         "writes the tracked config",
       );
+      if (provider.hookFile) {
+        const manifest = readJson(path.join(repo, provider.hookFile));
+        const commands = JSON.stringify(manifest);
+        assert.ok(
+          commands.includes(`${provider.payload}/scripts/hook.mjs`),
+          "the hook command points at the payload it was installed with",
+        );
+      }
     });
   }
+
+  test("the Cursor manifest carries the schema version its format requires", () => {
+    const repo = project();
+    cli(repo, ["install", "--providers=cursor", "--yes"]);
+    const manifest = readJson(path.join(repo, ".cursor/hooks.json"));
+    assert.equal(manifest.version, 1);
+    assert.ok(manifest.hooks.afterFileEdit[0].command.includes("--event after-edit"));
+    assert.ok(manifest.hooks.stop[0].command.includes("--event stop"));
+  });
+
+  test("aliases resolve to canonical provider names", () => {
+    const repo = project();
+    const result = cli(repo, ["install", "--providers=claude,copilot", "--yes"]);
+    assert.equal(result.status, 0, result.stderr);
+    assert.ok(fs.existsSync(path.join(repo, ".claude/skills/docbound/SKILL.md")));
+    assert.ok(fs.existsSync(path.join(repo, ".github/skills/docbound/SKILL.md")));
+  });
 
   test("installs two providers at once and wires both hooks", () => {
     const repo = project();

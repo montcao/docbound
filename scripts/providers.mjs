@@ -9,6 +9,13 @@
 // `payload` is where the skill directory lands, relative to the target
 // repository root. `hookFile` and `hookManifest` are omitted for providers with
 // no file-edit hook mechanism; those install the skill and nothing else.
+// `detect` names the directories whose presence implies the harness is in use,
+// looked for in the project first and then in the user's home directory.
+//
+// Verified against the harness itself: claude-code, codex, cursor. Taken from
+// documentation and unverified: gemini, github, opencode. `docs/ARCHITECTURE.md`
+// carries that split as a known gap, because a wrong path here installs a skill
+// where its harness will never look and nothing reports an error.
 
 const COMMAND = (payload, event, provider) =>
   `node ${payload}/scripts/hook.mjs --event ${event} --provider ${provider}`;
@@ -48,11 +55,23 @@ function genericHooks(payload, provider) {
         },
       ],
       stop: [
-        {
-          name: "docbound-stop",
-          command: COMMAND(payload, "stop", provider),
-        },
+        { name: "docbound-stop", command: COMMAND(payload, "stop", provider) },
       ],
+    },
+  };
+}
+
+// Cursor's hooks file is versioned and its entries carry no name, so it does
+// not share `genericHooks`. Both events exist in its vocabulary, and a command
+// hook that exits 2 blocks the action, which is what the stop gate relies on.
+function cursorHooks(payload) {
+  return {
+    version: 1,
+    hooks: {
+      afterFileEdit: [
+        { command: COMMAND(payload, "after-edit", "cursor") },
+      ],
+      stop: [{ command: COMMAND(payload, "stop", "cursor") }],
     },
   };
 }
@@ -86,10 +105,10 @@ export const PROVIDERS = [
   {
     name: "cursor",
     label: "Cursor",
-    payload: ".agents/skills/docbound",
+    payload: ".cursor/skills/docbound",
     detect: [".cursor"],
     hookFile: ".cursor/hooks.json",
-    hookManifest: (payload) => genericHooks(payload, "cursor"),
+    hookManifest: cursorHooks,
   },
   {
     name: "gemini",

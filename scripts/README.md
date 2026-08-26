@@ -57,6 +57,7 @@ node scripts/release.mjs --version 0.2.0
 | No formatter or linter | `biome` with a committed config | A dev dependency in a repository whose whole claim is zero dependencies is a claim the reader has to qualify; the style here is small enough to hold by reading | A second regular contributor arrives and style review starts costing more than a config would |
 | `.editorconfig` sets 100 columns | The audit's 80-column default | The repository's own convention wins over the skill's default — that rule is in `skill/docbound/references/code-style.md` — and 100 fits the check modules without wrapping every message string | The code stops fitting, in either direction |
 | One provider table, read by build and CLI | A table per consumer | Adding a provider is one entry, and an entry that is wrong is wrong in one place | A provider needs different placement for install than for distribution |
+| `skills-lock.json` records the payload hash once | Once per provider | The payload is byte-identical across providers by construction, so seven copies were seven chances to compare against the wrong one | A provider needs a transformed payload rather than a copy |
 
 ## Gotchas
 
@@ -64,4 +65,5 @@ node scripts/release.mjs --version 0.2.0
   Editing the generated copy is reverted by the next build.
 - The provider paths in `scripts/providers.mjs` are the part of this repository
   most likely to be out of date, because they track seven other projects'
-  conventions. `docs/DEVELOP.md` says how to correct one.
+  conventions. Each entry says whether it was verified against the harness or
+  taken from documentation. `docs/DEVELOP.md` says how to correct one.

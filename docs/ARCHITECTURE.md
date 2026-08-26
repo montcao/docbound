@@ -100,10 +100,13 @@ table of the module README that owns them — `cli/README.md` and
 
 ## Known gaps
 
-- The provider paths in `scripts/providers.mjs` encode seven other projects'
-  conventions and are verified against none of them. A wrong path installs a
-  skill where its harness will not look for it, silently. Not fixed because
-  verifying it needs each harness present.
+- Four of the seven provider entries in `scripts/providers.mjs` are taken from
+  documentation and checked against no running harness: gemini, github,
+  opencode, and the generic `universal` layout. A wrong path installs a skill
+  where its harness will not look, and nothing reports an error —
+  `tests/cli.test.mjs` can only assert that the payload lands where the entry
+  says, not that the entry is right. Claude Code, Codex, and Cursor were
+  verified against the harness itself.
 - Two implementations of the audit exist for one release. The Python under
   `skill/docbound/scripts/reference/` is frozen and unmaintained, and nothing
   automatically checks that the two still agree — the diff is run by hand, and

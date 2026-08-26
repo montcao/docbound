@@ -159,7 +159,7 @@ async function commandInstall(options) {
   }
 
   for (const provider of resolved.providers) {
-    const written = copyDist(DIST_ROOT, root, provider, { hooks: options.hooks });
+    const written = copyDist(DIST_ROOT, root, provider);
     process.stdout.write(`  ${provider.name}: ${written} file(s)\n`);
     if (provider.hookFile && options.hooks) {
       mergeHookManifest(root, provider);
@@ -183,11 +183,11 @@ async function commandUpdate(options) {
   const lock = readLock(PACKAGE_ROOT);
   let changed = 0;
   for (const { provider, current } of installed) {
-    if (current === lock.providers[provider.name]?.payloadHash) {
+    if (current === lock.payloadHash) {
       process.stdout.write(`  ${provider.name}: current\n`);
       continue;
     }
-    const written = copyDist(DIST_ROOT, root, provider, { hooks: options.hooks });
+    const written = copyDist(DIST_ROOT, root, provider);
     process.stdout.write(`  ${provider.name}: updated, ${written} file(s)\n`);
     changed += 1;
   }

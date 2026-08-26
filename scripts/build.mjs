@@ -16,6 +16,7 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { PROVIDERS } from "./providers.mjs";
+import { DEFAULT_CONFIG } from "../skill/docbound/scripts/lib/config.mjs";
 import { isEntryPoint } from "../skill/docbound/scripts/lib/entry.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -25,15 +26,6 @@ export const SKILL_SOURCE = path.join(REPO_ROOT, "skill", "docbound");
 // The skill payload is what every provider gets, byte for byte. The Python
 // reference is the audit's specification for one release and is not shipped.
 const PAYLOAD_EXCLUDE = new Set(["scripts/reference"]);
-
-export const DEFAULT_CONFIG_FILE = JSON.stringify(
-  {
-    audit: { exclude: [] },
-    hook: { enabled: true, fast: true, blockOnStop: true },
-  },
-  null,
-  2,
-);
 
 export function collectPayload(source = SKILL_SOURCE) {
   const files = new Map();
@@ -59,7 +51,7 @@ function byName(a, b) {
 }
 
 /** All files one provider's distribution contains, keyed by target-relative path. */
-export function buildProvider(provider, payload) {
+function buildProvider(provider, payload) {
   const files = new Map();
   for (const [rel, contents] of payload) {
     files.set(`${provider.payload}/${rel}`, contents);
@@ -68,7 +60,10 @@ export function buildProvider(provider, payload) {
     const manifest = provider.hookManifest(provider.payload);
     files.set(provider.hookFile, Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`));
   }
-  files.set(".docbound/config.json", Buffer.from(`${DEFAULT_CONFIG_FILE}\n`));
+  files.set(
+    ".docbound/config.json",
+    Buffer.from(`${JSON.stringify(DEFAULT_CONFIG, null, 2)}\n`),
+  );
   return files;
 }
 
@@ -130,7 +125,6 @@ export function build({
       payload: provider.payload,
       hookFile: provider.hookFile ?? null,
       files: files.size,
-      payloadHash,
       hash: hashFiles(files),
     };
     if (!quiet) process.stdout.write(`  ${provider.name}: ${files.size} file(s)\n`);

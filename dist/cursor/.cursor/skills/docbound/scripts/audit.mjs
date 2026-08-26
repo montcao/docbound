@@ -119,9 +119,9 @@ export function parseArgs(argv) {
   return options;
 }
 
-export class UsageError extends Error {}
+class UsageError extends Error {}
 
-export function nextAdrNumber(root) {
+function nextAdrNumber(root) {
   const dir = path.join(root, "docs", "decisions");
   let highest = 0;
   let entries = [];

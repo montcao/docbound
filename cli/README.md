@@ -23,8 +23,9 @@ finding an agent sees.
 ## Must not
 
 - Must not overwrite what the project already owns. `.docbound/config.json` is
-  written once and merged thereafter; a hook manifest is merged entry by entry
-  so an unrelated hook survives. Both rules are exercised in `tests/cli.test.mjs`.
+  written once and merged thereafter; a hook manifest is merged key by key and
+  event by event, so both an unrelated hook and a key the format requires
+  survive. Both rules are exercised in `tests/cli.test.mjs`.
 - Must not implement a check. Checks live in the skill payload; the CLI runs it.
 - Must not gain a runtime dependency (`docs/decisions/0002-node-runtime.md`).
 - Must not require the repository this file is in. Installed through npm, the
@@ -55,6 +56,7 @@ npx docbound audit
 | Install seeds `audit.exclude` with docbound's own paths | Leave the list empty | Installing a tool should not open a documentation task; see `docs/decisions/0007-audit-exclude-config.md` | An install stops being the only writer of those paths |
 | `update` compares the payload hash only | Compare the whole distribution | A merged hook manifest carries the project's other hooks, so a whole-distribution hash never matches | The manifest becomes a file docbound fully owns |
 | `link` points at a checkout's `skill/docbound/` | Link a built distribution | A linked checkout is for developing the skill, where the canonical source is what you want live | Providers start needing transformed payloads rather than copies |
+| Detection reads the project and the home directory | Project only | A harness writes its project directory only once it has something to keep there, so a Cursor user on a fresh repository was detected as nothing at all | A harness starts using a home directory that does not imply the user works with it |
 
 ## Gotchas
 

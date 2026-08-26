@@ -18,7 +18,7 @@ export const EXCLUDE_DIRS = new Set([
   ".cache", "out", ".tox", ".mypy_cache", ".pytest_cache", "site-packages",
 ]);
 
-export const MANIFESTS = new Set([
+const MANIFESTS = new Set([
   "package.json", "pyproject.toml", "requirements.txt", "setup.py", "setup.cfg",
   "Pipfile", "go.mod", "Cargo.toml", "Gemfile", "pom.xml", "build.gradle",
   "build.gradle.kts", "composer.json", "mix.exs", "pubspec.yaml",

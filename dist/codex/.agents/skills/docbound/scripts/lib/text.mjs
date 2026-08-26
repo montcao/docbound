@@ -122,6 +122,6 @@ export function stripComments(text, suffix) {
   return out.join("\n");
 }
 
-export function escapeRegExp(text) {
+function escapeRegExp(text) {
   return text.replace(/[.*+?^${}()|[\]\\/-]/g, "\\$&");
 }

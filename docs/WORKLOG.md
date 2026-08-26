@@ -5,6 +5,103 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-26 — Correct the Cursor provider entry and cut dead surface
+
+Agent: claude · Branch: main
+
+### Intent
+
+A user working in Cursor questioned a claim in the previous task's report that
+`doctor` had called Cursor installed when it was not. Checking it turned up a
+real defect underneath: the Cursor entry in `scripts/providers.mjs` places the
+skill in the generic agent-skills directory, and Cursor reads project skills
+from its own. Installing for Cursor has been putting the payload where
+Cursor never looks, silently — the exact failure the previous task recorded as a
+known gap and could not verify without the harness present. The harness is now
+present, and its own bundled documentation is the source.
+
+Two smaller faults come with it. The Cursor hook manifest omits the schema
+version its format requires, and carries a key that format does not define.
+Provider detection reads only the project directory, so a Cursor user whose
+repository has no Cursor directory yet gets no detection at all.
+
+The second half of the task is removal. The previous task left duplicated and
+unreachable surface: the default configuration is written out in three places,
+`cli/install.mjs` imports and re-exports a function nothing imports from it,
+`copyDist` takes an option it no longer reads, several modules export helpers
+that only they use, and `skills-lock.json` records the same payload hash eight
+times.
+
+### Expected to touch
+
+- `scripts/providers.mjs` — the Cursor entry, its hook manifest, and detection
+- `cli/install.mjs`, `cli/index.mjs` — dead imports, dead option, lock shape
+- `skill/docbound/scripts/lib/` — un-export helpers with one internal caller
+- `scripts/build.mjs`, `scripts/check-dist-fresh.mjs` — one owner for the
+  default config, and a lock that records each hash once
+- `dist/`, `skills-lock.json` — rebuilt
+- `docs/` — this entry, ARCHITECTURE's known gaps, module README decisions
+
+### Unknowns going in
+
+- Whether Cursor reads the generic agent-skills directory as well as its own.
+  If it does, the current entry was merely redundant rather than broken.
+  Nothing the harness ships mentions the generic one.
+- Whether the other six provider entries have the same class of error. Only
+  Claude Code, Codex, and Cursor are present on this machine to check against.
+
+### Outcome
+
+**The Cursor entry was wrong, and worse than reported.** Cursor reads project
+skills from its own directory, and the entry in `scripts/providers.mjs` named
+the generic agent-skills one, so `install --providers=cursor` had been writing
+the payload where Cursor never looks. Corrected, along with two faults in the same
+entry: its hook manifest now carries `version: 1`, which that format requires,
+and drops a key the format does not define. `cursorHooks` in
+`scripts/providers.mjs` is separate from `genericHooks` for that reason. The
+event names and the exit-code-2 blocking contract the stop gate depends on were
+already right.
+
+The correction is sourced from the harness's own bundled documentation rather
+than from a third-party summary, so Claude Code, Codex, and Cursor are now
+verified entries and the remaining four are not. `docs/ARCHITECTURE.md` carries
+that split, and `scripts/providers.mjs` says it per entry.
+
+**Detection read only the project directory.** A harness writes its project
+directory only once it has something to keep there, so working in Cursor on a
+repository with no Cursor directory was detected as no harness at all, and fell
+back to the generic layout Cursor does not read. `detectProviders` in `cli/install.mjs`
+now reads the home directory too.
+
+**A second bug the new test found.** Merging a hook manifest built its result
+from the existing file's top-level keys only, so every key the incoming manifest
+declared was discarded — including the schema version Cursor requires. Fixed in
+`mergeHooks`; the project's own keys still win over docbound's.
+
+**Removed.** The default configuration was written out three times; the copy in
+`skill/docbound/scripts/lib/config.mjs` is now the only one, imported by
+`scripts/build.mjs` and `cli/install.mjs`. `skills-lock.json` recorded one
+payload hash per provider, all eight identical by construction, and now records
+it once. Deleted a re-export in `cli/install.mjs` that nothing imported, an
+option `copyDist` had stopped reading, and five exports whose only caller was
+the module that defined them.
+
+**Tests.** The install matrix now runs over the provider table itself rather
+than a hand-written list, and asserts the payload lands at each provider's
+declared path and that its hook command points there. That is the strongest
+assertion available from inside the repository: it catches a payload written to
+the wrong place, and cannot catch a declared path that is wrong about the world.
+Three tests added, 69 passing.
+
+### Still open
+
+- Four provider entries remain unverified against a running harness: gemini,
+  github, opencode, and the generic layout. Each needs the harness present, and
+  the same method that fixed Cursor — read what the harness itself ships —
+  applies to each.
+- The check candidate from the previous entry stands: `comment-sentence` reads
+  the continuation lines of a wrapped sentence as fragments. Unchanged here.
+
 ## 2026-08-26 — Turn the canonical skill folder into a distributable repository
 
 Agent: claude · Branch: main

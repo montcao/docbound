@@ -9,23 +9,35 @@
 
 import crypto from "node:crypto";
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 
-import { PROVIDERS, providerByName } from "../scripts/providers.mjs";
+import { PROVIDERS } from "../scripts/providers.mjs";
+import { DEFAULT_CONFIG } from "../skill/docbound/scripts/lib/config.mjs";
 
 export function readLock(packageRoot) {
   const file = path.join(packageRoot, "skills-lock.json");
   return JSON.parse(fs.readFileSync(file, "utf8"));
 }
 
-/** Providers whose harness directory is present in `root`. */
-export function detectProviders(root) {
+/**
+ * Providers whose harness directory is present, in the project or in the user's
+ * home directory.
+ *
+ * Home counts because a harness only writes its project directory once you give
+ * it something to keep there. Someone working in Cursor on a repository with no
+ * `.cursor/` is still working in Cursor, and detecting nothing would install the
+ * generic layout their harness does not read.
+ */
+export function detectProviders(root, home = os.homedir()) {
   const found = [];
   for (const provider of PROVIDERS) {
     if (!provider.detect) continue;
-    if (provider.detect.some((dir) => fs.existsSync(path.join(root, dir)))) {
-      found.push(provider);
-    }
+    const roots = home && home !== root ? [root, home] : [root];
+    const present = provider.detect.some((dir) =>
+      roots.some((base) => fs.existsSync(path.join(base, dir))),
+    );
+    if (present) found.push(provider);
   }
   // `.agents` alone means universal; with a named harness beside it the named
   // one is the better answer and universal is redundant.
@@ -105,10 +117,10 @@ function hashTree(root, provider) {
 
 /**
  * Copy one provider's distribution into `root`. Returns the number of files
- * written. The hook manifest is skipped when hooks are off, and
- * `.docbound/config.json` is never overwritten.
+ * written. The hook manifest and the tracked config are never copied: each has
+ * a function that merges into whatever the project already has.
  */
-export function copyDist(distRoot, root, provider, { hooks = true } = {}) {
+export function copyDist(distRoot, root, provider) {
   const source = path.join(distRoot, provider.name);
   if (!fs.existsSync(source)) {
     throw new Error(`no distribution for ${provider.name}; run the build`);
@@ -128,7 +140,6 @@ export function copyDist(distRoot, root, provider, { hooks = true } = {}) {
     fs.copyFileSync(path.join(source, rel), target);
     written += 1;
   }
-  void hooks;
   return written;
 }
 
@@ -143,10 +154,7 @@ export function copyDist(distRoot, root, provider, { hooks = true } = {}) {
  */
 export function ensureConfig(root, providers) {
   const file = path.join(root, ".docbound", "config.json");
-  const config = readJson(file) ?? {
-    audit: { exclude: [] },
-    hook: { enabled: true, fast: true, blockOnStop: true },
-  };
+  const config = readJson(file) ?? structuredClone(DEFAULT_CONFIG);
   config.audit = config.audit ?? {};
   const exclude = new Set(config.audit.exclude ?? []);
   exclude.add(".docbound/**");
@@ -185,7 +193,14 @@ export function mergeHookManifest(root, provider) {
 }
 
 function mergeHooks(existing, incoming) {
-  const merged = { ...existing, hooks: { ...(existing.hooks ?? {}) } };
+  // Incoming keys first so a manifest format that requires one — Cursor's
+  // `version` — survives; the project's own keys win over ours where both set
+  // the same one; hooks are merged event by event below.
+  const merged = {
+    ...incoming,
+    ...existing,
+    hooks: { ...(existing.hooks ?? {}) },
+  };
   for (const [event, entries] of Object.entries(incoming.hooks ?? {})) {
     const current = Array.isArray(merged.hooks[event]) ? merged.hooks[event] : [];
     const kept = current.filter((entry) => !isDocbound(entry));
@@ -229,5 +244,3 @@ function readJson(file) {
     return null;
   }
 }
-
-export { providerByName };
