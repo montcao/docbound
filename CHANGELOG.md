@@ -8,6 +8,14 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Fixed
+
+- `logic-touched` reported a logic edit when a subagent reworded a comment on a
+  line whose string contained a comment marker, which is an edit its own
+  contract allows. It now reads the span scanner, which tells the two apart. An
+  ordinary string literal is still compared, because changing one is a logic
+  change.
+
 ### Added
 
 - A span scanner that answers what kind of span a character sits in: code, line

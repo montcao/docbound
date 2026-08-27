@@ -418,6 +418,11 @@ renames is editing the thing it was sent to describe, and a rename it believes
 in belongs under `Still open` as a proposal with the current name, the proposed
 name, and the reason.
 
+Documentation is removed by the span scanner, which distinguishes a comment
+marker inside a string from a comment. An ordinary string literal is kept,
+because changing one is a logic change. A language the scanner has no entry for
+falls back to the line-based approximation.
+
 ```
 waiver: logic-touched src/api/handlers.py - deleted a block of commented-out
 code, which the subagent contract allows and this comparison cannot distinguish

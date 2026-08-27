@@ -5,6 +5,97 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Move logic-touched onto the scanner
+
+Agent: claude · Branch: main
+
+### Intent
+
+`logic-touched` is the check that stops a documentation subagent editing logic,
+names, or tests. It compares the coder's end state against the subagent's with
+comments stripped, and it strips them with a regular expression that cannot tell
+a comment marker inside a string from a comment.
+
+The failure is demonstrable. A Python line reading
+`URL = "https://x.com/#frag"  # the fragment is ignored` keeps its trailing
+comment after stripping, because the heuristic sees a quote earlier on the line
+and gives up. Edit only that comment, which the subagent is explicitly allowed
+to do, and the check reports that logic moved. It is a false accusation from the
+one check whose job is trust.
+
+The scanner landed in the previous entry with nothing reading it. This is the
+first check to move, chosen because the correctness win is unambiguous and the
+check is a warning, so being wrong in a new way costs a line of output rather
+than a blocked task.
+
+One thing has to be got right rather than assumed. `maskNonCode` blanks strings
+as well as comments, and a string literal is logic: changing one is exactly the
+edit this check exists to catch. So the mask this check needs is narrower, the
+documentation-bearing spans only, which means comments everywhere plus
+triple-quoted strings in the languages that use them as docstrings.
+
+### Expected to touch
+
+- `skill/docbound/scripts/lib/scan.mjs` - a mask for documentation spans
+- `skill/docbound/scripts/lib/languages.mjs` - which strings carry docs
+- `skill/docbound/scripts/lib/checks/logic-touched.mjs` - read the scanner
+- `tests/fixtures/` - a fixture for the case that is wrong today
+- `docs/ARCHITECTURE.md` - the known gap this closes
+
+### Unknowns going in
+
+- Whether blanking rather than deleting makes a comment's length significant. It
+  does, so the comparison has to normalise, and getting that wrong turns a
+  reworded comment into a finding.
+- Whether the two existing subagent fixtures still produce identical output. If
+  they do not, either the change is wrong or the fixture was passing for the
+  wrong reason.
+
+### Outcome
+
+**`logic-touched` reads the scanner.** `logicOf` in
+`skill/docbound/scripts/lib/checks/logic-touched.mjs` masks documentation and
+falls back to the old regular expression for a language the table has no entry
+for, so nothing degrades below where it was.
+
+**The mask had to be narrower than the one that already existed.** `maskNonCode`
+blanks strings, and a string literal is logic: blanking it would hide exactly
+the edit this check exists to catch. `maskDocumentation` blanks comments plus
+strings a language uses as docstrings, which the table now marks with `doc`, and
+keeps ordinary literals. Three behaviours, each a test: rewording a comment is
+not a change, moving a string literal is, adding a docstring is not.
+
+**Blanking made a comment's length significant**, exactly as the Unknown
+predicted. A longer sentence left more spaces and read as a different program.
+The mask trims trailing whitespace per line and drops empty lines, which is what
+the regular expression did by deleting rather than blanking.
+
+**The fixture is evidence rather than decoration.** `subagent-comment-in-string`
+has a subagent reword one comment on a line whose string contains a `#`. Running
+both paths over that input directly: the regular expression reports a
+difference, the scanner does not. Without checking that, a passing fixture would
+only have shown the check staying quiet, which it could do for the wrong reason.
+
+The three existing subagent fixtures produce identical output, which is the
+other half of the evidence.
+
+`docs/ARCHITECTURE.md` loses the known gap about a comment marker inside a
+string literal and gains the ones the scanner actually has: no entry for the
+JSX-shaped languages, and template literal interiors read as string.
+
+180 tests.
+
+### Still open
+
+- [scanner-adoption] Three checks still read source with regular expressions:
+  `comment-sentence`, `restating-comments`, and `todo-shape`. Moving
+  `comment-sentence` also closes [comment-sentence-wrapping], since a run of
+  comment lines is one span to the scanner.
+- [suite-runtime] Measured rather than assumed: 151 tests in 11 seconds,
+  including `npm pack`. I had claimed the suite was past a minute, which came
+  from the timeouts I set around it rather than from timing it. Nothing to fix,
+  and worth remembering that a number nobody measured is not a number.
+
 ## 2026-08-27 - Add a span scanner, with no check depending on it yet
 
 Agent: claude · Branch: main

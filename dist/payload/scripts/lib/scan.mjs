@@ -52,10 +52,12 @@ export function scan(text, suffix) {
   let stringSpec = null;
   let i = 0;
 
+  let openedBy = null;
   const close = (end, next) => {
-    if (end > start) spans.push({ kind, start, end });
+    if (end > start) spans.push({ kind, start, end, doc: openedBy?.doc === true });
     kind = next;
     start = end;
+    openedBy = null;
   };
 
   while (i < text.length) {
@@ -78,6 +80,7 @@ export function scan(text, suffix) {
       if (string) {
         close(i, STRING);
         stringSpec = string;
+        openedBy = string;
         i += string.open.length;
         continue;
       }
@@ -138,7 +141,9 @@ export function scan(text, suffix) {
     i += 1;
   }
 
-  if (text.length > start) spans.push({ kind, start, end: text.length });
+  if (text.length > start) {
+    spans.push({ kind, start, end: text.length, doc: openedBy?.doc === true });
+  }
   return spans;
 }
 
@@ -172,6 +177,39 @@ function blank(piece) {
   let out = "";
   for (const ch of piece) out += ch === "\n" ? "\n" : " ";
   return out;
+}
+
+/**
+ * The text with documentation blanked and everything else kept.
+ *
+ * Comments always, plus strings a language uses as docstrings. An ordinary
+ * string literal survives, because changing one is a logic change and blanking
+ * it would hide exactly what a caller comparing two revisions is looking for.
+ *
+ * Blank runs are collapsed and empty lines dropped, so rewording a comment does
+ * not change the result. Without that, a mask preserves the comment's length
+ * and a longer sentence reads as a different program.
+ */
+export function maskDocumentation(text, suffix) {
+  const spans = scan(text, suffix);
+  if (spans === null) return null;
+
+  const out = [];
+  for (const span of spans) {
+    const piece = text.slice(span.start, span.end);
+    const isDocumentation =
+      span.kind === LINE_COMMENT ||
+      span.kind === BLOCK_COMMENT ||
+      (span.kind === STRING && span.doc);
+    out.push(isDocumentation ? blank(piece) : piece);
+  }
+
+  return out
+    .join("")
+    .split("\n")
+    .map((line) => line.replace(/\s+$/, ""))
+    .filter((line) => line !== "")
+    .join("\n");
 }
 
 /** Comment spans only, with their text and the line each starts on. */

@@ -21,6 +21,7 @@ import {
   comments,
   defines,
   definitions,
+  maskDocumentation,
   maskNonCode,
   scan,
   scannable,
@@ -147,6 +148,44 @@ describe("maskNonCode", () => {
     const masked = maskNonCode(text, ".py");
     const line = masked.slice(0, masked.indexOf("def target")).split("\n").length;
     assert.equal(line, 3);
+  });
+});
+
+describe("maskDocumentation", () => {
+  const source = (comment, url = "x.com") =>
+    `URL = "https://${url}/#frag"  # ${comment}\ndef f():\n    return URL`;
+
+  test("rewording a comment on a line whose string holds a marker is not a change", () => {
+    // The case logic-touched was wrong about: the regular expression kept that
+    // trailing comment, so rewording it read as a logic edit.
+    assert.equal(
+      maskDocumentation(source("the fragment is ignored"), ".py"),
+      maskDocumentation(source("fragments are dropped by the server"), ".py"),
+    );
+  });
+
+  test("changing a string literal is a change, because it is logic", () => {
+    assert.notEqual(
+      maskDocumentation(source("same", "x.com"), ".py"),
+      maskDocumentation(source("same", "y.com"), ".py"),
+    );
+  });
+
+  test("adding a docstring is not a change", () => {
+    const without = "def f():\n    return 1";
+    const with_ = 'def f():\n    """Added."""\n    return 1';
+    assert.equal(maskDocumentation(with_, ".py"), maskDocumentation(without, ".py"));
+  });
+
+  test("renaming a function is a change", () => {
+    assert.notEqual(
+      maskDocumentation("def one():\n    return 1", ".py"),
+      maskDocumentation("def two():\n    return 1", ".py"),
+    );
+  });
+
+  test("an unknown language answers null so the caller can fall back", () => {
+    assert.equal(maskDocumentation("anything", ".tsx"), null);
   });
 });
 

@@ -1,0 +1,8 @@
+{
+  "note": "Rewording a comment on a line whose string holds a comment marker. The regular expression this check used reported a logic edit here; the scanner does not.",
+  "git": true,
+  "errors": {},
+  "warnings": {},
+  "waived": {},
+  "exit": 0
+}

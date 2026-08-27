@@ -155,9 +155,10 @@ table of the module README that owns them. `cli/README.md` and
   `skill/docbound/scripts/reference/` is frozen and unmaintained, and nothing
   automatically checks that the two still agree. The diff is run by hand, and
   `tests/fixtures/` is what actually pins behaviour.
-- The `logic-touched` check strips comments with a line-based approximation, so
-  a comment marker inside a string literal can be misread. It is a warning for
-  that reason.
+- The span scanner has no table entry for TSX, JSX, Vue, or Svelte, since each
+  nests a second syntax, and it reads the inside of a template literal as string
+  rather than code. Checks reading it fall back to the line-based path for those,
+  which is what they did before it existed.
 - The audit does not read this repository's own skill payload prose
   (`docs/decisions/0007-audit-exclude-config.md`), so a dead path inside
   `skill/docbound/SKILL.md` is not caught here. It is caught in any repository

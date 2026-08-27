@@ -24,6 +24,12 @@ const backtick = { open: "`", close: "`", escape: "\\", multiline: true };
 const tripleDouble = { open: '"""', close: '"""', escape: "\\", multiline: true };
 const tripleSingle = { open: "'''", close: "'''", escape: "\\", multiline: true };
 
+// `doc` marks a string that carries documentation rather than data. A check
+// comparing logic has to ignore a docstring and must not ignore an ordinary
+// string literal, since changing one of those is the edit it exists to catch.
+const docDouble = { ...tripleDouble, doc: true };
+const docSingle = { ...tripleSingle, doc: true };
+
 const C_STYLE = {
   line: ["//"],
   block: [["/*", "*/"]],
@@ -61,7 +67,7 @@ export const LANGUAGES = {
     blockNests: false,
     // Triple quotes first: a docstring is a string, and the scanner has to see
     // all three characters before it sees one.
-    strings: [tripleDouble, tripleSingle, dq, sq],
+    strings: [docDouble, docSingle, dq, sq],
     define: [/\bdef\s+(\w+)/g, /\bclass\s+(\w+)/g, /^(\w+)\s*=/gm],
   },
   ".js": { ...C_STYLE, strings: [dq, sq, backtick], define: JS_DEFINE },
@@ -118,8 +124,8 @@ export const LANGUAGES = {
   },
   ".sql": { line: ["--"], block: [["/*", "*/"]], blockNests: false, strings: [sq, dq], define: [] },
   ".hs": { line: ["--"], block: [["{-", "-}"]], blockNests: true, strings: [dq], define: [] },
-  ".ex": { ...HASH_STYLE, strings: [tripleDouble, dq], define: [/\bdef\s+(\w+)/g, /\bdefmodule\s+([\w.]+)/g] },
-  ".exs": { ...HASH_STYLE, strings: [tripleDouble, dq], define: [/\bdef\s+(\w+)/g, /\bdefmodule\s+([\w.]+)/g] },
+  ".ex": { ...HASH_STYLE, strings: [docDouble, dq], define: [/\bdef\s+(\w+)/g, /\bdefmodule\s+([\w.]+)/g] },
+  ".exs": { ...HASH_STYLE, strings: [docDouble, dq], define: [/\bdef\s+(\w+)/g, /\bdefmodule\s+([\w.]+)/g] },
   ".proto": { ...C_STYLE, define: [/\bmessage\s+(\w+)/g, /\bservice\s+(\w+)/g] },
   ".graphql": { ...HASH_STYLE, define: [/\btype\s+(\w+)/g] },
 };

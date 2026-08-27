@@ -4,10 +4,28 @@
 
 import { excluded, exists, isSource, readText, suffixOf } from "../paths.mjs";
 import { run as git, showFile } from "../git.mjs";
+import { maskDocumentation } from "../scan.mjs";
 import { stripComments } from "../text.mjs";
 
 export const id = "logic-touched";
 export const level = "warn";
+
+/**
+ * The file with its documentation removed, for comparing two revisions.
+ *
+ * The scanner knows a comment marker inside a string from a comment, which the
+ * regular expression it replaces does not: a Python line reading
+ * `URL = "https://x/#f"  # note` kept its trailing comment, so rewording that
+ * comment read as a logic change and this check accused a subagent of an edit
+ * the contract allows.
+ *
+ * A language the scanner has no table entry for falls back to that regular
+ * expression, which is what this check used before and is still better than
+ * refusing to answer.
+ */
+export function logicOf(text, suffix) {
+  return maskDocumentation(text, suffix) ?? stripComments(text, suffix);
+}
 
 export function run(ctx) {
   if (!ctx.git || !ctx.since) return;
@@ -32,7 +50,7 @@ export function run(ctx) {
 
     const after = readText(ctx.root, file) ?? "";
     const suffix = suffixOf(file);
-    if (stripComments(before, suffix) !== stripComments(after, suffix)) {
+    if (logicOf(before, suffix) !== logicOf(after, suffix)) {
       ctx.add(
         id,
         level,
