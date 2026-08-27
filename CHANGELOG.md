@@ -10,10 +10,15 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
-- `.github/workflows/publish.yml`. A version tag runs the three gates CI runs,
-  checks that the tag matches `package.json`, prints the tarball contents, and
-  publishes with provenance. Releasing is `node scripts/release.mjs --version
-  X.Y.Z` followed by `git push --follow-tags`.
+- `.github/workflows/publish.yml`. Every push to main asks the registry whether
+  the version in `package.json` is already there and stops quietly when it is.
+  When it is not, it runs the three gates CI runs, prints the tarball contents,
+  and publishes with provenance. Releasing is `node scripts/release.mjs
+  --version X.Y.Z` followed by `git push`.
+
+  A registry version is immutable, so publishing on every push without that
+  guard fails with E403 on every push that does not change the version. With it,
+  a re-run, a revert, and a merge that leaves the version alone all skip.
 - `CONTRIBUTING.md`, `SECURITY.md`, three issue templates, and a pull request
   template. `SECURITY.md` carries the threat model, which is specific here: the
   hook runs automatically after every edit, over repositories nobody has read,

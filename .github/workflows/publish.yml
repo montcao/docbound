@@ -1,11 +1,18 @@
 name: publish
 
-# Fires on a version tag, which is what `node scripts/release.mjs --version
-# X.Y.Z` creates. The whole release is then: run that script, push with
-# --follow-tags, and this does the rest.
+# Publishing follows main. Any push that carries a version the registry does not
+# have is published; every other push stops at the guard below.
+#
+# A registry version is immutable, so a workflow that publishes on every push to
+# main fails with E403 on every push that does not change the version, which is
+# nearly all of them. Asking the registry first turns that into a skip. It also
+# makes the trigger idempotent: a re-run, a revert, and a merge that leaves the
+# version alone all do nothing rather than failing.
 on:
   push:
-    tags: ["v*"]
+    branches: [main]
+  # For re-running a publish that failed after the version was already bumped.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -28,39 +35,62 @@ jobs:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
+      - name: Is this version already on the registry
+        id: check
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          # Any lookup failure counts as not published. A name that has never
+          # been published and a version that does not exist yet both fail here,
+          # and both should publish.
+          if npm view "docbound@$version" version >/dev/null 2>&1; then
+            echo "publish=false" >> "$GITHUB_OUTPUT"
+            echo "docbound@$version is already published; nothing to do."
+          else
+            echo "publish=true" >> "$GITHUB_OUTPUT"
+            echo "docbound@$version is not on the registry; publishing."
+          fi
+
       # Trusted publishing needs a newer npm than the one bundled with Node 22.
       # Harmless when publishing over a token.
       - name: Use a current npm
+        if: steps.check.outputs.publish == 'true'
         run: npm install -g npm@latest
 
-      - name: Tag matches package.json
-        run: |
-          tag="${GITHUB_REF_NAME#v}"
-          pkg="$(node -p "require('./package.json').version")"
-          if [ "$tag" != "$pkg" ]; then
-            echo "tag $GITHUB_REF_NAME does not match package.json version $pkg"
-            exit 1
-          fi
-
-      # The same three gates CI runs on every push. A tag can be pushed without
-      # passing through a green CI run, so they run again here rather than being
-      # assumed.
+      # The same three gates CI runs. They run again here because a publish is
+      # the one step that cannot be taken back, and because a push to main can
+      # arrive without a green CI run beside it.
       - name: Tests
+        if: steps.check.outputs.publish == 'true'
         run: npm test
 
       - name: dist is current
+        if: steps.check.outputs.publish == 'true'
         run: node scripts/check-dist-fresh.mjs
 
       - name: docbound audits itself
+        if: steps.check.outputs.publish == 'true'
         run: node cli/index.mjs audit
 
       - name: What would be published
+        if: steps.check.outputs.publish == 'true'
         run: npm pack --dry-run
 
       - name: Publish
+        if: steps.check.outputs.publish == 'true'
         run: npm publish --provenance --access public
         env:
           # Empty when trusted publishing is configured on npmjs.com, which is
           # the better arrangement: no long-lived secret in this repository.
           # Set NPM_TOKEN as a repository secret to publish over a token instead.
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Summary
+        if: always()
+        run: |
+          v="${{ steps.check.outputs.version }}"
+          if [ "${{ steps.check.outputs.publish }}" = "true" ]; then
+            echo "published docbound@$v" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "docbound@$v already on the registry; skipped" >> "$GITHUB_STEP_SUMMARY"
+          fi

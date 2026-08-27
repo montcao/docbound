@@ -5,6 +5,83 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Publish from main when the version changes, not from a tag
+
+Agent: claude · Branch: main · t=1787865686
+
+### Intent
+
+The publish workflow fires on a version tag. That works and it means a release
+needs two things to go right: the tag has to be created, and it has to be
+pushed. `git push` without `--follow-tags` publishes nothing and says nothing,
+which is a failure mode with no output.
+
+Triggering on a push to main instead is what was asked for, and it needs one
+guard. A registry version is immutable, so publishing on every push to main
+fails with E403 on every push that does not change the version, which is nearly
+all of them. The workflow has to ask the registry whether this version exists
+and stop quietly when it does.
+
+That guard also makes the trigger idempotent. A re-run, a revert, a merge that
+touches nothing about the version: all of them skip rather than fail, and the
+only push that publishes is the one carrying a version the registry has not
+seen. `scripts/release.mjs` already commits that bump to main, so the release
+path loses a step rather than gaining one.
+
+### Expected to touch
+
+- `.github/workflows/publish.yml` — the trigger and the guard
+- `docs/DEVELOP.md` — the release path is now one push
+
+### Unknowns going in
+
+Whether `npm view` distinguishes a package that has never been published from a
+version of an existing package that does not exist yet. Both are the case here for the
+first release and both should publish, so the guard has to treat any lookup
+failure as "not published" rather than as an error.
+
+### Outcome
+
+The trigger is a push to main, guarded by a registry lookup.
+
+`.github/workflows/publish.yml` reads the version out of `package.json`, asks
+`npm view` whether that exact version is on the registry, and writes the answer
+to a step output every later step is conditioned on. A push carrying a version
+the registry already has skips everything and writes one line to the run summary.
+A push carrying a new version runs the tests, the freshness check, and the audit,
+prints the tarball contents, and publishes with provenance.
+
+Measured rather than assumed: `npm view docbound@0.1.0 version` exits 1 with
+empty output, and `npm view react@18.2.0 version` exits 0 and prints the version.
+The unknown going in was whether a package that has never been published looks
+different from a version that does not exist yet. Both fail the same way, which
+is what the guard wants, since both should publish.
+
+`workflow_dispatch` is on the workflow so a publish that failed after the version
+was already bumped can be re-run without another commit.
+
+[publish-workflow-untested] carries more weight than when it was opened. The
+guard is now the piece a first release depends on, and nothing has run it.
+
+The release path lost a step. It was `node scripts/release.mjs --version X.Y.Z`
+followed by `git push --follow-tags`, where forgetting the flag published nothing
+and said nothing. It is now that script followed by `git push`, and the tag it
+creates is a marker rather than a trigger.
+
+`docs/DEVELOP.md` and `CHANGELOG.md` carry the change, including why the guard is
+the load-bearing part: a registry version is immutable, so the unguarded version
+of this workflow fails on nearly every push.
+
+### Still open
+
+- [no-canary] Nothing is published between releases, so main is only installable
+  at a version boundary. A prerelease published on every push under a separate
+  dist-tag would change that, and would put a version on the registry for every
+  commit.
+- [reusable-extraction] This workflow is specific to one package name, which is
+  hardcoded in the guard. Extracting it as a reusable workflow means taking the
+  name and the Node version as inputs.
+
 ## 2026-08-27 - Make the repository publishable and legible to a stranger
 
 Agent: claude · Branch: main · t=1787862681

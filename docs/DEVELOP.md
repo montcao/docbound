@@ -211,10 +211,17 @@ tree, moves the changelog's Unreleased section under the new number, writes its
 own worklog entry, commits, and tags. It refuses to start on a dirty tree and
 refuses to finish on a red one. `--dry-run` writes nothing.
 
-Pushing the tag is the whole of publishing.
-`.github/workflows/publish.yml` fires on `v*`, checks that the tag matches
-`package.json`, runs the same three gates CI runs, prints what would go into the
-tarball, and publishes with provenance. Nothing is published by hand.
+Pushing is the whole of publishing. `.github/workflows/publish.yml` runs on
+every push to main, asks the registry whether the version in `package.json` is
+already there, and stops quietly when it is. When it is not, it runs the same
+three gates CI runs, prints what would go into the tarball, and publishes with
+provenance. Nothing is published by hand.
+
+A registry version is immutable, which is why the guard exists: without it,
+every push that does not change the version fails with E403, and most pushes do
+not change the version. With it, a re-run, a revert, and a merge that leaves the
+version alone all skip rather than fail, and the tag is a marker rather than a
+trigger.
 
 The version lives in four files plus `skills-lock.json`, which is why setting it
 by hand is four chances to leave one behind.
@@ -222,10 +229,11 @@ by hand is four chances to leave one behind.
 ### The npm side, once
 
 Trusted publishing has to be configured on npmjs.com against this repository and
-`publish.yml`, which requires the package to exist, so the first release is
-published from a maintainer's machine and every one after it is automatic. Until
-that is configured, the workflow falls back to an `NPM_TOKEN` repository secret;
-with it configured, no long-lived secret lives in this repository at all.
+`publish.yml`, which requires the package to exist. So either publish `0.1.0`
+from a maintainer's machine and configure it afterwards, or set an `NPM_TOKEN`
+repository secret and let the workflow publish the first version too. The
+workflow supports both and needs no edit either way. With trusted publishing
+configured, no long-lived secret lives in this repository at all.
 
 npm ignores the `readme` field in `package.json` and always renders the
 `README.md` at the tarball root, whatever `files` says. A second README written
