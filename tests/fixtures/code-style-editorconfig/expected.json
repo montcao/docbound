@@ -1,9 +1,10 @@
 {
-  "note": "The repository's own limit silences line-length without the code changing.",
+  "note": "The same source as code-style, under a repository that sets a width. line-length enforces the configured 60 and nothing else changes.",
   "git": true,
   "errors": {},
   "warnings": {
     "comment-sentence": 2,
+    "line-length": 1,
     "mixed-indent": 1,
     "todo-shape": 1
   },

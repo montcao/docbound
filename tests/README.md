@@ -10,6 +10,10 @@ check that fires where the scenario does not call for it is a failure.
   the audit against it.
 - `tests/fixtures/_base.sh`: the documented baseline most fixtures start from.
 - `tests/audit.test.mjs`: the fixture table.
+- `tests/fixtures/real-world-shapes/setup.sh`: constructs collected from a real
+  repository, each of which was once reported as a defect
+  (`docs/decisions/0024-a-fixture-of-real-world-shapes.md`).
+- `tests/hook.test.mjs`: the hook, which is the part that can stop a session.
 
 ## Contract
 
@@ -55,9 +59,18 @@ comparison can be made against a tree that was never written to disk.
 
 ## Gotchas
 
-- `tests/fixtures/code-style/pricing.py.txt` is the deliberately bad sample
-  file. Its extension keeps it out of the audit's source set, so its marker
-  comment and long lines are not findings against *this* repository.
+- `tests/fixtures/code-style/pricing.py.txt` and
+  `tests/fixtures/real-world-shapes/prompt.go.txt` are deliberately bad sample
+  files. The extension keeps them out of the audit's source set, so their marker
+  comments, long lines, and tab-and-space indentation are not findings against
+  *this* repository. A sample needing both tabs and spaces has to live in a file
+  like this rather than in a heredoc, or the fixture's own shell script becomes
+  the finding.
+- The suite has met code this project did not write exactly once, through
+  `tests/fixtures/real-world-shapes/`. Everything else is written here, by the
+  same hand as the checks, which is why four blocking false positives shipped in
+  0.1.0. Pointing docbound at an unfamiliar repository and reading the first run
+  costs about five minutes and is the only thing that has ever found them.
 - Fixture dates come from `date +%F` so the worklog entries they write are
   always inside the audit's session window. A fixture cannot be pinned to a
   fixed date without `worklog-entry` failing on age.

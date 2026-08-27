@@ -46,8 +46,14 @@ export function parseWorklog(root, { git, changed, sessionDays, today }) {
   const problems = [];
   const waivers = [];
   const text = readText(root, WORKLOG_PATH);
+  // Nothing changed, so no task happened, so there is nothing to have logged.
+  // This is what a repository looks like the moment after it sets a baseline,
+  // and asking it for a worklog entry about no work is a finding nobody can
+  // act on (`docs/decisions/0019-adoption-baseline.md`).
+  const idle = git && changed.size === 0;
 
   if (text === null) {
+    if (idle) return { topEntry: null, waivers, problems };
     problems.push({
       check: "worklog-entry",
       message:
@@ -57,7 +63,7 @@ export function parseWorklog(root, { git, changed, sessionDays, today }) {
     return { topEntry: null, waivers, problems };
   }
 
-  if (git && !changed.has(WORKLOG_PATH)) {
+  if (git && !idle && !changed.has(WORKLOG_PATH)) {
     problems.push({
       check: "worklog-entry",
       message:

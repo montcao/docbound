@@ -71,9 +71,16 @@ export function run(ctx) {
 ```
 
 The context object carries `root`, `changed`, `added`, `addedDirs`, `git`,
-`ref`, `mode`, `since`, `excludes`, `topEntry`, `waivers`, `docs()` (the
-memoised list of Markdown files), and `beforeVersion(path)` (a file's content at
-the reference commit, or null). Anything a check needs that is not there goes on
+`ref`, `mode`, `since`, `baseline`, `excludes`, `topEntry`, `waivers`, `docs()`,
+`allDocs()`, and `beforeVersion(path)` (a file's content at the reference
+commit, or null).
+
+`docs()` is the docs this change is answerable for and is what a check reports
+on. `allDocs()` is every doc in the repository and is a corpus, for a check that
+cannot answer without one: `orphan-doc` needs it to see that an older doc links
+to a newer one, and `duplicate-block` needs it to find the paragraph's first
+owner. Under a baseline the two differ; without one they are the same list
+(`docs/decisions/0019-adoption-baseline.md`). Anything a check needs that is not there goes on
 the context, which is a shared surface on purpose. See
 `docs/decisions/0006-check-plugin-architecture.md`.
 
@@ -90,6 +97,13 @@ Then add a second fixture, or extend an existing one, for the case where the
 check must **not** fire. The suite asserts exact check-ID sets, so the negative
 case is already covered by every other fixture. The near-miss is not, and the
 near-miss is where a check goes wrong.
+
+Then point the check at a repository nobody here wrote. Install docbound into a
+clone of something real, run the audit, and read every finding: four blocking
+false positives shipped in 0.1.0 and all four were found this way in about five
+minutes, by a suite of 154 passing tests that had never met unfamiliar code.
+A construct that turns up goes into `tests/fixtures/real-world-shapes/`
+(`docs/decisions/0024-a-fixture-of-real-world-shapes.md`).
 
 **3. Add a row to the check table** in `skill/docbound/SKILL.md`. That table is
 what an agent reads; a check missing from it is a check nobody knows how to
@@ -113,6 +127,13 @@ them. Changing one needs a decision record and a deprecation path, not a commit.
 
 Messages may be reworded, and `docs/checks.md` and the SKILL.md table are
 updated in the same change when they are.
+
+A check may report an individual finding at a level below its declared one, and
+`dead-ref` does: it blocks on an unambiguous path claim and warns on an
+ambiguous one (`docs/decisions/0023-ambiguous-path-claims-are-warnings.md`). The
+declared `level` stays what it was, so a waiver written against the ID still
+dismisses every finding from it. Raising a finding's level is the breaking
+direction and needs the same treatment as changing the declared one.
 
 ## Adding or correcting a provider
 

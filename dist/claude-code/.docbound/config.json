@@ -1,6 +1,7 @@
 {
   "audit": {
-    "exclude": []
+    "exclude": [],
+    "baseline": null
   },
   "hook": {
     "enabled": true,

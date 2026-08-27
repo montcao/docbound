@@ -18,9 +18,47 @@ export function sectionBody(text, heading, marker = "## ") {
   return start === -1 ? null : lines.slice(start).join("\n");
 }
 
+// Lazy repetition against a literal terminator, and no alternation inside it:
+// linear over any input. These run over every doc after every edit.
+const IGNORE_REGION =
+  /<!--\s*docbound-ignore-start\s*-->[\s\S]*?<!--\s*docbound-ignore-end\s*-->/g;
+const IGNORE_LINE = /<!--\s*docbound-ignore\s*-->/;
+
 /** Remove fenced code blocks; placeholders and paths inside them are examples. */
 export function stripFences(text) {
   return text.replace(/^```[\s\S]*?^```/gm, "");
+}
+
+/**
+ * The text with every region a doc marked as not-for-checking blanked out.
+ *
+ * Some documents legitimately contain what a check is looking for. A repository
+ * that documents its commit convention writes `<type>(scope): <summary>`, and
+ * `template-residue` cannot tell that from a placeholder nobody filled in,
+ * because there is nothing in the shape to tell it by. Rather than guess, the
+ * doc says so:
+ *
+ *     <!-- docbound-ignore -->        the next line is exempt
+ *     <!-- docbound-ignore-start -->  ... <!-- docbound-ignore-end -->
+ *
+ * Blanking rather than deleting keeps every line number matching the file, so a
+ * finding still points where a reader can open it.
+ */
+export function stripIgnored(text) {
+  const lines = text.replace(IGNORE_REGION, blankLines).split("\n");
+  for (let i = 0; i < lines.length; i += 1) {
+    if (!IGNORE_LINE.test(lines[i])) continue;
+    lines[i] = "";
+    if (i + 1 < lines.length) {
+      lines[i + 1] = "";
+      i += 1;
+    }
+  }
+  return lines.join("\n");
+}
+
+function blankLines(region) {
+  return region.replace(/[^\n]/g, "");
 }
 
 export function normalizeParagraph(text) {

@@ -151,7 +151,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `worklog-closed` | error | That entry has non-empty `Outcome` and `Still open` sections |
 | `doc-coverage` | error | Every changed source file is covered in the same diff: its own or an ancestor module README was touched, or a system doc (root README, ARCHITECTURE, an ADR) was touched *and names the file or its directory*. Tests and trivially small files are exempt |
 | `new-dir-readme` | error | Every new directory containing source has a `README.md` |
-| `dead-ref` | error | No doc references a file path that does not exist |
+| `dead-ref` | error | No doc references a file path that does not exist. A token carrying an extension or a trailing slash is unambiguous and blocks; a slash between two bare words is reported as a warning |
 | `diagram-refs` | error | No Mermaid diagram names a path that does not exist. A file is written with its extension, a directory with a trailing slash; anything else in a label is prose |
 | `dep-adr` | error | A changed dependency manifest has a new or superseding ADR in the same diff |
 | `adr-shape` | error | Every new ADR has Context, Decision, and "What would reverse this" sections with content |
@@ -163,7 +163,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `restating-comments` | warn | Changed source files do not have mostly comments that restate the adjacent code |
 | `todo-shape` | warn | Every TODO/FIXME in changed source states a problem and an action (six or more words) and names an owner, ticket, or reference |
 | `comment-sentence` | warn | Full-line comments in changed source are complete sentences (capitalized, terminated); commented-out code is flagged |
-| `line-length` | warn | Changed source respects the repo's configured line length (`.editorconfig`, `pyproject`, `.prettierrc`, `setup.cfg`), or 80 if none is set |
+| `line-length` | warn | Changed source respects the line length the repo configures (`.editorconfig`, `pyproject`, `.prettierrc`, `setup.cfg`). A repo that configures none has stated no convention, and the check says nothing |
 | `mixed-indent` | warn | No changed source file indents with both tabs and spaces |
 | `open-item-typo` | warn | No two `Still open` slugs are within two characters of each other, which is how one item silently becomes two |
 
@@ -190,6 +190,24 @@ Read `references/style.md` before writing any doc. Essentials:
 - Delete before you add.
 
 `references/code-style.md` is the standard for the code itself — naming, structure, context, comments — and the rule that the repo's own convention comes first. `references/anti-patterns.md` lists what to refuse to write, with the tell for each.
+
+## Adopting this in a repo that already has history
+
+Run `npx docbound baseline` once, or write the current commit into
+`audit.baseline` in `.docbound/config.json`. Everything before that commit is
+out of scope until a change touches it, and the audit asks only about what
+happens next. Without it, adoption on a branch that is a hundred files from main
+means owing documentation for a hundred files on the first run, which is not a
+finding anyone can act on.
+
+Two HTML comments handle the cases no check can decide from the text. A doc
+whose relative paths are written against a package rather than the repository
+root says so once at the top with `<!-- docbound-root: path/to/package -->`. A
+region a check will read wrongly, such as a documented commit format whose
+angle-bracket fields are not unfilled placeholders, sits between
+`<!-- docbound-ignore-start -->` and `<!-- docbound-ignore-end -->`, or after a
+single `<!-- docbound-ignore -->` for one line. Reach for either only when a
+check is wrong.
 
 ## Bootstrapping a repo with no docs
 

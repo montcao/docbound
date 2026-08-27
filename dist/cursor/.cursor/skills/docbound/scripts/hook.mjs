@@ -8,6 +8,10 @@
 //   after-edit  a fast subset, findings returned as context, never blocking.
 //               It fires after every file edit, so its cost is paid constantly
 //               and its job is to surface a problem early, not to stop work.
+//               It reports each finding once. Repeating the same seventeen
+//               findings after every edit fills the transcript with the thing
+//               it was already told, which is the cost this project exists to
+//               argue against (`docs/decisions/0022-report-each-finding-once.md`).
 //   stop        the full audit. On failure it exits 2 with the findings on
 //               stderr, which every supported provider treats as "do not stop,
 //               and here is why".
@@ -27,6 +31,7 @@
 // `stale-marker`, and those messages pass through here like any other. That is
 // the whole of the file content that can reach a transcript by this route.
 
+import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 
@@ -38,6 +43,48 @@ import { isEntryPoint } from "./lib/entry.mjs";
 
 const EVENTS = new Set(["after-edit", "stop"]);
 const MAX_REPORTED = 20;
+const SEEN_FILE = path.join(".docbound", "cache", "reported.json");
+// Findings this session already surfaced, so a long edit sequence does not keep
+// restating them. Bounded so a repository with thousands of findings cannot
+// grow the file without limit.
+const MAX_REMEMBERED = 500;
+
+/** A finding's identity for the purpose of "have I already said this". */
+function fingerprint(finding) {
+  return `${finding.check}\u0000${finding.path}\u0000${finding.message}`;
+}
+
+function readSeen(root) {
+  try {
+    const parsed = JSON.parse(fs.readFileSync(path.join(root, SEEN_FILE), "utf8"));
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    // No cache, unreadable, or malformed: report everything. Losing the memory
+    // costs a repeat; trusting a bad file costs a finding nobody ever sees.
+    return new Set();
+  }
+}
+
+function writeSeen(root, keys) {
+  const file = path.join(root, SEEN_FILE);
+  try {
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, JSON.stringify(keys.slice(-MAX_REMEMBERED)));
+  } catch {
+    // A read-only or absent working directory is not a reason to fail an edit.
+  }
+}
+
+/**
+ * The findings not reported yet, and the memory to persist.
+ *
+ * A finding that goes away and comes back is reported again, because the
+ * memory is rebuilt from what is currently open rather than accumulated.
+ */
+export function unreported(seen, errors) {
+  const current = errors.map(fingerprint);
+  return { fresh: errors.filter((f) => !seen.has(fingerprint(f))), current };
+}
 
 export function parseHookArgs(argv) {
   const options = { event: "after-edit", root: null, provider: "unknown" };
@@ -93,16 +140,24 @@ export function runHook(options) {
   const { errors, warnings } = partition(findings);
 
   if (options.event === "after-edit") {
-    if (errors.length === 0) return { code: 0, stdout: "", stderr: "" };
+    const { fresh, current } = unreported(readSeen(root), errors);
+    writeSeen(root, current);
+    if (fresh.length === 0) return { code: 0, stdout: "", stderr: "" };
+    const rest = errors.length - fresh.length;
+    const tail = rest > 0 ? ` (${rest} reported earlier)` : "";
     return {
       code: 0,
       stdout:
-        `docbound: ${errors.length} documentation finding(s) open on this ` +
-        `change.\n${formatFindings(errors)}\n` +
+        `docbound: ${fresh.length} new documentation finding(s) on this ` +
+        `change${tail}.\n${formatFindings(fresh)}\n` +
         "Fix them as you go; the full audit runs before this task can end.\n",
       stderr: "",
     };
   }
+
+  // The stop event reports everything still open, so what the edit hook
+  // already said is no longer worth suppressing: the memory starts over.
+  writeSeen(root, []);
 
   if (errors.length === 0) {
     const tail = warnings.length > 0 ? ` (${warnings.length} warning(s))` : "";

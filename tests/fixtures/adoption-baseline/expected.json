@@ -1,0 +1,8 @@
+{
+  "note": "Nothing has changed since the baseline, so nothing is in scope: not the undocumented source, and not the dead reference in the README that predates adoption.",
+  "git": true,
+  "errors": {},
+  "warnings": {},
+  "waived": {},
+  "exit": 0
+}

@@ -1,0 +1,10 @@
+{
+  "note": "No error on any of them. The one warning is `owner/repo`: a slash between two words is a path in some documents and English in most, so dead-ref says so without blocking.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "dead-ref": 1
+  },
+  "waived": {},
+  "exit": 0
+}

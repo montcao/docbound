@@ -8,6 +8,53 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Added
+
+- `docbound baseline` records the commit a repository adopted docbound at. From
+  then on the change set is everything since it, and the whole-repository doc
+  checks report only on docs that changed since it. Installing docbound into a
+  107-file repository it had never seen reported 97 errors, none of them about
+  anything the person installing it had done; after this command the same
+  repository passes, and the next real edit produces two findings about that
+  edit. `docs/decisions/0019-adoption-baseline.md`.
+- Two HTML comments a document can carry, for the cases no heuristic decides
+  correctly. `docbound-root` names the directory a doc's relative paths are
+  written against, for a doc inside a package. `docbound-ignore`, alone or as a
+  start and end pair, exempts a region from `dead-ref` and `template-residue`,
+  which is how a documented commit format stops reading as an unfilled
+  placeholder. `docs/decisions/0020-doc-local-directives.md`.
+
+### Changed
+
+- `dead-ref` reports two levels. A token carrying an extension or a trailing
+  slash says it is a path and still blocks when it does not resolve. A slash
+  between two bare words is a warning, because a repository placeholder and a
+  real directory have the same shape. A waiver against `dead-ref` dismisses
+  both. `docs/decisions/0023-ambiguous-path-claims-are-warnings.md`.
+- `line-length` enforces the width a repository configures and says nothing when
+  it configures none. The old default of 80 was this project's preference
+  wearing the check's authority, and on a TypeScript repository that had chosen
+  no width it produced 45 findings in one component.
+  `docs/decisions/0021-line-length-needs-a-convention.md`.
+- The edit hook reports each finding once. It ran after every edit and reprinted
+  everything open each time, so a forty-edit session put the same seventeen
+  lines into the transcript forty times. The stop hook still restates
+  everything and still blocks. `docs/decisions/0022-report-each-finding-once.md`.
+
+### Fixed
+
+- A URL route written `/scan` is no longer reported as a missing file.
+  `pathClaim` tested for a bare word before stripping a leading slash, so the
+  route passed the gate that exists to stop exactly that.
+- `mixed-indent` reads through the span scanner, so a string literal is not
+  indentation. A gofmt-clean Go file whose raw string held space-indented JSON
+  was being called mixed.
+- `todo-shape` reads a marker only at the start of a comment body, where every
+  convention puts one, and not when a hyphen follows it. Prose about markers and
+  a comment naming this check were both being reported as shapeless TODOs.
+- An empty change set no longer asks for a worklog entry. Nothing changed, so no
+  task happened, so there is nothing to have logged.
+
 ### Changed
 
 - `docbound summary` makes no claim about what it saved anyone. Every such claim

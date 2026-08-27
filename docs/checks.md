@@ -1,7 +1,9 @@
 # Checks
 
 Twenty-three checks. Errors block; warnings print and do not block, but leaving
-one is a choice made on the record.
+one is a choice made on the record. The level below is the level a check
+reports at, and `dead-ref` is the one check that reports at both: it blocks on a
+reference that says it is a path and warns on one that only might be.
 
 Check IDs are a public interface. Agents write waiver lines against them in
 repositories this project cannot see, so an ID is never renamed and a level is
@@ -28,6 +30,52 @@ Two rules the audit cannot enforce. A waiver states a reason a reviewer would
 accept, and "not relevant" is not one. And a waiver is an exception, not a
 shortcut: the adoption record every repository gets says that waivers in more
 than one entry in five mean the checks are mistuned.
+
+## Scope
+
+Every check reads the change set: the working tree, plus this branch against its
+merge base. The doc checks that read the whole repository rather than the diff
+are `dead-ref`, `template-residue`, `orphan-doc`, `duplicate-block`, and
+`stale-marker`.
+
+A repository adopting docbound on existing history runs `docbound baseline`
+once. That records the current commit, and from then on the change set is
+everything since it and the whole-repository doc checks report only on docs that
+changed since it. Without it, adopting docbound on a branch a hundred files from
+main means owing documentation for a hundred files on the first run
+(`docs/decisions/0019-adoption-baseline.md`).
+
+## What a document can say to a check
+
+Two HTML comments, invisible wherever Markdown is rendered, for the cases no
+heuristic decides correctly (`docs/decisions/0020-doc-local-directives.md`).
+
+An anchor, for a doc whose relative paths are written against a package rather
+than the repository root. `dead-ref` tries it as a third base, after the
+repository root and the doc's own directory.
+
+<!-- docbound-ignore-start -->
+```
+<!-- docbound-root: services/search-api -->
+```
+
+An exemption, for a region a check will read wrongly, such as a documented
+commit format whose `<type>` is not an unfilled placeholder. `dead-ref` and
+`template-residue` read through it. The single-line form exempts the line after
+it; the paired form exempts everything between.
+
+```
+<!-- docbound-ignore -->
+<!-- docbound-ignore-start --> ... <!-- docbound-ignore-end -->
+```
+<!-- docbound-ignore-end -->
+
+Regions do not nest: the first `docbound-ignore-end` closes the region,
+whichever `docbound-ignore-start` opened it.
+
+Neither is honoured by the source-file checks. A marker that turns a check off
+inside code is the shape that ends up sprinkled through a codebase, and none of
+the source checks block.
 
 ## Errors
 
@@ -106,8 +154,20 @@ moved is worse than either. It is also what fires when a rename lands without
 its documentation.
 
 Anything with a scheme, a glob character, or a leading `$`, `-`, `<`, `{`, `@`,
-or `#` is skipped, as is a bare word with no slash and no dot. Paths are
-resolved from the repository root and from the doc's own directory.
+or `#` is skipped, as is a bare word with no slash and no dot. A leading slash
+is stripped before that test, so a URL route written `/scan` is a bare word and
+not a path. Paths are resolved from the repository root, from the doc's own
+directory, and from a `docbound-root` anchor if the doc carries one.
+
+Two levels. A token that says what it is, by carrying a known extension or a
+<!-- docbound-ignore-start -->
+trailing slash, is an error when it does not resolve. A slash between two bare
+words is a warning, because `owner/repo` and `docs/decisions` have the same
+shape and only the filesystem tells them apart. The warning says how to promote
+<!-- docbound-ignore-end -->
+it: write the extension or the trailing slash
+(`docs/decisions/0023-ambiguous-path-claims-are-warnings.md`). A waiver against
+`dead-ref` dismisses both.
 
 ```
 waiver: dead-ref docs/ONBOARDING.md - the paths under vendor/ are created by the
@@ -278,6 +338,11 @@ Only comments are searched, so a marker inside a string literal is not a TODO.
 Test files are **not** exempt: a stale TODO in a test is as misleading as one
 anywhere else.
 
+The marker has to begin the comment body, which is where every convention puts
+it. A marker with words in front of it is prose about markers, and a marker
+followed by a hyphen is an identifier: a comment naming this check is not a
+TODO.
+
 ```
 waiver: todo-shape src/net/retry.go:88 - upstream's own TODO, kept verbatim so
 the next sync is a clean diff.
@@ -308,12 +373,18 @@ symbol glossary for the transform, matching the notation in the cited paper.
 
 ### `line-length`
 
-Changed source respects the line length the repository configures, or 80 when it
-configures none.
+Changed source respects the line length the repository configures. A repository
+that configures none hears nothing.
 
-Convention beats preference. The limit comes from `.editorconfig` first, then
-from a Python project, flake8, or tox config, a Prettier config for the
-JavaScript family, or a rustfmt config for Rust. The exact files and keys are in
+Convention beats preference, and a repository with no formatter config has
+stated no convention. A default would be this project's preference wearing the
+check's authority, which on a TypeScript repository that had never chosen a
+width meant 45 findings in one component
+(`docs/decisions/0021-line-length-needs-a-convention.md`).
+
+The limit comes from `.editorconfig` first, then from a Python project, flake8,
+or tox config, a Prettier config for the JavaScript family, or a rustfmt config
+for Rust. The exact files and keys are in
 `skill/docbound/scripts/lib/checks/line-length.mjs`.
 
 Fires only when at least three lines and more than five percent of the file
@@ -332,6 +403,10 @@ No changed source file indents with both tabs and spaces.
 
 Mixed indentation renders differently in every editor, which turns a diff into
 an argument about whitespace. Test files are **not** exempt.
+
+Read through the span scanner, so a string literal is not indentation: a
+gofmt-clean Go file whose raw string holds space-indented JSON reads as tab and
+space indentation together until the string is masked. A language the scanner has no entry for falls back to reading raw lines.
 
 ```
 waiver: mixed-indent Makefile.d/build.sh - the here-doc it emits is a makefile

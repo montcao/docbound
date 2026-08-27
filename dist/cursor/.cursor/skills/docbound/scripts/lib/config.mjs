@@ -8,7 +8,10 @@ import fs from "node:fs";
 import path from "node:path";
 
 export const DEFAULT_CONFIG = {
-  audit: { exclude: [] },
+  // `baseline` is the commit an existing repository adopted docbound at.
+  // Everything before it is somebody else's work and is out of scope until
+  // touched. `docbound baseline` writes it.
+  audit: { exclude: [], baseline: null },
   hook: { enabled: true, fast: true, blockOnStop: true },
 };
 

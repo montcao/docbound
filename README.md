@@ -224,6 +224,26 @@ Check what happened:
 npx docbound doctor
 ```
 
+## If your repository already has history
+
+Run this once, right after installing:
+
+```
+npx docbound baseline
+```
+
+It records the commit you adopted at. From then on the audit asks about what
+changed since, and the hundred files somebody wrote last year are not your
+first run's problem.
+
+Without it, docbound compares your branch against `main` and asks for
+documentation on everything that differs, which on a real branch is most of the
+repository. Measured on a 107-file project: 97 errors before this command, and a
+passing audit after it, with the next real edit producing exactly two findings
+about that edit (`docs/decisions/0019-adoption-baseline.md`).
+
+A brand new repository does not need it. There is no history to hold apart.
+
 ## Turning it down, or off
 
 Adopt this in the order that suits you. All four of these are supported

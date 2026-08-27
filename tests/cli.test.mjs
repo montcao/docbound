@@ -275,6 +275,44 @@ describe("docbound link", () => {
   });
 });
 
+describe("docbound baseline", () => {
+  test("records HEAD and leaves every other config key alone", () => {
+    const repo = project();
+    const configFile = path.join(repo, ".docbound", "config.json");
+    fs.mkdirSync(path.dirname(configFile), { recursive: true });
+    fs.writeFileSync(
+      configFile,
+      JSON.stringify({ audit: { exclude: ["vendor/**"] }, hook: { fast: false } }, null, 2),
+    );
+
+    const result = cli(repo, ["baseline"]);
+    assert.equal(result.status, 0, result.stderr);
+
+    const head = spawnSync("git", ["-C", repo, "rev-parse", "HEAD"], {
+      encoding: "utf8",
+    }).stdout.trim();
+    const config = readJson(configFile);
+    assert.equal(config.audit.baseline, head);
+    assert.deepEqual(config.audit.exclude, ["vendor/**"]);
+    assert.equal(config.hook.fast, false);
+  });
+
+  test("refuses a ref that is not a commit and writes nothing", () => {
+    const repo = project();
+    const result = cli(repo, ["baseline", "not-a-ref"]);
+    assert.notEqual(result.status, 0);
+    assert.equal(fs.existsSync(path.join(repo, ".docbound", "config.json")), false);
+  });
+
+  test("a second run says the baseline is already there", () => {
+    const repo = project();
+    cli(repo, ["baseline"]);
+    const again = cli(repo, ["baseline"]);
+    assert.equal(again.status, 0, again.stderr);
+    assert.match(again.stdout, /already/);
+  });
+});
+
 describe("docbound audit, scaffold, adr, doctor", () => {
   test("audit passes through and reports the repository's state", () => {
     const repo = project();

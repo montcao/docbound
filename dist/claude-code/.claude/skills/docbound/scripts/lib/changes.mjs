@@ -1,22 +1,32 @@
 // Change detection. Every check that says "in this diff" reads what this
 // produces, so its three cases are the audit's most load-bearing behaviour:
 //
+//   baseline set                    everything since the baseline commit
 //   feature branch with no commits  the working tree alone is the change set
 //   base branch with a clean tree   the last commit is the change set
 //   no git                          the whole tree, with coverage not evaluated
 //
-// The first two were wrong in an early version of the reference implementation
+// The middle two were wrong in an early version of the reference implementation
 // and were fixed there; `tests/fixtures/undocumented-change` and
 // `tests/fixtures/direct-to-main` pin them.
+//
+// The baseline exists because the merge-base rule is right for a change and
+// wrong for an adoption. A repository installing docbound on a branch that is
+// 128 files from main owes documentation for all 128 on the first run, and
+// cutting a fresh branch does not help because the merge base does not move.
+// `docbound baseline` writes the current commit into `.docbound/config.json`
+// and everything before it is somebody else's work
+// (`docs/decisions/0019-adoption-baseline.md`).
 
 import fs from "node:fs";
 import path from "node:path";
+import process from "node:process";
 import { excluded, isSource, parentOf } from "./paths.mjs";
 import { run } from "./git.mjs";
 
 const BASE_CANDIDATES = ["origin/main", "main", "origin/master", "master"];
 
-export function detectChanges(root, base, extraExcludes = []) {
+export function detectChanges(root, base, extraExcludes = [], baseline = null) {
   if (run(["rev-parse", "--is-inside-work-tree"], root) === null) {
     return {
       changed: allFiles(root, extraExcludes),
@@ -24,6 +34,7 @@ export function detectChanges(root, base, extraExcludes = []) {
       git: false,
       added: new Set(),
       ref: null,
+      baseline: null,
     };
   }
 
@@ -45,6 +56,34 @@ export function detectChanges(root, base, extraExcludes = []) {
     changed.add(file);
     if (["A", "??", "AM"].includes(code.trim())) added.add(file);
     if (!excluded(file, extraExcludes)) dirty = true;
+  }
+
+  // A baseline that no longer resolves is reported and ignored rather than
+  // failing the audit: it usually means a rebase or a shallow clone, and an
+  // audit that refuses to run is worse than one that widens its scope.
+  const resolvedBaseline = baseline ? resolveRef(root, baseline) : null;
+  if (baseline && resolvedBaseline === null) {
+    process.stderr.write(
+      `docbound: baseline ${baseline} is not a commit in this repository; ` +
+        "ignoring it and using the merge base\n",
+    );
+  }
+
+  if (resolvedBaseline !== null) {
+    const diff = run(
+      ["diff", "--name-status", `${resolvedBaseline}..HEAD`],
+      root,
+    );
+    collect(diff, changed, added);
+    const keptSince = filterExcluded(changed, extraExcludes);
+    return {
+      changed: keptSince,
+      addedDirs: newDirs(root, keptSince, extraExcludes),
+      git: true,
+      added: filterExcluded(added, extraExcludes),
+      ref: resolvedBaseline,
+      baseline: resolvedBaseline,
+    };
   }
 
   const candidates = base ? [base] : BASE_CANDIDATES;
@@ -72,13 +111,7 @@ export function detectChanges(root, base, extraExcludes = []) {
       ref = mb;
     }
 
-    for (const line of (diff ?? "").split("\n")) {
-      const parts = line.split("\t");
-      if (parts.length < 2) continue;
-      const file = parts[parts.length - 1];
-      changed.add(file);
-      if (parts[0].startsWith("A")) added.add(file);
-    }
+    collect(diff, changed, added);
     break;
   }
 
@@ -91,7 +124,25 @@ export function detectChanges(root, base, extraExcludes = []) {
     git: true,
     added: keptAdded,
     ref,
+    baseline: null,
   };
+}
+
+/** Names from `--name-status` output into the two sets, in place. */
+function collect(diff, changed, added) {
+  for (const line of (diff ?? "").split("\n")) {
+    const parts = line.split("\t");
+    if (parts.length < 2) continue;
+    const file = parts[parts.length - 1];
+    changed.add(file);
+    if (parts[0].startsWith("A")) added.add(file);
+  }
+}
+
+/** The commit a ref names, or null when the ref is not one. */
+function resolveRef(root, ref) {
+  const resolved = run(["rev-parse", "--verify", "--quiet", `${ref}^{commit}`], root);
+  return resolved === null || resolved.trim() === "" ? null : resolved.trim();
 }
 
 function filterExcluded(paths, extraExcludes) {

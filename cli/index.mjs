@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// npx docbound — install, update, link, audit, scaffold, adr, doctor.
+// npx docbound — install, update, link, audit, baseline, scaffold, adr, doctor.
 //
 // Zero runtime dependencies, Node 20 or later. Every interactive prompt has a
 // flag equivalent, so nothing here needs a terminal to run in CI.
@@ -24,6 +24,7 @@ import {
   mergeHookManifest,
   readLock,
   recordHookChoice,
+  setBaseline,
 } from "./install.mjs";
 import { ignoreEpipe, isEntryPoint } from "../skill/docbound/scripts/lib/entry.mjs";
 
@@ -44,6 +45,8 @@ usage: docbound <command> [options]
   start      open a worklog entry, before the first edit
   close      close a tracked open item by its slug
   scaffold   create the initial docs structure
+  baseline   record the commit this repository adopted docbound at, so that
+             work older than today is out of scope until it is touched
   adr        print the next decision-record number and create the file
   doctor     report what is installed, whether hooks are wired, and whether
              this repository passes its own audit
@@ -258,6 +261,51 @@ function commandAudit(options) {
   return passThrough(path.join(SKILL_SCRIPTS, "audit.mjs"), options.rest);
 }
 
+/**
+ * Write the current commit into `audit.baseline`.
+ *
+ * The adoption step for a repository that already has history. Run once, after
+ * install: from then on the audit asks about what changed since, and the
+ * hundred files somebody else wrote last year are somebody else's.
+ */
+function commandBaseline(options) {
+  const root = gitRoot();
+  if (root === null) {
+    return fail("not a git repository, so there is no commit to baseline at");
+  }
+  const requested = options.rest.find((arg) => !arg.startsWith("-")) ?? "HEAD";
+  const resolved = gitOutput(root, ["rev-parse", "--verify", "--quiet", `${requested}^{commit}`]);
+  if (resolved === null) return fail(`${requested} is not a commit in this repository`);
+
+  const { file, commit, previous } = setBaseline(root, resolved);
+  const short = commit.slice(0, 12);
+  if (previous === commit) {
+    process.stdout.write(`baseline already ${short} in ${path.relative(root, file)}\n`);
+    return 0;
+  }
+  process.stdout.write(
+    `baseline ${previous ? `moved to ${short}` : `set to ${short}`} in ` +
+      `${path.relative(root, file)}\n` +
+      "Work before it is out of scope until a change touches it. " +
+      "`docbound audit` now reports on what you do next.\n",
+  );
+  return 0;
+}
+
+function gitRoot() {
+  const result = spawnSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" });
+  if (result.status !== 0) return null;
+  const top = (result.stdout ?? "").trim();
+  return top === "" ? null : top;
+}
+
+function gitOutput(root, args) {
+  const result = spawnSync("git", ["-C", root, ...args], { encoding: "utf8" });
+  if (result.status !== 0) return null;
+  const out = (result.stdout ?? "").trim();
+  return out === "" ? null : out;
+}
+
 function commandScaffold(options) {
   return passThrough(path.join(SKILL_SCRIPTS, "scaffold.mjs"), options.rest);
 }
@@ -361,6 +409,8 @@ export async function main(argv) {
       return commandAudit(options);
     case "scaffold":
       return commandScaffold(options);
+    case "baseline":
+      return commandBaseline(options);
     case "summary":
       return commandSummary(options);
     case "start":

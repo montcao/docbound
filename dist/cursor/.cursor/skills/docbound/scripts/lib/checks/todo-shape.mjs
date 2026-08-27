@@ -7,7 +7,13 @@ import { comments } from "../scan.mjs";
 export const id = "todo-shape";
 export const level = "warn";
 
-const TODO = /\b(TODO|FIXME|XXX|HACK)\b[:\s(]*(.*)/i;
+// Anchored at the start of the comment body, because that is where every
+// convention puts a marker: `// TODO: ...`, `# FIXME(bob): ...`. A marker with
+// words in front of it is prose about markers, which is what the header of this
+// very file is. Not followed by a hyphen either, so a comment naming the
+// `todo-shape` check is not read as one: every check ID is hyphenated and
+// several begin with a marker word.
+const TODO = /^[\s*/#-]*(TODO|FIXME|XXX|HACK)\b(?!-)[:\s(]*(.*)/i;
 const OWNER = /(@\w+|#\d+|\b[A-Z]{2,}-\d+\b|\([A-Za-z][\w .-]*\)|https?:\/\/)/;
 const MIN_WORDS = 6;
 

@@ -95,6 +95,13 @@ to a shared context → waivers from the worklog entry demote some of them →
 `skill/docbound/scripts/lib/report.mjs` prints text or JSON and the exit code
 says whether the task is done.
 
+The change set is the working tree unioned with this branch against its merge
+base, unless `audit.baseline` in `.docbound/config.json` names a commit, in
+which case it is everything since that commit and the whole-repository doc
+checks narrow with it. `docbound baseline` writes that key, which makes adopting
+docbound on existing history a passing first run rather than a wall
+(`docs/decisions/0019-adoption-baseline.md`).
+
 The audit is entered from four places, all of which reach the same function:
 the agent running `skill/docbound/scripts/audit.mjs` directly, the hook on an
 edit or a stop, `npx docbound audit`, and CI.
@@ -107,6 +114,7 @@ edit or a stop, `npx docbound audit`, and CI.
 | Audit JSON: `root`, `git`, `changed`, `errors`, `warnings`, `waived` | `skill/docbound/scripts/lib/report.mjs` | The hook, the CLI, the test suite | Architecture Decision Record |
 | Audit exit codes: 0 pass, 1 errors, 2 usage | `skill/docbound/scripts/audit.mjs` | CI, pre-commit hooks, the CLI | Architecture Decision Record |
 | The check module contract, `{ id, level, run(ctx) }` | `skill/docbound/scripts/audit.mjs` | Every check module | Architecture Decision Record |
+| `.docbound/config.json`: `audit.exclude`, `audit.baseline`, `hook.*` | `skill/docbound/scripts/lib/config.mjs` | Every repository that has installed docbound | Architecture Decision Record |
 | Provider placement and hook manifests | `cli/providers.mjs` | The build and the CLI | Evidence from the harness itself, recorded in the entry |
 | The npm `files` whitelist | `package.json` | Everyone who runs `npx docbound` | A passing `tests/package.test.mjs` |
 | Fixture contract: a setup script and an expected-findings file | `tests/harness.mjs` | Every fixture | Nothing |
@@ -143,6 +151,7 @@ table of the module README that owns them. `cli/README.md` and
 | Fixtures assert exact check-ID counts | Assert a subset | A check firing where it should not is the failure mode a subset assertion cannot see | Counts start changing for reasons unrelated to behaviour |
 | Tests run the executables as subprocesses | Import and call | Exit codes and argument parsing are the interface CI depends on, and importing skips both | The subprocess cost dominates the suite's runtime |
 | Provider hooks are not installed in this repository | Wire a settings file here | A contributor's session should not be gated by tooling they did not ask for; CI is this repository's gate | Contributors start landing changes that CI catches and a hook would have caught first |
+| `baseline` lives in the CLI, not the skill | A step in the loop | Adopting docbound happens once, at install time, and the loop is what happens every task | Repositories start moving the baseline during ordinary work |
 
 ## Known gaps
 

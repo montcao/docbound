@@ -20,6 +20,9 @@ export const DATA_EXT = new Set([
   ".lock", ".html", ".css", ".xml",
 ]);
 const SKIP_PREFIX = ["$", "-", "--", "<", "{", "@", "#"];
+// One capture, no nesting, no alternation: linear over any input, which matters
+// because every doc in the repository passes through it on every edit.
+const ANCHOR = /<!--\s*docbound-root:\s*([^\s>]+)\s*-->/;
 const SKIP_CHARS = "*?<>{}()=";
 
 /**
@@ -41,12 +44,16 @@ export function pathClaim(ref, { trailingSlashIsPath = false } = {}) {
 
   const named = trailingSlashIsPath && ref.endsWith("/");
   let target = ref.split(":")[0].replace(/\/+$/, "");
-  // A bare word is a symbol or a command, not a path.
-  if (!named && !target.includes("/") && !target.includes(".")) return null;
+  // Normalising before the bare-word test, not after. A URL route written
+  // `/scan` carries a slash only because of its leading one, so testing for a
+  // bare word first let it through the gate that exists to stop it, and the
+  // route was reported as a missing file.
   if (target.startsWith("./") || target.startsWith("/")) {
     target = target.replace(/^[./]+/, "");
   }
   if (!target || target === "." || target === "..") return null;
+  // A bare word is a symbol or a command, not a path.
+  if (!named && !target.includes("/") && !target.includes(".")) return null;
 
   const suffix = suffixOf(target);
   const known = SOURCE_EXT.has(suffix) || DATA_EXT.has(suffix);
@@ -71,10 +78,32 @@ export function isPathShaped(token) {
   return SOURCE_EXT.has(suffix) || DATA_EXT.has(suffix);
 }
 
-/** True when `target` resolves from the repository root or from the doc's own directory. */
-export function resolves(root, doc, target) {
+/**
+ * The directory a doc writes its relative paths against, or null for the root.
+ *
+ * A doc describing one package of a monorepo writes paths the way that
+ * package's own tooling does: `internal/httpapi`, not
+ * `services/search-api/internal/router`. Both are correct, and nothing in
+ * the text says which. This lets the doc say it, once, at the top:
+ *
+ *     <!-- docbound-root: services/search-api -->
+ *
+ * An HTML comment because it is invisible wherever Markdown is rendered.
+ */
+export function docRoot(text) {
+  const match = ANCHOR.exec(text);
+  if (!match) return null;
+  const anchor = match[1].replace(/^[./]+/, "").replace(/\/+$/, "");
+  return anchor === "" ? null : anchor;
+}
+
+/**
+ * True when `target` resolves from the repository root, the doc's own
+ * directory, or the doc's declared anchor.
+ */
+export function resolves(root, doc, target, anchor = null) {
   const local = parentOf(doc) === "." ? "" : parentOf(doc);
-  return [path.join(root, target), path.join(root, local, target)].some((c) =>
-    fs.existsSync(c),
-  );
+  const bases = ["", local];
+  if (anchor !== null) bases.push(anchor);
+  return bases.some((base) => fs.existsSync(path.join(root, base, target)));
 }

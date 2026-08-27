@@ -3,13 +3,20 @@
 //
 // Usage:
 //   node audit.mjs [--root .] [--base <ref>] [--mode author|subagent]
-//                  [--since <ref>] [--session-days 2] [--fast]
-//                  [--next-adr] [--json]
+//                  [--since <ref>] [--baseline <ref>] [--session-days 2]
+//                  [--fast] [--next-adr] [--json]
 //
 // Change detection: working tree and index against HEAD, unioned with HEAD
 // against the merge base of --base (default: origin/main, main, or master,
 // whichever exists). With no git repository every file is treated as changed
 // and coverage is not evaluated. See `lib/changes.mjs`.
+//
+// A baseline, from `--baseline` or `audit.baseline` in `.docbound/config.json`,
+// replaces the merge base: the change set is everything since that commit, and
+// the whole-repository doc checks report only on docs that changed since it.
+// That is what makes adopting docbound on an existing repository a first run
+// with nothing in it rather than a wall
+// (`docs/decisions/0019-adoption-baseline.md`).
 //
 // Waivers: a line in the current worklog entry of the form
 //     waiver: <check-id> [target] - <reason>
@@ -69,7 +76,8 @@ export const SUBAGENT_CHECKS = [
 ];
 
 const USAGE = `usage: audit.mjs [--root DIR] [--base REF] [--mode author|subagent]
-                 [--since REF] [--session-days N] [--fast] [--next-adr] [--json]`;
+                 [--since REF] [--baseline REF] [--session-days N] [--fast]
+                 [--next-adr] [--json]`;
 
 export function parseArgs(argv) {
   const options = {
@@ -77,6 +85,7 @@ export function parseArgs(argv) {
     base: null,
     mode: "author",
     since: null,
+    baseline: null,
     sessionDays: 2,
     nextAdr: false,
     json: false,
@@ -88,6 +97,7 @@ export function parseArgs(argv) {
     "--base": "base",
     "--mode": "mode",
     "--since": "since",
+    "--baseline": "baseline",
     "--session-days": "sessionDays",
   };
 
@@ -147,7 +157,8 @@ export function audit(options) {
   const config = loadConfig(root);
   const excludes = config.audit?.exclude ?? [];
 
-  const detected = detectChanges(root, options.base, excludes);
+  const baseline = options.baseline ?? config.audit?.baseline ?? null;
+  const detected = detectChanges(root, options.base, excludes, baseline);
   const worklog = parseWorklog(root, {
     git: detected.git,
     changed: detected.changed,
@@ -156,6 +167,7 @@ export function audit(options) {
   });
 
   let docCache = null;
+  let scopedDocCache = null;
   const beforeCache = new Map();
   const ctx = {
     root,
@@ -176,7 +188,26 @@ export function audit(options) {
     add(check, level, target, message) {
       this.findings.push({ check, level, path: target, message });
     },
+    baseline: detected.baseline,
+    /**
+     * The docs this change is answerable for.
+     *
+     * Every doc in the repository, until a baseline is set. With one, only the
+     * docs that changed since it: a repository adopting docbound inherits the
+     * documentation it already had, and a check that reports every existing
+     * flaw on the first run reports nothing anyone can act on.
+     */
     docs() {
+      if (scopedDocCache !== null) return scopedDocCache;
+      const all = this.allDocs();
+      scopedDocCache =
+        detected.baseline === null
+          ? all
+          : all.filter((doc) => detected.changed.has(doc));
+      return scopedDocCache;
+    },
+    /** Every doc, whatever the baseline. A corpus, not a set to report on. */
+    allDocs() {
       if (docCache === null) docCache = allDocs(root, excludes);
       return docCache;
     },

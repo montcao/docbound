@@ -172,6 +172,33 @@ export function ensureConfig(root, providers) {
   return file;
 }
 
+/**
+ * Record the commit this repository adopted docbound at.
+ *
+ * Everything before it is work that predates the discipline, and the audit
+ * leaves it alone until somebody touches it. Without this, installing docbound
+ * on a branch that is a hundred files from main means owing documentation for
+ * a hundred files on the first run, which is not a finding anyone can act on
+ * (`docs/decisions/0019-adoption-baseline.md`).
+ *
+ * Returns `{ file, commit, previous }`. `previous` is what the baseline was,
+ * so a caller can say whether it moved.
+ */
+export function setBaseline(root, commit) {
+  const file = path.join(root, ".docbound", "config.json");
+  const existing = readExistingJson(file, ".docbound/config.json");
+  const config = Object.keys(existing).length > 0
+    ? existing
+    : structuredClone(DEFAULT_CONFIG);
+  config.audit = config.audit ?? {};
+  const previous = config.audit.baseline ?? null;
+  config.audit.baseline = commit;
+
+  fs.mkdirSync(path.dirname(file), { recursive: true });
+  fs.writeFileSync(file, `${JSON.stringify(config, null, 2)}\n`);
+  return { file, commit, previous };
+}
+
 /** Point the provider's payload path at a checkout instead of copying it. */
 export function linkDist(source, root, provider) {
   const skill = path.join(source, "skill", "docbound");

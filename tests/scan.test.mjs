@@ -286,6 +286,35 @@ describe("input that must not hang a hook", () => {
   });
 });
 
+describe("what the checks read through the scanner", () => {
+  // The finding that sent the scanner into this check: a gofmt-clean Go file
+  // whose raw string holds space-indented JSON was called mixed-indent.
+  test("space-indented JSON inside a Go raw string is not indentation", () => {
+    const go = [
+      "package main",
+      "",
+      "const Schema = `{",
+      '  "verdict": "...",',
+      '  "evidence": []',
+      "}`",
+      "",
+      "func Route() string {",
+      '\treturn "/scan"',
+      "}",
+      "",
+    ].join("\n");
+
+    const code = maskNonCode(go, ".go");
+    const indents = code
+      .split("\n")
+      .filter((line) => line.trim() !== "")
+      .map((line) => (line.startsWith("\t") ? "tab" : line.startsWith("  ") ? "space" : "none"));
+
+    assert.equal(indents.includes("space"), false);
+    assert.equal(indents.includes("tab"), true);
+  });
+});
+
 describe("the language table", () => {
   test("every entry has the shape the scanner reads", () => {
     for (const [suffix, spec] of Object.entries(LANGUAGES)) {

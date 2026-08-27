@@ -5,6 +5,155 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Fix four false positives, add an adoption baseline, and test against real repositories
+
+Agent: claude · Branch: main
+
+### Intent
+
+docbound was installed into a 107-file repository it had never seen, a
+TypeScript and Go monorepo, and audited on a first run. It reported 97 errors,
+and four of the classes behind them were the check being wrong rather than the
+repository being undocumented.
+
+<!-- docbound-ignore-start -->
+`dead-ref` calls `pathClaim`, the loose reader, where `isPathShaped`, the strict
+one, sits beside it in the same file with a comment describing this exact
+failure. So a URL route written `/scan` and a prose placeholder written
+`owner/repo` were both reported as missing files. `pathClaim` also tests for a
+bare word before it strips a leading slash, so `/scan` passes a gate that exists
+to stop it. A doc inside a Go module wrote paths relative to that module and had
+nowhere to say so. `template-residue` read the `<type>` in a documented
+Conventional Commits format as an unfilled placeholder. Every one of these is
+error level, so every one blocks.
+<!-- docbound-ignore-end -->
+
+Two warnings were wrong for one shared reason: `mixed-indent` and `line-length`
+read raw lines, so three space-indented lines inside a Go raw string made a
+gofmt-clean file mixed, and a column count included text inside string literals.
+The scanner that answers this exactly was built for it and never wired in.
+
+Underneath all of it is one adoption problem that is larger than any single
+check. The change set is the merge-base diff, so a repository adopting docbound
+on a branch that is 128 files from main owes documentation for all 128 on the
+first run. Cutting a fresh branch does not help, because the merge base does not
+move. There is no way to say "start counting here".
+
+The reason none of this was caught is that all 22 fixtures are shell scripts
+that build small synthetic repositories, written by the same hand as the checks,
+so each one contains the constructs its check expects. The suite measures
+internal consistency. Nothing in it has ever touched code this project did not
+write.
+
+### Expected to touch
+
+- `skill/docbound/scripts/lib/refs.mjs` — order of the bare-word test, and an anchor for module-relative paths
+- `skill/docbound/scripts/lib/checks/dead-ref.mjs` — the strict reader
+- `skill/docbound/scripts/lib/checks/template-residue.mjs` — a documented format is not a placeholder
+- `skill/docbound/scripts/lib/checks/mixed-indent.mjs` and
+  `skill/docbound/scripts/lib/checks/line-length.mjs` — through the scanner
+- `skill/docbound/scripts/lib/changes.mjs`, `cli/index.mjs` — the baseline
+- `skill/docbound/scripts/hook.mjs` — stop repeating findings that did not change
+- `tests/` — a real-source corpus, and fixtures for each fix
+
+### Unknowns going in
+
+Whether a corpus of real files can be committed here without a dependency and
+without vendoring somebody else's licence. Whether the baseline belongs in
+config, where it is shared and reviewable, or in a git ref, where it is
+per-clone. Whether `line-length` through the scanner still has anything to say
+about a JSX file, or whether the default of 80 is the real problem and the
+scanner only hides it.
+
+### Outcome
+
+Nine fixes, five decision records, and the first fixture in this repository
+whose contents came from code nobody here wrote.
+
+**The adoption problem, which was larger than any check.** `docbound baseline`
+(`cli/index.mjs`, `cli/install.mjs`) writes the current commit into
+`audit.baseline`. `detectChanges` uses it in place of the merge base, and
+`ctx.docs()` narrows to docs changed since it while the new `ctx.allDocs()`
+keeps the full corpus for `orphan-doc` and `duplicate-block`, which cannot
+answer without one. An empty change set now also silences `worklog-entry`
+(`skill/docbound/scripts/lib/worklog.mjs`): nothing changed, so no task
+happened. Verified end to end on the 107-file repository that started this:
+install, baseline, PASS, then one real edit producing exactly two findings about
+that edit. `docs/decisions/0019-adoption-baseline.md`.
+
+**Four blocking false positives.** `pathClaim` in
+`skill/docbound/scripts/lib/refs.mjs` normalises a leading slash before testing
+for a bare word, so a URL route is no longer a missing file. `dead-ref` reports
+two levels, blocking on a token that carries an extension or a trailing slash
+and warning on a slash between two bare words. `resolves` takes a third base
+from a `docbound-root` anchor, so a doc inside a package can write paths the way
+that package does. `stripIgnored` in `skill/docbound/scripts/lib/text.mjs` gives
+a document a way to exempt a region, which is how a documented commit format
+stops reading as an unfilled placeholder. Records 0020 and 0023.
+
+**Two checks that were guessing.** `mixed-indent` reads through the span
+scanner, so the space-indented JSON inside a Go raw string is not indentation;
+this is the fourth check to adopt the scanner and closes half of
+`[scanner-adoption]`. `line-length` enforces the width a repository configures
+and says nothing when it configures none, since a default was this project's
+preference wearing the check's authority. `docs/decisions/0021-line-length-needs-a-convention.md`.
+
+**The hook's cost.** It ran after every edit and reprinted everything open each
+time: 0.92 seconds and the same seventeen findings, forty times in a forty-edit
+session. It now reports each finding once, remembering fingerprints under
+`.docbound/`, and the stop event clears the memory and restates everything.
+`docs/decisions/0022-report-each-finding-once.md`.
+
+**Two more false positives, both found by this repository's own audit while
+writing the above.** A comment naming `todo-shape` was read as a TODO, because
+every check ID beginning with a marker word matched. Then, with that fixed, the
+check reported its own header, which is a sentence about what a TODO is.
+`todo-shape` now reads a marker only at the start of a comment body, where every
+convention puts one, and not when a hyphen follows it. Both were caught by
+running the audit on a change that touched the file, which is the whole argument
+for this repository running its own tool.
+
+**Tests.** 154 to 166. `tests/fixtures/adoption-baseline` and
+`tests/fixtures/real-world-shapes` are new, the two `code-style` fixtures were
+repointed at the two branches `line-length` now has, and `tests/hook.test.mjs`
+is a new file because the script that can stop a session had no test of its own.
+`docs/decisions/0024-a-fixture-of-real-world-shapes.md` records why the corpus is
+distilled rather than vendored, and says plainly what that does not cover.
+
+**Docs.** `README.md` gained the adoption step. `docs/checks.md` gained a Scope
+section, the directive syntax, and rewrites of the `dead-ref`, `line-length`,
+and `mixed-indent` entries. `docs/ARCHITECTURE.md` gained the config file as a
+named boundary and one row in its decisions table. `docs/DEVELOP.md` documents
+`allDocs()`, the two-level rule, and the instruction to point a new check at an
+unfamiliar repository. `cli/README.md` says why `baseline` is not a
+pass-through. `tests/README.md` records that the suite had met unfamiliar code
+exactly once. `skill/docbound/SKILL.md` gained an adoption section and two
+rewritten table rows, at 227 lines of its 300.
+
+Nothing was deleted. No waivers.
+
+### Still open
+
+- [corpus-vendoring] `tests/fixtures/real-world-shapes/` holds shapes distilled
+  from one repository rather than real vendored code, so it catches the four
+  constructs somebody was already bitten by and not the fifth. The way to find
+  more is to install docbound into an unfamiliar repository and read the first
+  run, which costs about five minutes and has no schedule attached to it.
+- [baseline-drift] Nothing stops a repository moving its baseline forward to
+  dodge findings. It is a tracked file, so the move shows up in review, and that
+  is the whole of the defence.
+- [directive-density] Decision records about checks quote the tokens they are
+  about, so this change added `docbound-ignore` regions to six docs in a
+  repository that had none. That is denser than
+  `docs/decisions/0020-doc-local-directives.md` says the markers should be, and
+  whether it is the category or the mechanism is not yet clear.
+- [hook-memory-lifetime] A finding reported once can scroll out of an agent's
+  context and not be mentioned again until the stop hook blocks. If that happens
+  in practice the memory should expire on a timer rather than lasting a session.
+- [nested-directives] `docbound-ignore` regions do not nest; the first end
+  marker closes the region. This was found by nesting two of them by accident
+  while writing the records above.
+
 ## 2026-08-27 - Remove every self-serving metric, and say when there is nothing to summarise
 
 Agent: claude · Branch: main
