@@ -1,6 +1,6 @@
 # Checks
 
-Twenty-three checks. Errors block; warnings print and do not block, but leaving
+Twenty-four checks. Errors block; warnings print and do not block, but leaving
 one is a choice made on the record. The level below is the level a check
 reports at, and `dead-ref` is the one check that reports at both: it blocks on a
 reference that says it is a path and warns on one that only might be.
@@ -162,6 +162,13 @@ or `#` is skipped, as is a bare word with no slash and no dot. A leading slash
 is stripped before that test, so a URL route written `/scan` is a bare word and
 not a path. Paths are resolved from the repository root, from the doc's own
 directory, and from a `docbound-root` anchor if the doc carries one.
+
+A first segment carrying a dot that is not its first character is a host rather
+than a directory, so `gcr.io/distroless/base-debian12` and a URL written without
+its scheme are skipped, while `.github/workflows/ci.yml` is not. A bare file
+name with no directory in it is satisfied by a file of that name anywhere in the
+tree, because prose naming `package.json` means a kind of file rather than the
+one at the root.
 
 Two levels. A token that says what it is, by carrying a known extension or a
 <!-- docbound-ignore-start -->
@@ -415,6 +422,30 @@ space indentation together until the string is masked. A language the scanner ha
 ```
 waiver: mixed-indent Makefile.d/build.sh - the here-doc it emits is a makefile
 recipe, which must be tab-indented inside a space-indented script.
+```
+
+### `open-item-form`
+
+A slug is closed by writing the bullet, and an item already open is carried
+forward rather than declared again.
+
+Everything the slug ledger does rests on exact syntax, and getting it wrong
+produces no signal. Writing `Closes [retry-jitter].` in an Outcome section reads
+like closing the item and does not; the closing form is
+`- [retry-jitter] closed: <what changed>` as a bullet under `Still open`. And an
+item that is already open carries forward on its own, so restating it in a new
+entry is the duplication the slug exists to remove.
+
+Reads the newest entry only, since that is the one being written. Reports a line
+naming a slug beside a closing word that is not a canonical bullet, and a fresh
+declaration of a slug that was open before this entry. An entry that does write
+the closing bullet may name that slug in prose as much as it likes, so
+"Closing `[retry-jitter]`." is an ordinary way to open an Intent. Both messages carry the
+form to write instead. `docs/decisions/0025-the-slug-ledger-checks-itself.md`.
+
+```
+waiver: open-item-form docs/WORKLOG.md - the entry is about the tracking scheme
+itself and quotes slugs as examples rather than as items.
 ```
 
 ### `open-item-typo`

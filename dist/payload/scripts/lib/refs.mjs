@@ -20,6 +20,11 @@ export const DATA_EXT = new Set([
   ".lock", ".html", ".css", ".xml",
 ]);
 const SKIP_PREFIX = ["$", "-", "--", "<", "{", "@", "#"];
+// A first segment carrying a dot that is not its first character is a host, not
+// a directory: `gcr.io/distroless/python3-debian12` is an image reference and
+// `example.com/path` is a URL missing its scheme. `.github/workflows` keeps its
+// leading dot and is a directory, which is why the position matters.
+const HOSTLIKE = /^[^/.][^/]*\.[^/]+\//;
 // One capture, no nesting, no alternation: linear over any input, which matters
 // because every doc in the repository passes through it on every edit.
 const ANCHOR = /<!--\s*docbound-root:\s*([^\s>]+)\s*-->/;
@@ -39,6 +44,7 @@ const SKIP_CHARS = "*?<>{}()=";
  */
 export function pathClaim(ref, { trailingSlashIsPath = false } = {}) {
   if (ref.includes("://")) return null;
+  if (HOSTLIKE.test(ref)) return null;
   if (SKIP_PREFIX.some((prefix) => ref.startsWith(prefix))) return null;
   if ([...SKIP_CHARS].some((ch) => ref.includes(ch))) return null;
 
@@ -100,10 +106,59 @@ export function docRoot(text) {
 /**
  * True when `target` resolves from the repository root, the doc's own
  * directory, or the doc's declared anchor.
+ *
+ * A bare file name with no directory in it is also satisfied by a file of that
+ * name anywhere in the tree. Prose naming `package.json` or `requirements.txt`
+ * means a kind of file rather than the one at the root, and resolving only at
+ * the root reported four of them as missing in a repository holding four.
  */
 export function resolves(root, doc, target, anchor = null) {
   const local = parentOf(doc) === "." ? "" : parentOf(doc);
   const bases = ["", local];
   if (anchor !== null) bases.push(anchor);
-  return bases.some((base) => fs.existsSync(path.join(root, base, target)));
+  if (bases.some((base) => fs.existsSync(path.join(root, base, target)))) {
+    return true;
+  }
+  return !target.includes("/") && existsByName(root, target);
 }
+
+// Built once per process. An audit reads every doc, and several name the same
+// file, so walking the tree per reference is the shape that gets slow on a
+// repository large enough to care.
+let nameIndex = null;
+let nameIndexRoot = null;
+
+function existsByName(root, name) {
+  if (nameIndexRoot !== root) {
+    nameIndex = collectNames(root);
+    nameIndexRoot = root;
+  }
+  return nameIndex.has(name);
+}
+
+function collectNames(root) {
+  const names = new Set();
+  const stack = [""];
+  while (stack.length > 0) {
+    const prefix = stack.pop();
+    let entries;
+    try {
+      entries = fs.readdirSync(path.join(root, prefix), { withFileTypes: true });
+    } catch {
+      continue;
+    }
+    for (const entry of entries) {
+      if (SKIP_DIRS.has(entry.name)) continue;
+      if (entry.isSymbolicLink()) continue;
+      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
+      if (entry.isDirectory()) stack.push(rel);
+      else names.add(entry.name);
+    }
+  }
+  return names;
+}
+
+const SKIP_DIRS = new Set([
+  ".git", "node_modules", "vendor", "dist", "build", "target", ".venv",
+  "__pycache__", ".next", ".cache",
+]);

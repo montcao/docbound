@@ -166,6 +166,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `line-length` | warn | Changed source respects the line length the repo configures (`.editorconfig`, `pyproject`, `.prettierrc`, `setup.cfg`). A repo that configures none has stated no convention, and the check says nothing |
 | `mixed-indent` | warn | No changed source file indents with both tabs and spaces |
 | `open-item-typo` | warn | No two `Still open` slugs are within two characters of each other, which is how one item silently becomes two |
+| `open-item-form` | warn | A slug is closed by the bullet form and not by prose, and an item already open is carried forward rather than restated |
 
 Subagent mode (`--mode subagent`) adds:
 

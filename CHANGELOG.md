@@ -10,6 +10,12 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- `open-item-form` (warn): a slug is closed by the bullet form and not by prose,
+  and an item already open is carried forward rather than restated. Writing
+  `Closes [some-slug].` in an Outcome section reads like closing the item and
+  does nothing, which is a wrong ledger with no other symptom. Both were done by
+  hand in one real session before either was noticed.
+  `docs/decisions/0025-the-slug-ledger-checks-itself.md`.
 - `docbound baseline` records the commit a repository adopted docbound at. From
   then on the change set is everything since it, and the whole-repository doc
   checks report only on docs that changed since it. Installing docbound into a
@@ -49,6 +55,15 @@ breaking change to any of them is a major version and carries a decision record.
 - `mixed-indent` reads through the span scanner, so a string literal is not
   indentation. A gofmt-clean Go file whose raw string held space-indented JSON
   was being called mixed.
+- `dead-ref` stops reporting two shapes that are not repository paths: a
+  container image reference or a scheme-less URL, whose first segment carries a
+  dot, and a bare file name that exists elsewhere in the tree. A Go CLI's
+  documentation produced nine warnings between them and every one was wrong.
+- `scaffold` says that it opened a worklog entry, since the next `start`
+  otherwise refuses while naming an entry the caller does not know exists.
+- `skill/docbound/templates/WORKLOG-entry.md` heads an entry with a hyphen, matching what
+  `start` writes. The two disagreed, so a worklog holding entries from both was
+  punctuated two ways.
 - `todo-shape` reads a marker only at the start of a comment body, where every
   convention puts one, and not when a hyphen follows it. Prose about markers and
   a comment naming this check were both being reported as shapeless TODOs.

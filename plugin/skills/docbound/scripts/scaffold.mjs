@@ -263,6 +263,16 @@ export function main(argv) {
     "\nNext: read the code, replace every placeholder with a true statement,\n" +
       "delete sections that do not apply, then run scripts/audit.mjs.\n",
   );
+  if (created.includes("docs/WORKLOG.md")) {
+    // Without this the next `start` refuses, naming an entry the caller does
+    // not know exists, and the refusal reads as a bug rather than as the
+    // adoption task still being open.
+    process.stdout.write(
+      "\nThat worklog holds an open entry for this adoption. Filling the\n" +
+        "documents is the task it describes; close it before `start` will\n" +
+        "open another.\n",
+    );
+  }
   return 0;
 }
 

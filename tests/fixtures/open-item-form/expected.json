@@ -1,0 +1,10 @@
+{
+  "note": "Two findings: prose that reads as closing a slug and does not, and a slug restated when it was already carrying forward. The third slug is named in prose and closed by the bullet, which is ordinary writing and is not reported.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "open-item-form": 2
+  },
+  "waived": {},
+  "exit": 0
+}

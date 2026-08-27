@@ -57,6 +57,7 @@ import * as commentSentence from "./lib/checks/comment-sentence.mjs";
 import * as lineLength from "./lib/checks/line-length.mjs";
 import * as mixedIndent from "./lib/checks/mixed-indent.mjs";
 import * as openItemTypo from "./lib/checks/open-item-typo.mjs";
+import * as openItemForm from "./lib/checks/open-item-form.mjs";
 import * as handoffPresent from "./lib/checks/handoff-present.mjs";
 import * as adrSourced from "./lib/checks/adr-sourced.mjs";
 import * as inferredOpen from "./lib/checks/inferred-open.mjs";
@@ -69,7 +70,7 @@ export const AUTHOR_CHECKS = [
   depAdr,
   adrShape, adrImmutable, templateResidue, orphanDoc, duplicateBlock,
   staleMarker, restatingComments, todoShape, commentSentence, lineLength,
-  mixedIndent, openItemTypo,
+  mixedIndent, openItemTypo, openItemForm,
 ];
 export const SUBAGENT_CHECKS = [
   handoffPresent, adrSourced, inferredOpen, logicTouched,

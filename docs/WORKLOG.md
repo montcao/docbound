@@ -5,6 +5,136 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Fix what a real documentation session found
+
+Agent: claude · Branch: main
+
+### Intent
+
+docbound was pointed at a second unfamiliar repository, a 31-file Go CLI with a
+README and no other documentation, and the whole loop was run twice in it: an
+adoption task that wrote the structure, then a task that fixed a real bug the
+first task surfaced. Both audits passed. Six things went wrong along the way,
+and none of them were caught by anything.
+
+`dead-ref` warned nine times and every warning was wrong. Two shapes account for
+all of them. A bare file name carrying a known extension is resolved only at the
+repository root, so a document naming `package.json` as a kind of file gets a
+finding even though four of them exist in the tree. And a container image
+reference has slashes and dots in it, so it reads as a path that never existed.
+Neither blocks, and both teach a reader to skim a check, which is the failure
+`docs/decisions/0021-line-length-needs-a-convention.md` argued about a different
+check three days ago.
+
+Writing `Closes [nginx-python-default].` in an Outcome section did nothing. The
+closing grammar is a bullet, `- [slug] closed: ...`, and prose naming the slug
+is silently not it. The item stayed open, `summary --open` still listed it, and
+no check said a word. That is the single worst finding of the session: the
+ledger is only as good as an exact syntax, and getting it wrong is invisible.
+
+Two items were also restated as fresh declarations in the second entry rather
+than left to carry forward. `summary --open` reports them as restated, which
+means the information to warn about it already exists.
+
+Then three smaller things. `scaffold` writes a worklog entry and does not
+mention it, so the next `start` refuses with a message about an entry the user
+did not know they had. `start` writes `Agent: agent`, which is a placeholder
+wearing the clothes of a real value. And `start` heads an entry with a hyphen
+where the template uses an em dash, so two entries in one file are punctuated
+differently.
+
+### Expected to touch
+
+- `skill/docbound/scripts/lib/refs.mjs` — the two shapes that are not paths
+- a new check for the slug ledger, and `skill/docbound/scripts/audit.mjs`
+- `skill/docbound/scripts/scaffold.mjs`, `skill/docbound/scripts/start.mjs`
+- `docs/checks.md`, `skill/docbound/SKILL.md`, `CHANGELOG.md`, tests
+
+### Unknowns going in
+
+Whether resolving a bare file name anywhere in the tree is cheap enough to do on
+every audit, or whether it needs the index built once and cached. Whether the
+slug check can tell "closing this in prose" from "mentioning a slug in a
+sentence" without firing on ordinary writing.
+
+### Outcome
+
+Two loops were run end to end in a 31-file Go CLI that had a README and nothing
+else: an adoption task that wrote `docs/ARCHITECTURE.md` and three module
+READMEs, then a task that fixed a real bug the first one surfaced. Both audits
+passed and both produced documentation worth reading, which is the part that
+was never tested before. What follows is what went wrong while doing it.
+
+**`dead-ref` warned nine times and was wrong nine times.** Two shapes,
+`skill/docbound/scripts/lib/refs.mjs` for both. A first path segment carrying a
+dot that is not its first character is a host, so a container image reference
+and a scheme-less URL are no longer claims about a path, while
+`.github/workflows/ci.yml` still is. And a bare file name is now satisfied by a
+file of that name anywhere in the tree, built once per process behind a name
+index, because prose naming `package.json` means a kind of file and the
+repository held four of them. Both shapes are in
+`tests/fixtures/real-world-shapes/`, which gained sample projects and the
+decision record `dep-adr` correctly asked for when two manifests arrived with
+them.
+
+**`Closes [nginx-python-default].` in an Outcome section did nothing, silently.**
+The closing form is a bullet, prose naming the slug is not it, and the item
+stayed open while the audit passed. The same session restated two slugs that
+were already carrying forward. `open-item-form`
+(`skill/docbound/scripts/lib/checks/open-item-form.mjs`, warn) reports both, on
+the newest entry only, with the form to write instead in the message.
+`docs/decisions/0025-the-slug-ledger-checks-itself.md` records why it warns
+rather than blocks: it is reading intent out of a sentence.
+
+It then fired on the test repository's own Intent, which opened with "Closing
+[nginx-python-default]." beside a correct closing bullet. That is ordinary
+writing, so an entry that closes an item with the bullet may now name it in
+prose freely. The fixture carries the case.
+
+**`scaffold` opened a worklog entry without saying so**, so the next `start`
+refused while naming an entry the caller did not know existed. It now says what
+it opened and that filling the documents is the task it describes.
+
+**The template and `start` disagreed about the dash** in an entry heading. The
+existing test asserted a hyphen and gave a reason, so I counted: this repository
+had seventeen hyphens and six em dashes, and the template was the outlier.
+`skill/docbound/templates/WORKLOG-entry.md` now writes a hyphen; `start` is
+unchanged.
+
+**`Agent: agent` was looked at and left.** `start.mjs` writes it when no
+`--agent` is given, and the obvious fix is a placeholder that `template-residue`
+demands be filled. That file's own header argues against exactly that, and the
+argument holds: creating a finding so an agent can clear it is busywork. The
+field is already tracked as [start-agent-name].
+
+Also confirmed working and not changed: the baseline made adoption a passing
+first run on a second unfamiliar repository; `summary` on a README-only project
+named the four things it looked for; every audit blocked on something true and
+nothing else. `doc-coverage` accepted a module README touched in an earlier
+commit on the same branch, which is what "in the same diff" means when the diff
+is a branch, and is recorded below rather than changed.
+
+Tests 168 to 169, with `tests/fixtures/open-item-form/` new and
+`tests/fixtures/real-world-shapes/` extended. `docs/checks.md` gained an entry
+and the two ref rules, `skill/docbound/SKILL.md` gained a table row and a
+correction to what step 5 says about closing an item.
+
+### Still open
+
+- [branch-length-coverage] `doc-coverage` is satisfied by a doc touched anywhere
+  in the change set, so on a long branch one edit to a module README covers
+  every later change to that module. That is what "in the same diff" means when
+  the diff is a branch, and it is a hole a per-commit mode would close at the
+  cost of the working-tree workflow.
+- [prose-slug-mentions] `open-item-form` still reads a slug beside a closing word
+  as an attempt to close it when the entry does not close that item, so an entry
+  discussing one it is not finishing gets a warning it does not deserve.
+- [worklog-read-cost] `open-item-form` is the first check whose cost grows with
+  the worklog's length rather than with the diff.
+- [name-index-scope] The bare-name index skips a fixed list of vendor
+  directories. A repository keeping dependencies somewhere else has them in the
+  index, which can satisfy a reference that should have failed.
+
 ## 2026-08-27 - Correct baseline's exit code and say what it does without git
 
 Agent: claude · Branch: main

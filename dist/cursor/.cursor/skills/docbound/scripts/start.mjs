@@ -5,7 +5,10 @@
 // it spends attention on a heading and a date that a command can produce
 // identically every time. Hand-written headings are also why this project's own
 // worklog mixed an em dash into one heading and hyphens into the rest, which
-// the summary parser then had to tolerate.
+// the summary parser then had to tolerate. A hyphen, matching
+// `templates/WORKLOG-entry.md` and the majority of this project's own entries,
+// so a worklog holding entries from both this command and `scaffold` reads as
+// one document.
 //
 // The sections come from `templates/WORKLOG-entry.md`, so the template stays
 // the one place that decides which sections an entry has. Their guidance text

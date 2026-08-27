@@ -1,4 +1,4 @@
-## <YYYY-MM-DD> — <task title, as a verb phrase>
+## <YYYY-MM-DD> - <task title, as a verb phrase>
 
 Agent: <claude | codex | gemini | copilot | other> · Branch: <branch or "n/a">
 <In subagent mode, both: `Agent: codex (code) · claude (docs)`>
