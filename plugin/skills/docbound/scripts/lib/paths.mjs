@@ -153,7 +153,7 @@ export function exists(root, relpath) {
 /**
  * Split like Python's `str.splitlines()`: universal newlines, and no trailing
  * empty element for a file that ends in a newline. Line counts feed the ratio
- * thresholds in `line-length` and `comment-sentence`, so an extra element at
+ * threshold in `comment-sentence`, so an extra element at
  * the end would move a finding.
  */
 export function splitLines(text) {

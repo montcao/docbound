@@ -92,7 +92,7 @@ The reader can run `ls`. Say what the module owns, what it must not do, and wher
 
 ## 12. Decision recorded at the wrong tier
 
-A dependency swap noted as one row in a module README's decisions table; or a variable-naming choice written up as a full Architecture Decision Record (ADR).
+A dependency swap noted as one row in a module README's decisions table; or a local implementation choice inside one module written up as a full Architecture Decision Record (ADR).
 
 Tell: cost of reversal does not match ceremony of the record.
 

@@ -1,6 +1,6 @@
 ---
 name: docbound
-description: Continuous documentation discipline for any coding task in a repository, built on established industry and academic documentation practice (minimum viable docs, update docs with code, delete dead docs, docs as the story of the code, no duplication) and code-communication standards (clear code before comments; naming, structure, context, then comments; the repo's existing convention wins). Vendor-agnostic. Use whenever writing, modifying, refactoring, or reviewing code, not only when asked to "document". Covers reading docs before touching code, a worklog entry before the first edit, recording decisions when made (inline, or as an Architecture Decision Record), keeping README / ARCHITECTURE / module READMEs / API docstrings current in the same change as the code, actionable comments and TODOs, trimming dead docs, and a blocking doc audit that defines done. Also use to bootstrap docs in a bare repo, to audit, triage, or refresh stale docs, or as a subagent documenting code another agent wrote.
+description: Continuous documentation discipline for any coding task in a repository, built on established industry and academic documentation practice (minimum viable docs, update docs with code, delete dead docs, docs as the story of the code, no duplication). It documents; it never recommends a change to logic, naming, structure, or formatting. Vendor-agnostic. Use whenever writing, modifying, refactoring, or reviewing code, not only when asked to "document". Covers reading docs before touching code, a worklog entry before the first edit, recording decisions when made (inline, or as an Architecture Decision Record), keeping README / ARCHITECTURE / module READMEs / API docstrings current in the same change as the code, actionable comments and TODOs, trimming dead docs, and a blocking doc audit that defines done. Also use to bootstrap docs in a bare repo, to audit, triage, or refresh stale docs, or as a subagent documenting code another agent wrote.
 ---
 
 # docbound
@@ -29,7 +29,15 @@ Six principles, distilled from published engineering documentation guides used a
 
 **6. Duplication is evil.** Do not write your own copy of something that exists; link to it. Take ownership of the canonical location instead. → One owner per fact. The `duplicate-block` check flags copied paragraphs.
 
-Beneath these, for the code itself, the code-communication standard in `references/code-style.md`, drawn from academic scientific-software guidance and the major language style guides: **write clear code before adding comments**. Four mechanisms communicate logic — naming, structure, context, comments — and they are tried in that order. Style is a convention, so where the repository already has one, it wins over this skill. → The Orient step identifies the repo's convention; the Work step tries a rename and a restructure before a comment; the `todo-shape`, `comment-sentence`, `line-length`, and `mixed-indent` checks put drift on the record.
+## The boundary
+
+**This skill documents. It never recommends a change to logic, naming, structure, or formatting.**
+
+Not a matter of tone. A recommendation about documentation is the job: this comment restates the code, this TODO names no owner, this README claims something untrue. A recommendation about logic is somebody else's: rename this, extract that, wrap this line, use tabs. Naming and structure are the coder's own mechanisms, and a documentation tool that reaches for them is arguing about work it was not asked to look at.
+
+The audit reads what a comment or a docstring *says*, never what the code does. `todo-shape`, `comment-sentence`, and `restating-comments` are the three checks that open a source file at all, and each one reads prose. Nothing counts a column or compares a tab to a space; a formatter owns that, does it better, and does it on save.
+
+Where you find code you believe is wrong, write down what it does and what it appears to promise. That record is the contribution. Whoever owns the code decides what to do about it.
 
 ## What "done" means
 
@@ -55,7 +63,7 @@ Terse to prose. Each tier has one job. Information in the wrong tier is either l
 
 | Tier | Carries | Lives in | Rule |
 |---|---|---|---|
-| Names | What a thing is | Identifiers, files, directories | Nouns for things, verbs for actions; length proportional to scope; the repo's casing convention. Before writing a comment, try renaming. |
+| Names | What a thing is | Identifiers, files, directories | Read them; they are the repository's most compressed documentation. Never change one to make a document easier to write. |
 | Inline comments | *Why* the code is there; what naming, structure, and context cannot say | Next to the code | Complete sentences. Never *what*. TODOs name the problem, the action, and an owner. Maintained with the code. |
 | Method API docs | The contract: arguments, returns, errors, restrictions, gotchas | Docstring / header of public functions and methods | Every behavior documented here should have a test. Private helpers need none unless surprising. |
 | Class / module API docs | Overview of what the module does; simplest usage first | Module docstring or module `README.md` | Examples earn their place when there is more than one way to use it. |
@@ -75,8 +83,6 @@ Run `node scripts/summary.mjs`. It assembles what the repository already says ab
 Without it, read in this order whatever exists: root `README.md`; `docs/ARCHITECTURE.md`; the three most recent entries in `docs/WORKLOG.md`; `README.md` in every directory you expect to touch; any ADR in `docs/decisions/` whose title touches your area.
 
 If none of these exist, run `node scripts/scaffold.mjs` from the repo root first. It creates the structure from templates without overwriting anything.
-
-Also identify the repository's code style convention before writing code: linter and formatter config, `.editorconfig`, a CONTRIBUTING or style doc, and the existing code itself. That convention wins over `references/code-style.md` wherever they differ. If there is no convention, `code-style.md` decides.
 
 While reading, note anything already false. Stale docs you encounter are in scope for your task (principle 3): fix or delete them, and say so in the worklog entry. Leaving a known-false claim in place because "it wasn't my task" is how docs die.
 
@@ -100,7 +106,7 @@ Which doc, by kind of change:
 | New directory or package | New `README.md` in it, from `templates/MODULE.md` |
 | A module's purpose, contract, or "must never do" list | That module's `README.md` |
 | A choice with a plausible alternative | A decision record — step 4 |
-| Code that would surprise a competent reader | First a better name, then a clearer structure, then context. Only if all three fail, an inline comment explaining *why* — a complete sentence |
+| Code that would surprise a competent reader | An inline comment explaining *why* it is that way, as a complete sentence. If you do not know why, say what it does and put the question under `Still open`. Do not rename or restructure it |
 | Any TODO or FIXME left in code | The problem, the action, and an owner in the comment; the same item under `Still open` in the worklog |
 
 When you update a doc, update it as the owner. Rewrite the paragraph so it is true now. Do not append "Update: as of task X…" — that is a changelog, and the worklog already is one. Do not copy a paragraph from another doc; link to it (principle 6).
@@ -163,8 +169,6 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `restating-comments` | warn | Changed source files do not have mostly comments that restate the adjacent code |
 | `todo-shape` | warn | Every TODO/FIXME in changed source states a problem and an action (six or more words) and names an owner, ticket, or reference |
 | `comment-sentence` | warn | Full-line comments in changed source are complete sentences (capitalized, terminated); commented-out code is flagged |
-| `line-length` | warn | Changed source respects the line length the repo configures (`.editorconfig`, `pyproject`, `.prettierrc`, `setup.cfg`). A repo that configures none has stated no convention, and the check says nothing |
-| `mixed-indent` | warn | No changed source file indents with both tabs and spaces |
 | `open-item-typo` | warn | No two `Still open` slugs are within two characters of each other, which is how one item silently becomes two |
 | `open-item-form` | warn | A slug is closed by the bullet form and not by prose, and an item already open is carried forward rather than restated |
 
@@ -181,7 +185,6 @@ Subagent mode (`--mode subagent`) adds:
 
 Read `references/style.md` before writing any doc. Essentials:
 
-- Clear code before comments: naming, then structure, then context, then comments — in that order. If the reader needs a comment to know what a thing is, rename the thing.
 - Contract docstrings on the public surface: arguments, returns, errors, restrictions, gotchas. Tested. Nothing on private helpers unless they surprise.
 - Inline comments explain *why*, in complete sentences. Never restate the code. TODOs carry problem, action, owner.
 - Docs lead with constraints and invariants. What must be true, what must never happen. Features are visible in the code; constraints are not.
@@ -190,7 +193,7 @@ Read `references/style.md` before writing any doc. Essentials:
 - Link, never copy. One owner per fact.
 - Delete before you add.
 
-`references/code-style.md` is the standard for the code itself — naming, structure, context, comments — and the rule that the repo's own convention comes first. `references/anti-patterns.md` lists what to refuse to write, with the tell for each.
+`references/anti-patterns.md` lists what to refuse to write, with the tell for each.
 
 ## Adopting this in a repo that already has history
 

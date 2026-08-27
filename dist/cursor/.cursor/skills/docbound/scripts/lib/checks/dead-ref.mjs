@@ -9,8 +9,17 @@
 // level blocked on prose in the first repository this was pointed at, and a
 // blocking check that fires on prose is a check somebody switches off. They are
 // warnings: still on the record, no longer in the way.
+//
+// The two historical documents never block, whatever the token looks like. A
+// decision record's body is immutable and the worklog is the log of what
+// happened, so a path either one named that has since been deleted cannot be
+// fixed: both are describing the world as it was, correctly, and satisfying an
+// error would mean editing an archive or falsifying a record. `stale-marker`
+// already exempts exactly these two for exactly this reason. This surfaced the
+// moment a record about a check outlived the check
+// (`docs/decisions/0026-docbound-does-not-recommend-logic.md`).
 
-import { readText } from "../paths.mjs";
+import { isAdr, readText } from "../paths.mjs";
 import { docRoot, isPathShaped, pathClaim, resolves } from "../refs.mjs";
 import { stripIgnored } from "../text.mjs";
 
@@ -18,6 +27,11 @@ export const id = "dead-ref";
 export const level = "error";
 
 const PATH_REF = /`([^`\s]+)`/g;
+
+/** The two documents that describe the past rather than the present. */
+function historical(doc) {
+  return isAdr(doc) || doc === "docs/WORKLOG.md";
+}
 
 export function run(ctx) {
   for (const doc of ctx.docs()) {
@@ -32,8 +46,17 @@ export function run(ctx) {
       if (target === null) continue;
       if (resolves(ctx.root, doc, target, anchor)) continue;
 
-      if (isPathShaped(ref)) {
+      if (isPathShaped(ref) && !historical(doc)) {
         ctx.add(id, level, doc, `references \`${ref}\` which does not exist`);
+      } else if (isPathShaped(ref)) {
+        ctx.add(
+          id,
+          "warn",
+          doc,
+          `references \`${ref}\` which no longer exists; this document records ` +
+            "what happened and is not rewritten, so it is history rather than a " +
+            "defect",
+        );
       } else {
         ctx.add(
           id,

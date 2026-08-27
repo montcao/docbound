@@ -48,7 +48,7 @@ Documentation lives inside source files too. In subagent mode you may:
 
 You may not:
 
-- Rename identifiers, restructure code, or change logic — even where `code-style.md` would call for it. Propose the rename under `Still open` with the current name, the proposed name, and the reason. Naming is the coder's first mechanism; it is not yours.
+- Rename identifiers, restructure code, or change logic. Record the mismatch under `Still open` with the current name and what it appears to promise. Naming is the coder's first mechanism; it is not yours. This is the rule in author mode too, and stating it here is a reminder rather than an extra restriction.
 - Write tests for documented behavior. Note the missing test under `Still open`.
 - Change dependency manifests, configuration, or anything outside docs and comments.
 

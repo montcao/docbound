@@ -61,7 +61,7 @@ the one commit on main that cannot pass this repository's own audit.
 | Decision | Rejected | Why | Reverse if |
 |---|---|---|---|
 | No formatter or linter | `biome` with a committed config | A dev dependency in a repository whose whole claim is zero dependencies is a claim the reader has to qualify; the style here is small enough to hold by reading | A second regular contributor arrives and style review starts costing more than a config would |
-| `.editorconfig` sets 100 columns | The audit's 80-column default | The repository's own convention wins over the skill's default, a rule set in `skill/docbound/references/code-style.md`, and 100 fits the check modules without wrapping every message string | The code stops fitting, in either direction |
+| `.editorconfig` sets 100 columns | Leaving the width unstated | 100 fits the check modules without wrapping every message string, and an editor that reads the file gets it right without being told. docbound has no opinion about column width (`docs/decisions/0026-docbound-does-not-recommend-logic.md`) | The code stops fitting, in either direction |
 | One provider table, read by build and CLI | A table per consumer | Adding a provider is one entry, and an entry that is wrong is wrong in one place | A provider needs different placement for install than for distribution |
 | `skills-lock.json` records the payload hash once | Once per provider | The payload is byte-identical across providers by construction, so seven copies were seven chances to compare against the wrong one | A provider needs a transformed payload rather than a copy |
 

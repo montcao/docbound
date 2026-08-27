@@ -50,9 +50,11 @@ An accepted Architecture Decision Record (ADR) is an archive of the decision as 
 
 The third is the one that gets skipped and the one that matters most. "Reverse if p99 latency exceeds 200ms under 10k concurrent sessions" is a decision that can be revisited. "We chose X" is a decision that will be re-litigated from scratch.
 
-## Names before comments
+## Names are documentation you do not own
 
-The first tier of documentation is the identifier. A comment that exists to say what a variable, function, file, or directory is, is a rename that has not happened yet. Before writing any comment or doc sentence that explains *what* something is, try renaming it so the sentence is unnecessary. This applies at every level: local variable, function, class, file, directory.
+The first tier of documentation is the identifier. A name carries more per character than any sentence about it, which is why a comment saying what a variable, function, file, or directory *is* usually adds nothing the name did not already say.
+
+That is a reason to write fewer comments, not a reason to rename anything. Naming is the coder's own mechanism and this skill does not touch it. Where a name is genuinely misleading, write what the thing does and put the mismatch under `Still open`, with the current name and what it appears to promise. Whoever owns the code decides whether to rename it.
 
 ## API docstrings — the contract
 

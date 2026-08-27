@@ -54,8 +54,6 @@ import * as staleMarker from "./lib/checks/stale-marker.mjs";
 import * as restatingComments from "./lib/checks/restating-comments.mjs";
 import * as todoShape from "./lib/checks/todo-shape.mjs";
 import * as commentSentence from "./lib/checks/comment-sentence.mjs";
-import * as lineLength from "./lib/checks/line-length.mjs";
-import * as mixedIndent from "./lib/checks/mixed-indent.mjs";
 import * as openItemTypo from "./lib/checks/open-item-typo.mjs";
 import * as openItemForm from "./lib/checks/open-item-form.mjs";
 import * as handoffPresent from "./lib/checks/handoff-present.mjs";
@@ -69,8 +67,8 @@ export const AUTHOR_CHECKS = [
   worklogEntry, worklogClosed, docCoverage, newDirReadme, deadRef, diagramRefs,
   depAdr,
   adrShape, adrImmutable, templateResidue, orphanDoc, duplicateBlock,
-  staleMarker, restatingComments, todoShape, commentSentence, lineLength,
-  mixedIndent, openItemTypo, openItemForm,
+  staleMarker, restatingComments, todoShape, commentSentence,
+  openItemTypo, openItemForm,
 ];
 export const SUBAGENT_CHECKS = [
   handoffPresent, adrSourced, inferredOpen, logicTouched,

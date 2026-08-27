@@ -8,6 +8,34 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Removed
+
+<!-- docbound-ignore-start -->
+- `line-length` and `mixed-indent`, and `skill/docbound/references/code-style.md`
+  with them. Counting columns and comparing tabs to spaces says nothing about
+  what a repository records about itself, and a formatter owns both, does them
+  better, and does them on save. Twenty-two checks.
+<!-- docbound-ignore-end -->
+
+  Removing a check ID is a breaking change to a public interface. The
+  deprecation path needs no code: a waiver naming a removed check is parsed,
+  matches nothing, and dismisses nothing, so a repository carrying
+  `waiver: line-length ...` keeps working and that line becomes inert.
+
+### Changed
+
+- **docbound documents; it does not recommend a change to logic, naming,
+  structure, or formatting.** The skill's `description` claimed a
+  code-communication standard, step 3 of the loop told an agent to try "a better
+  name, then a clearer structure" before writing a comment, and
+  `skill/docbound/references/style.md` called a comment "a rename that has not happened yet".
+  All of it is gone. Step 3 now says to record why surprising code is that way;
+  where a name misleads, the instruction is to write what the thing does and put
+  the mismatch under `Still open` with the current name and what it appears to
+  promise. `skill/docbound/references/subagent-mode.md` has had this rule from the start and it
+  now applies in both modes.
+  `docs/decisions/0026-docbound-does-not-recommend-logic.md`.
+
 ### Added
 
 - `open-item-form` (warn): a slug is closed by the bullet form and not by prose,

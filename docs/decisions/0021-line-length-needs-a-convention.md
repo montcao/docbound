@@ -1,7 +1,7 @@
 # 0021. line-length enforces a limit the repository set, and nothing otherwise
 
 - Date: 2026-08-27
-- Status: accepted
+- Status: superseded by 0026
 - Supersedes: none
 
 ## Context

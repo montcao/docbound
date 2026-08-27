@@ -1,9 +1,8 @@
 {
-  "note": "Prose standards do not apply to tests; todo-shape and mixed-indent still do.",
+  "note": "Prose standards do not apply to tests; todo-shape still does, because a TODO in a test is a message to a reader like any other.",
   "git": true,
   "errors": {},
   "warnings": {
-    "mixed-indent": 1,
     "todo-shape": 1
   },
   "waived": {},

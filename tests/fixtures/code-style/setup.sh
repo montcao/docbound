@@ -1,7 +1,11 @@
 #!/usr/bin/env bash
-# Every warning derived from references/code-style.md, in one file: a shrug of
-# a TODO, a fossil, lines past the limit, mixed indentation, and comments that
-# are notes rather than sentences.
+# Every warning the audit makes about documentation living in a source file, in
+# one file: a shrug of a TODO, a fossil, and comments that are notes to self
+# rather than sentences addressed to a reader.
+#
+# The sample also has long lines and mixed indentation. Nothing reports them,
+# and that is the point: formatting is not documentation
+# (`docs/decisions/0026-docbound-does-not-recommend-logic.md`).
 set -euo pipefail
 . "$FIXTURE_LIB"
 db_build_baseline

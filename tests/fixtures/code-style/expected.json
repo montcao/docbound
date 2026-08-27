@@ -1,10 +1,9 @@
 {
-  "note": "comment-sentence reports twice: once for the fossil, once for the fragments. line-length says nothing because this repository configures no width, so there is no convention to enforce; code-style-editorconfig is the fixture where one exists.",
+  "note": "comment-sentence reports twice: once for the fossil, once for the fragments. The sample's long lines and mixed indentation are not reported by anything, because formatting is not documentation.",
   "git": true,
   "errors": {},
   "warnings": {
     "comment-sentence": 2,
-    "mixed-indent": 1,
     "todo-shape": 1
   },
   "waived": {},

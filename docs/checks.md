@@ -1,9 +1,15 @@
 # Checks
 
-Twenty-four checks. Errors block; warnings print and do not block, but leaving
+Twenty-two checks. Errors block; warnings print and do not block, but leaving
 one is a choice made on the record. The level below is the level a check
 reports at, and `dead-ref` is the one check that reports at both: it blocks on a
 reference that says it is a path and warns on one that only might be.
+
+Three of them open a source file: `todo-shape`, `comment-sentence`, and
+`restating-comments`. Each reads what a comment *says*, never what the code
+does. Nothing here counts a column, compares a tab to a space, or has an opinion
+about a name, because docbound documents and does not recommend a change to
+logic (`docs/decisions/0026-docbound-does-not-recommend-logic.md`).
 
 Check IDs are a public interface. Agents write waiver lines against them in
 repositories this project cannot see, so an ID is never renamed and a level is
@@ -380,48 +386,6 @@ Test files are exempt. Directives, pragmas, and TODO markers are skipped.
 ```
 waiver: comment-sentence src/dsp/fft.c:41 - the fragments are the standard
 symbol glossary for the transform, matching the notation in the cited paper.
-```
-
-### `line-length`
-
-Changed source respects the line length the repository configures. A repository
-that configures none hears nothing.
-
-Convention beats preference, and a repository with no formatter config has
-stated no convention. A default would be this project's preference wearing the
-check's authority, which on a TypeScript repository that had never chosen a
-width meant 45 findings in one component
-(`docs/decisions/0021-line-length-needs-a-convention.md`).
-
-The limit comes from `.editorconfig` first, then from a Python project, flake8,
-or tox config, a Prettier config for the JavaScript family, or a rustfmt config
-for Rust. The exact files and keys are in
-`skill/docbound/scripts/lib/checks/line-length.mjs`.
-
-Fires only when at least three lines and more than five percent of the file
-exceed the limit. Lines containing a URL are ignored. Go and SQL files are
-skipped entirely, since gofmt sets no limit and SQL is habitually wide. Test
-files are exempt.
-
-```
-waiver: line-length src/i18n/strings.ts:210 - one translated string per line;
-wrapping them would put the literals out of alignment with the source catalogue.
-```
-
-### `mixed-indent`
-
-No changed source file indents with both tabs and spaces.
-
-Mixed indentation renders differently in every editor, which turns a diff into
-an argument about whitespace. Test files are **not** exempt.
-
-Read through the span scanner, so a string literal is not indentation: a
-gofmt-clean Go file whose raw string holds space-indented JSON reads as tab and
-space indentation together until the string is masked. A language the scanner has no entry for falls back to reading raw lines.
-
-```
-waiver: mixed-indent Makefile.d/build.sh - the here-doc it emits is a makefile
-recipe, which must be tab-indented inside a space-indented script.
 ```
 
 ### `open-item-form`

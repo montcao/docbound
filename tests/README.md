@@ -39,7 +39,7 @@ file inside the fixture would join the change set and move the findings.
 - Must not depend on the order fixtures run in, or on a fixture built by another
   test. A fixture that reuses another runs that fixture's setup script
   explicitly, which `documented-change`, `waiver`,
-  `code-style-editorconfig`, and `author-on-subagent-tree` all do.
+  and `author-on-subagent-tree` all do.
 - Must not need a test framework. `node --test` and `node:assert` only.
 
 ## Use
@@ -62,10 +62,7 @@ comparison can be made against a tree that was never written to disk.
 - `tests/fixtures/code-style/pricing.py.txt` and
   `tests/fixtures/real-world-shapes/prompt.go.txt` are deliberately bad sample
   files. The extension keeps them out of the audit's source set, so their marker
-  comments, long lines, and tab-and-space indentation are not findings against
-  *this* repository. A sample needing both tabs and spaces has to live in a file
-  like this rather than in a heredoc, or the fixture's own shell script becomes
-  the finding.
+  comments are not findings against *this* repository.
 - The suite has met code this project did not write exactly once, through
   `tests/fixtures/real-world-shapes/`. Everything else is written here, by the
   same hand as the checks, which is why four blocking false positives shipped in

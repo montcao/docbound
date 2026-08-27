@@ -5,6 +5,126 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Remove every recommendation docbound makes about logic
+
+Agent: claude · Branch: main
+
+### Intent
+
+docbound documents a repository. Somewhere in writing it, it also started
+telling people how to write their code, and that is not the same job.
+
+Three places say so outright. The skill's own `description` claims
+"code-communication standards (clear code before comments; naming, structure,
+context, then comments)". Step 3 of the loop tells an agent that code which
+would surprise a reader wants "first a better name, then a clearer structure"
+before a comment, which is an instruction to rename and restructure. And
+`references/code-style.md` is a code standard with no documentation in it,
+ending on a line that claims four checks are derived from it.
+
+Two of those four are pure formatting. `line-length` counts columns and
+`mixed-indent` compares tabs to spaces, and neither says anything about what a
+repository records about itself. A formatter already owns both, does it better,
+and does it on save.
+
+The other two are not the same thing. A comment and a docstring are
+documentation that happens to live in a source file, which is exactly what the
+spectrum in this skill argues: names, then comments, then API docs, then
+READMEs, one continuum. `todo-shape`, `comment-sentence`, and
+`restating-comments` read what a comment says, never what the code does, and
+they stay.
+
+The line is between a recommendation about documentation and a recommendation
+about logic. The first is the job. The second was never asked for, and
+`skill/docbound/references/subagent-mode.md` already states the rule for one mode: naming is
+the coder's first mechanism, it is not yours. It should have been the rule for
+both.
+
+### Expected to touch
+
+- `skill/docbound/scripts/lib/checks/line-length.mjs` and `mixed-indent.mjs` — deleted
+- `skill/docbound/references/code-style.md` — deleted
+- `skill/docbound/SKILL.md` — the description, the foundation, the spectrum, step 3, the check table, the writing standard
+- `docs/checks.md`, `README.md`, `NOTICE.md`, `docs/ARCHITECTURE.md`
+- `tests/fixtures/code-style/`, `tests/fixtures/code-style-editorconfig/`
+
+### Unknowns going in
+
+Removing a check ID is a breaking change to a public interface, and this
+repository's own rules require a deprecation path rather than a commit. What
+that path is for a check that no longer exists is not obvious: a waiver naming
+it has nothing to dismiss, and whether that is silent or an error has not been
+checked.
+
+### Outcome
+
+**The boundary is now the first thing the skill says.**
+`skill/docbound/SKILL.md` gained a section before the loop: it documents, and it
+never recommends a change to logic, naming, structure, or formatting. The
+`description` no longer claims a code-communication standard. Step 3's row for
+surprising code said "first a better name, then a clearer structure" and now
+says to record why the code is that way, and not to rename or restructure it.
+The spectrum's Names row said to try renaming before writing a comment and now
+says to read names and never change one to make a document easier to write.
+`skill/docbound/references/style.md` called a comment "a rename that has not
+happened yet"; it now says a name carries more per character than a sentence
+about it, which is a reason to write fewer comments rather than to change a
+name. Where a name misleads, the instruction everywhere is to write what the
+thing does and put the mismatch under `Still open` with what it appears to
+promise.
+
+**Two checks and a reference file are gone.** `line-length` counted columns and
+`mixed-indent` compared tabs to spaces; neither says anything about what a
+repository records about itself, and a formatter owns both. The code standard
+went with them, and `NOTICE.md` no longer attributes a file that does not exist.
+Twenty-two checks.
+
+`todo-shape`, `comment-sentence`, and `restating-comments` stayed. They are the
+only three that open a source file, and each reads what a comment says rather
+than what the code does. That is the line the removals draw: a comment is
+documentation that happens to live in a source file.
+
+The unknown going in was the deprecation path for a removed check ID. It needs
+no code. A waiver naming a check that no longer exists is parsed, matches
+nothing, and dismisses nothing, so a repository carrying
+`waiver: line-length ...` keeps working and that line goes inert. Verified by
+reading `skill/docbound/scripts/lib/report.mjs`, which matches waivers against
+findings and never the other way round.
+
+**The audit then found a problem the change created**, which is the part worth
+keeping. `docs/decisions/0021-line-length-needs-a-convention.md` names the check
+file I had just deleted, and a record's body is immutable, so that error could
+never be fixed: the only routes were editing an archive or carrying a waiver
+forever. The worklog has the same shape for the same reason. Both now report a
+missing path as a warning rather than an error
+(`skill/docbound/scripts/lib/checks/dead-ref.mjs`), which is precisely the
+exemption `stale-marker` already makes for those two documents. 0021 is
+superseded by 0026, whose decision it was the narrower version of.
+
+Fixtures: `tests/fixtures/code-style-editorconfig/` existed only for
+`line-length` and is deleted. `code-style` and `test-file-exempt` kept their
+samples and now assert that the long lines and mixed indentation in them are
+reported by nothing, which is the removal stated as a test rather than as a
+sentence. 168 tests.
+
+`docs/checks.md`, `README.md`, `docs/ARCHITECTURE.md`, `scripts/README.md`,
+`tests/README.md`, and `CHANGELOG.md` all updated.
+`skill/docbound/references/subagent-mode.md` had this rule from the start and
+now says so: stating it there is a reminder rather than an extra restriction.
+
+### Still open
+
+- [boundary-unenforced] Nothing checks that a finding recommends documentation
+  rather than logic, because a check cannot tell the two apart when both are
+  English. Held by reading, the way ADR 0018's rule about self-serving metrics
+  is held.
+- [formatter-gap] A repository that used docbound for line width or indent
+  consistency now has neither. The answer is a formatter, and nothing in the
+  install path says so.
+- [historical-warn-volume] Exempting the worklog from blocking means a long
+  worklog accumulates dead-reference warnings for every file the project ever
+  deleted. Fourteen already, and it only grows.
+
 ## 2026-08-27 - Fix what a real documentation session found
 
 Agent: claude · Branch: main

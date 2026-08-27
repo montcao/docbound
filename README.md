@@ -190,8 +190,6 @@ recorded in the output.
 | `restating-comments` | warn | Comments repeating what the code already says |
 | `todo-shape` | warn | A TODO with no problem, no action, or no owner |
 | `comment-sentence` | warn | Commented-out code, or comments written as notes to self |
-| `line-length` | warn | Lines past the limit your repository configures |
-| `mixed-indent` | warn | Tabs and spaces in one file |
 | `open-item-typo` | warn | Two open-item slugs one typo apart, so one item became two |
 
 Four more apply in subagent mode. `docs/checks.md` covers every check: what it

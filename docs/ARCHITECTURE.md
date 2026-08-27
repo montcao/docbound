@@ -111,6 +111,23 @@ The audit is entered from four places, all of which reach the same function:
 the agent running `skill/docbound/scripts/audit.mjs` directly, the hook on an
 edit or a stop, `npx docbound audit`, and CI.
 
+## What is out of scope
+
+docbound documents. It does not recommend a change to logic, naming, structure,
+or formatting (`docs/decisions/0026-docbound-does-not-recommend-logic.md`).
+
+Three checks open a source file at all: `todo-shape`, `comment-sentence`, and
+`restating-comments`, each reading what a comment *says*. Everything else in
+`skill/docbound/scripts/lib/checks/` reads documents. `skill/docbound/scripts/lib/paths.mjs`
+decides what counts as source and what counts as a document, and
+`skill/docbound/scripts/audit.mjs` holds the list that is allowed to run.
+
+Two documents are exempt from blocking on a path that has since been deleted:
+a decision record, whose body is immutable, and the worklog, which is the log of
+what happened. Both are describing the world as it was.
+`skill/docbound/scripts/lib/checks/dead-ref.mjs` reports those as warnings, the
+same exemption `stale-marker` already makes.
+
 ## Boundaries
 
 | Interface | Defined in | Consumers | Change requires |
