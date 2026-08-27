@@ -41,10 +41,12 @@ npx docbound summary
 
 Purpose, shape, what each module owns and is forbidden from doing, every
 decision with the condition that would reverse it, recent work, and what is
-still open. It reads no source file. On this repository that is about 2,400
-tokens against roughly 69,000 in the source an agent would otherwise have
-chewed through, and the output tells you both numbers so you can check the
-claim rather than take it.
+still open. It reads no source file.
+
+On this repository that is roughly 5,000 tokens against roughly 88,000 in the
+source an agent would otherwise have read. Do not take that on trust:
+`npx docbound summary --cost` measures both on your own repository. The default
+output says nothing about what it cost, because you asked what your project is.
 
 ## Try it without installing anything
 

@@ -5,6 +5,90 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Take the cost footer out of the summary
+
+Agent: claude · Branch: main
+
+### Intent
+
+`summary` ends every run with what it cost against what reading the source would
+have cost. That footer answers a question nobody asked at the moment they ran
+the command. They asked what the project is.
+
+It is also read by an agent loading the output into context, which pays tokens
+for a sentence about how few tokens it is paying. The tool talking about itself,
+in the output meant to talk about the project.
+
+The previous entry made it worse rather than better. Finding the figure absurd
+on a one-file repository, I suppressed it below a ratio threshold, which means
+hiding the number when it is unflattering and showing it when it flatters. That
+is what a self-serving metric is. Two entries earlier I removed build output
+from the source total for inflating the same ratio and did not notice the footer
+was built on that impulse throughout.
+
+The measurement should stay reachable, because
+`docs/decisions/0012-summary-from-docs.md` is right that a claim about token
+economics nobody can check is marketing. Reachable is a flag. Unconditional is
+advertising.
+
+That record's Decision section says the output ends with the cost line, so
+reading it alone would now mislead. It is superseded rather than edited.
+
+### Expected to touch
+
+- `skill/docbound/scripts/summary.mjs` - the footer moves behind `--cost`
+- `docs/decisions/` - a record superseding 0012, and 0012's Status line
+- `README.md` - the claim, with how to reproduce it
+- `tests/summary.test.mjs` - both paths
+
+### Unknowns going in
+
+- Whether a flag is the right home or whether the measurement belongs in the
+  README alone. A flag lets a reader reproduce the README's number, which is the
+  part worth keeping.
+
+### Outcome
+
+The footer moved behind `--cost`. Asked for, never volunteered. The default
+output now ends with the project's open items, which is the last thing worth
+reading rather than the first thing worth boasting about.
+
+The threshold went with it. A figure reported on request can be unflattering,
+because the person asking wanted the figure rather than the reassurance, and a
+measurement that appears only when it is good is not a measurement. `--cost` on
+a one-file repository says the summary cost more than the source would have, and
+that is the correct answer.
+
+`README.md` carries the claim and names the flag that reproduces it, which is
+what `docs/decisions/0012-summary-from-docs.md` was reaching for. Its numbers
+were stale as well, quoting 2,400 against 69,000 where it is now roughly 5,000
+against 88,000.
+
+`docs/decisions/0017-summary-describes-the-project.md` supersedes 0012, whose
+Decision section says the output ends with the cost line and would now mislead
+anyone reading it alone. Its Status line changed and its body did not. Second
+supersession in this repository.
+
+The test that asserted the footer was there now asserts it is not, and that
+`--cost` reports the number on a small repository as well as a large one.
+
+### Still open
+
+- [readme-cost-figures] The numbers in `README.md` are measured by hand and
+  nothing checks them. Moving the measurement out of the run that computes it is
+  what created that gap, and it is the cost named in the record.
+- [stale-marker-changelog] `stale-marker` exempts the worklog and the decision
+  records because both are historical by design, and does not exempt
+  `CHANGELOG.md`, which is the most historical document a repository has. Past
+  tense is what a changelog is for. One warning stands on that file, and
+  rewording every past-tense sentence to avoid it is arguing with the tool
+  rather than fixing it.
+- [self-serving-metrics] Twice now a measurement in this project has been shaped
+  by what it would make the project look like: build output counted into a
+  source total, and a ratio suppressed when unflattering. Both were caught by
+  reading rather than by any check. Worth remembering that the direction of an
+  error is evidence about its cause.
+
 ## 2026-08-27 - Fix what a newcomer sees on their first run
 
 Agent: claude · Branch: main

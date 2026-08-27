@@ -1,7 +1,7 @@
 # 0012. Answer "what is this project" from the docs, never from the source
 
 - Date: 2026-08-26
-- Status: accepted
+- Status: superseded by 0017
 - Supersedes: none
 
 ## Context

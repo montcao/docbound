@@ -8,6 +8,15 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Changed
+
+- `docbound summary` stops ending every run with what it cost. Someone running
+  it asked what their project is, and an agent loading the output pays tokens
+  for a sentence about how few tokens it is paying. `--cost` reports it when
+  asked. An earlier version suppressed the figure when the ratio was
+  unflattering, which is worse than printing it.
+  `docs/decisions/0017-summary-describes-the-project.md`.
+
 ### Fixed
 
 - `comment-sentence` judged each comment line separately, so the continuation of

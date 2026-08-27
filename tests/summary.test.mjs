@@ -74,24 +74,22 @@ describe("summary", () => {
     assert.ok(!out.includes(marker), "source content reached the summary");
   });
 
-  test("reports what it read", () => {
+  test("says nothing about what it cost unless asked", () => {
+    // The reader asked what the project is. What the command cost is a question
+    // about the command, and an agent loading this pays tokens to read it.
     const out = summarize(baseline());
-    assert.match(out, /Assembled from \d+ document\(s\), no source read/);
+    assert.ok(!/tokens/i.test(out), `the summary volunteered its own cost:\n${out}`);
   });
 
-  test("draws the comparison only where it is one", () => {
-    // A repository small enough that reading the source is cheaper would get a
-    // saving that is a loss, which invites distrust of the figure where it is
-    // real. The fixture is small; this repository is not.
-    const small = summarize(baseline());
-    assert.ok(
-      !small.includes("an answer from the code would have cost"),
-      "no comparison on a repository smaller than its own summary",
-    );
+  test("--cost reports it, flattering or not", () => {
+    const self = summarize(REPO_ROOT, ["--cost"]);
+    assert.match(self, /Read \d+ document\(s\) and no source/);
+    assert.match(self, /estimates at four characters per token/);
 
-    const self = summarize(REPO_ROOT);
-    assert.match(self, /an answer from the code would have cost/);
-    assert.match(self, /Both figures are estimates/);
+    // A small repository gets an unflattering number rather than silence: a
+    // figure that appears only when it is good is not a measurement.
+    const small = summarize(baseline(), ["--cost"]);
+    assert.match(small, /Read \d+ document\(s\) and no source/);
   });
 
   test("--open lists unfinished work and nothing else", () => {

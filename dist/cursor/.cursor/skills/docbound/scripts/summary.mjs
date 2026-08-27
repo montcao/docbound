@@ -10,11 +10,16 @@
 // rounding error next to the source.
 //
 // Usage:
-//   node summary.mjs [--root DIR] [--entries N] [--open] [--json]
+//   node summary.mjs [--root DIR] [--entries N] [--open] [--cost] [--json]
 //
-//   --entries N   how many worklog entries to include (default 5)
+//   --entries N   how many worklog entries to include, five by default
 //   --open        only the unfinished work, across every entry
+//   --cost        what this read, against what reading the source would have
 //   --json        the same content as data
+//
+// The output describes the project and nothing else. What the command cost is a
+// question about the command, and an agent loading this into context should not
+// pay tokens for a sentence about how few tokens it is paying.
 //
 // A repository that has not adopted the discipline produces a thin summary, and
 // the output says so rather than padding it. That is a true answer about the
@@ -37,7 +42,7 @@ import { ignoreEpipe, isEntryPoint } from "./lib/entry.mjs";
 import { topLevel } from "./lib/git.mjs";
 
 const USAGE =
-  "usage: summary.mjs [--root DIR] [--entries N] [--open] [--json]";
+  "usage: summary.mjs [--root DIR] [--entries N] [--open] [--cost] [--json]";
 const DEFAULT_ENTRIES = 5;
 
 export function parseArgs(argv) {
@@ -45,6 +50,7 @@ export function parseArgs(argv) {
     root: null,
     entries: DEFAULT_ENTRIES,
     open: false,
+    cost: false,
     json: false,
     help: false,
   };
@@ -56,6 +62,7 @@ export function parseArgs(argv) {
     if (flag === "--root") options.root = value();
     else if (flag === "--entries") options.entries = Number(value());
     else if (flag === "--open") options.open = true;
+    else if (flag === "--cost") options.cost = true;
     else if (flag === "--json") options.json = true;
     else if (flag === "-h" || flag === "--help") options.help = true;
     else return { error: `unrecognized argument: ${arg}` };
@@ -254,19 +261,17 @@ export function main(argv) {
   const body = options.open ? renderOpen(digest) : render(digest);
   process.stdout.write(body);
 
-  if (!options.open) {
+  // Asked for, never volunteered. Printing it on every run is the tool
+  // advertising in the place it is supposed to be working, and suppressing it
+  // when the ratio is unflattering, as an earlier version did, is worse.
+  if (options.cost) {
     const spend = cost(root, body, digest.excludes);
-    // The comparison is the point of the line, and on a repository small enough
-    // that reading the source is cheaper it is not a comparison worth drawing.
-    const worthComparing = spend.sourceTokens > spend.summaryTokens * 2;
     process.stdout.write(
-      worthComparing
-        ? `---\nAssembled from ${spend.docsRead} document(s), no source read. ` +
-            `About ${spend.summaryTokens} tokens here, against roughly ` +
-            `${spend.sourceTokens} in the ${spend.sourceFiles} source file(s) ` +
-            "an answer from the code would have cost. Both figures are " +
-            "estimates.\n"
-        : `---\nAssembled from ${spend.docsRead} document(s), no source read.\n`,
+      `---\nRead ${spend.docsRead} document(s) and no source. About ` +
+        `${spend.summaryTokens} tokens here, against roughly ` +
+        `${spend.sourceTokens} in the ${spend.sourceFiles} source file(s) an ` +
+        "answer from the code would have read. Both are estimates at four " +
+        "characters per token.\n",
     );
   }
   return 0;
