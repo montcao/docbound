@@ -10,7 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { after, describe, test } from "node:test";
 
-import { SKILL_DIR, buildFixture, removeTree, runNode, tempDir } from "./harness.mjs";
+import { REPO_ROOT, SKILL_DIR, buildFixture, removeTree, runNode, tempDir } from "./harness.mjs";
 import {
   bullets,
   leadParagraph,
@@ -74,10 +74,24 @@ describe("summary", () => {
     assert.ok(!out.includes(marker), "source content reached the summary");
   });
 
-  test("reports its own cost against the source it did not read", () => {
+  test("reports what it read", () => {
     const out = summarize(baseline());
     assert.match(out, /Assembled from \d+ document\(s\), no source read/);
-    assert.match(out, /Both figures are estimates/);
+  });
+
+  test("draws the comparison only where it is one", () => {
+    // A repository small enough that reading the source is cheaper would get a
+    // saving that is a loss, which invites distrust of the figure where it is
+    // real. The fixture is small; this repository is not.
+    const small = summarize(baseline());
+    assert.ok(
+      !small.includes("an answer from the code would have cost"),
+      "no comparison on a repository smaller than its own summary",
+    );
+
+    const self = summarize(REPO_ROOT);
+    assert.match(self, /an answer from the code would have cost/);
+    assert.match(self, /Both figures are estimates/);
   });
 
   test("--open lists unfinished work and nothing else", () => {

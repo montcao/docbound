@@ -50,7 +50,9 @@ export function parseWorklog(root, { git, changed, sessionDays, today }) {
   if (text === null) {
     problems.push({
       check: "worklog-entry",
-      message: "missing; open an entry from templates/WORKLOG-entry.md",
+      message:
+        "missing; run `docbound scaffold` to create the docs structure, " +
+        "then `docbound start \"<what you are about to do>\"`",
     });
     return { topEntry: null, waivers, problems };
   }

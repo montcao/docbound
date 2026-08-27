@@ -256,11 +256,17 @@ export function main(argv) {
 
   if (!options.open) {
     const spend = cost(root, body, digest.excludes);
+    // The comparison is the point of the line, and on a repository small enough
+    // that reading the source is cheaper it is not a comparison worth drawing.
+    const worthComparing = spend.sourceTokens > spend.summaryTokens * 2;
     process.stdout.write(
-      `---\nAssembled from ${spend.docsRead} document(s), no source read. ` +
-        `About ${spend.summaryTokens} tokens here, against roughly ` +
-        `${spend.sourceTokens} in the ${spend.sourceFiles} source file(s) an ` +
-        "answer from the code would have cost. Both figures are estimates.\n",
+      worthComparing
+        ? `---\nAssembled from ${spend.docsRead} document(s), no source read. ` +
+            `About ${spend.summaryTokens} tokens here, against roughly ` +
+            `${spend.sourceTokens} in the ${spend.sourceFiles} source file(s) ` +
+            "an answer from the code would have cost. Both figures are " +
+            "estimates.\n"
+        : `---\nAssembled from ${spend.docsRead} document(s), no source read.\n`,
     );
   }
   return 0;

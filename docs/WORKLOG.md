@@ -5,6 +5,58 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Fix what a newcomer sees on their first run
+
+Agent: claude · Branch: main
+
+### Intent
+
+Running the tool against a bare repository, the way someone trying it would,
+shows two things that make the first minute worse than it needs to be.
+
+`summary` ends with what it cost against what reading the source would have
+cost. On a repository with one file that reads "about 70 tokens here, against
+roughly 6 in the 1 source file", which is a saving that is a loss. The figure is
+honest and printing it there is not useful.
+
+The first finding anyone sees is `worklog-entry` saying the worklog is missing
+and to open an entry from the worklog template by a path relative to the skill
+payload, which a reader at their own repository root cannot find. The
+actionable answer is one command, and the message should say it.
+
+### Expected to touch
+
+- `skill/docbound/scripts/summary.mjs` - print the comparison when it is one
+- `skill/docbound/scripts/lib/worklog.mjs` - a message a newcomer can act on
+
+### Unknowns going in
+
+- Whether rewording a check message costs anything. `docs/checks.md` describes
+  when this check fires rather than quoting it, so probably not, but the message
+  is the part a user actually reads and a fixture might pin it.
+
+### Outcome
+
+`summary` prints the comparison only when the source is more than twice the
+summary. Below that it says what it read and stops, because a saving that is a
+loss is not a saving and printing it invites the reader to distrust the figure
+where it is real. On this repository the comparison still prints.
+
+`worklog-entry` names the two commands that fix it rather than a path relative
+to a payload the reader cannot see from their own root. It is the first
+finding anyone gets on a bare repository, so it is the message most worth
+getting right.
+
+Neither change moved a fixture: expectations record check IDs and counts rather
+than message text.
+
+### Still open
+
+- [first-run] Nothing tests the first-run experience end to end. Both of these
+  were found by running the tool against a bare repository by hand, which is not
+  a thing the suite does. A fixture that asserts on the *text* a newcomer sees,
+  rather than on which checks fire, would have caught them.
+
 ## 2026-08-27 - Move comment-sentence and todo-shape onto the scanner
 
 Agent: claude · Branch: main
