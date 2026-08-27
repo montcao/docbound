@@ -24,7 +24,7 @@ Output is safe to pipe. Every command is one someone will send through `head` or
 `cli/index.mjs` calls `ignoreEpipe` from the skill's entry module when it is run
 directly.
 
-`audit`, `scaffold`, `summary`, and `start` are pass-throughs: they hand their arguments
+`audit`, `scaffold`, `summary`, `start`, and `close` are pass-throughs: they hand their arguments
 to the skill's own scripts unchanged and return the exit code unchanged. The CLI adds
 nothing to them, so a finding reported through `npx docbound audit` is the same
 finding an agent sees.

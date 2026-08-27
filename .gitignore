@@ -1,5 +1,54 @@
+# Dependencies. This project has none, and the directory still appears the
+# moment anyone runs npm install for a tool.
 node_modules/
+
+# Credentials and machine-local configuration. Nothing here is used by this
+# project; the entries exist so that a file dropped in by another tool cannot be
+# committed by accident.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+.netrc
+.npmrc
+.yarnrc
+.yarnrc.yml
+*credentials*.json
+secrets.json
+
+# Build and publish artifacts. `dist/` and `plugin/` are deliberately committed
+# (docs/decisions/0004-dist-committed.md); the tarball npm pack writes is not.
+*.tgz
+*.tar.gz
+coverage/
+.nyc_output/
+
+# Editor and operating system noise.
 .DS_Store
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+desktop.ini
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs and crash reports.
+*.log
+npm-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local scratch. A file that exists only on one machine has no business in a
+# repository whose subject is what everyone can see.
+tmp/
+temp/
+.cache/
 
 # docbound-ignore-start
 # Managed by `npx docbound install`. Edits inside this block are overwritten;

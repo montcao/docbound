@@ -10,6 +10,14 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- `docbound close retry-jitter "added jitter"`: closes a tracked open item and
+  refuses a slug that is not open, printing the ones that are. A mistyped slug
+  was previously a second item that looked like the first.
+- `open-item-typo` (warn): two `Still open` slugs within two characters of each
+  other, which is the same failure reached by editing the file by hand.
+- Step 5 of the loop says to check what is already open before writing a new
+  item, since every open slug is one `summary --open` away.
+
 - `docbound start "Add rate limiting"`: writes the worklog entry skeleton so an agent
   composes the Intent and nothing else. Sections come from the template, their
   guidance text does not, and it refuses to stack on an entry that has no

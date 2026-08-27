@@ -5,6 +5,86 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Make slugs findable, close them by command, and scan for secrets
+
+Agent: claude · Branch: main
+
+### Intent
+
+Creating a slug costs nothing. Reusing one costs remembering an exact string,
+and getting it slightly wrong opens a second item instead of continuing the
+first, silently. That is a memory burden the design does not need to impose:
+every open slug is one command away, and nothing in the loop tells anyone to
+look.
+
+Three changes, cheapest first. The loop says to check what is open before
+writing a new item. `docbound close` takes a slug, refuses one that does not
+exist, and appends the closing line, so a typo becomes an error rather than a
+second item. A new check warns when two slugs are close enough to be a typo of
+each other, which is insurance for the case where someone edits the file by
+hand.
+
+This repository also goes to a public host after this task, so the same pass
+scans for anything that should not travel and brings `.gitignore` up to what a
+published repository needs.
+
+### Expected to touch
+
+- `skill/docbound/scripts/close.mjs` - new, with the CLI pass-through
+- `skill/docbound/scripts/lib/checks/open-item-typo.mjs` - new check
+- `skill/docbound/SKILL.md` - the loop, and the check table
+- `tests/` - the command, the check, and a fixture for it
+- `.gitignore`, `docs/` - the publication pass
+
+### Unknowns going in
+
+- Whether a similarity check on slugs produces false positives on this
+  repository's own set, where several share a prefix. If it does, the threshold
+  is wrong rather than the idea.
+- Whether anything sensitive has already been committed. History matters more
+  than the working tree, since a push publishes all of it.
+
+### Outcome
+
+**The loop points at the list.** Step 5 of `skill/docbound/SKILL.md` says to run
+`summary --open` before writing a new item. Free, and it removes the assumption
+that anyone was holding twenty-six strings in their head.
+
+**`docbound close` validates the slug.** `skill/docbound/scripts/close.mjs`
+refuses one that is not open and prints the ones that are, so a typo through the
+command is an error naming the alternatives rather than a second item. It writes
+the closing line into the newest entry, because closing something belongs to the
+task that closed it.
+
+**`open-item-typo` covers the hand-edited case**, warning when two slugs sit
+within two edits of each other. Zero findings against this repository's own
+twenty-six slugs, which is the evidence its threshold is not obviously loose. It
+says nothing about being too tight, and a three-character typo still passes.
+
+**One real bug, found by its own test.** The section scan in `appendToStillOpen`
+broke at the first `## ` heading it met, which is the newest entry's own
+heading, so it never reached the section it was looking for and reported that
+none existed.
+
+**Publication pass.** No credential-shaped string in the working tree or in any
+commit; every hit for "token" is the word in parser prose. No sensitive path has
+ever existed in history, and no home directory appears in any added line.
+`.gitignore` now covers credentials, npm pack tarballs, editor and operating
+system noise, and logs, and nothing already tracked became ignored.
+
+`docs/decisions/0015-slugs-must-be-findable.md` records why the answer was to
+make the slug findable rather than to generate one or drop it.
+
+### Still open
+
+- [three-char-typo] `open-item-typo` compares within two edits. A slug three
+  characters wrong still opens a second item silently, and raising the
+  threshold would start matching genuinely different slugs.
+- [close-writes-newest] `docbound close` writes into the newest entry, so a
+  closing is recorded where it was noticed rather than beside the item it
+  closes. A reader following one item reads two entries.
+- [slug-typos] closed: docbound close refuses an unknown slug, and open-item-typo warns on a near miss
+
 ## 2026-08-26 - Open an entry by command, and tag the items already open
 
 Agent: claude · Branch: main

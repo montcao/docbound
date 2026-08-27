@@ -1,6 +1,6 @@
 # Checks
 
-Twenty-two checks. Errors block; warnings print and do not block, but leaving
+Twenty-three checks. Errors block; warnings print and do not block, but leaving
 one is a choice made on the record.
 
 Check IDs are a public interface. Agents write waiver lines against them in
@@ -329,6 +329,31 @@ an argument about whitespace. Test files are **not** exempt.
 ```
 waiver: mixed-indent Makefile.d/build.sh - the here-doc it emits is a makefile
 recipe, which must be tab-indented inside a space-indented script.
+```
+
+### `open-item-typo`
+
+No two slugs on `Still open` items are within two characters of each other.
+
+A slug is what lets one piece of unfinished work be carried across entries
+without being retyped. Typed slightly wrong, it opens a second item that looks
+like the first and tracks separately, and neither copy is wrong on its face.
+
+`docbound close` refuses a slug that is not already open and prints the ones
+that are, so a typo made through the command is an error message. Nothing
+protects the file when it is edited by hand, which is what this covers.
+
+Only slugs of six characters or more are compared, since short ones collide
+innocently. Both open and closed items are considered, because closing the wrong
+slug leaves the real item open.
+
+A warning rather than an error: two genuinely different items can be one edit
+apart, and blocking a task over a naming coincidence would be a check about
+spelling rather than about truth.
+
+```
+waiver: open-item-typo docs/WORKLOG.md - retry-backoff and retry-backups are
+different items; the first is about timing and the second about persistence.
 ```
 
 ## Subagent mode

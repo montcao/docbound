@@ -42,6 +42,7 @@ usage: docbound <command> [options]
   audit      run the audit (pass-through to the skill's audit.mjs)
   summary    what this project is, assembled from its docs and no source
   start      open a worklog entry, before the first edit
+  close      close a tracked open item by its slug
   scaffold   create the initial docs structure
   adr        print the next decision-record number and create the file
   doctor     report what is installed, whether hooks are wired, and whether
@@ -269,6 +270,10 @@ function commandStart(options) {
   return passThrough(path.join(SKILL_SCRIPTS, "start.mjs"), options.rest);
 }
 
+function commandClose(options) {
+  return passThrough(path.join(SKILL_SCRIPTS, "close.mjs"), options.rest);
+}
+
 function commandAdr(options) {
   const root = process.cwd();
   const result = spawnSync(
@@ -360,6 +365,8 @@ export async function main(argv) {
       return commandSummary(options);
     case "start":
       return commandStart(options);
+    case "close":
+      return commandClose(options);
     case "adr":
       return commandAdr(options);
     case "doctor":

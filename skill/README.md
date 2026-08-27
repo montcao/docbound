@@ -11,6 +11,8 @@ edited; everything under `dist/` and `plugin/` is a copy of it produced by
 - `skill/docbound/scripts/lib/checks/`: one module per check, named for its ID.
 - `skill/docbound/scripts/start.mjs`: step 2 of the loop as a command. Writes
   the entry skeleton so the agent writes only the Intent.
+- `skill/docbound/scripts/close.mjs`: closes a tracked open item by slug, and
+  refuses a slug that is not open.
 - `skill/docbound/scripts/summary.mjs`: step 1 of the loop as a command. Reads
   the documentation set and no source at all; see
   `docs/decisions/0012-summary-from-docs.md`.

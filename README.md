@@ -187,6 +187,7 @@ recorded in the output.
 | `comment-sentence` | warn | Commented-out code, or comments written as notes to self |
 | `line-length` | warn | Lines past the limit your repository configures |
 | `mixed-indent` | warn | Tabs and spaces in one file |
+| `open-item-typo` | warn | Two open-item slugs one typo apart, so one item became two |
 
 Four more apply in subagent mode. `docs/checks.md` covers every check: what it
 detects, what is exempt from it, and a waiver a reviewer would accept.

@@ -1,0 +1,10 @@
+{
+  "note": "One character apart. docbound close would have refused it; a hand edit does not.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "open-item-typo": 1
+  },
+  "waived": {},
+  "exit": 0
+}

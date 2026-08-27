@@ -133,7 +133,7 @@ node scripts/audit.mjs
 
 Read every finding. Fix it, or add a waiver line with a reason a reviewer would accept. Then complete the worklog entry: `Outcome` with what actually changed by path — including what was deleted — and `Still open` with what is unfinished, unknown, or deferred.
 
-An item in `Still open` that will outlive this task gets a slug: `- [retry-jitter] the backoff has no jitter…`. Declare it once. It stays open until some later entry writes `- [retry-jitter] closed: …`, so carrying it forward costs nothing and never means retyping it in different words. Restating an untracked item is how one piece of work becomes five. "Tests pass" is not an outcome; "replaced the in-memory queue with the Redis-backed one in `worker/queue.py`; retry policy unchanged; deleted the stale durability caveat from `worker/README.md`" is.
+Before writing a new item, run `node scripts/summary.mjs --open` to see what is already open and under which slug. An item in `Still open` that will outlive this task gets a slug: `- [retry-jitter] the backoff has no jitter…`. Declare it once. It stays open until some later entry writes `- [retry-jitter] closed: …`, so carrying it forward costs nothing and never means retyping it in different words. Restating an untracked item is how one piece of work becomes five. "Tests pass" is not an outcome; "replaced the in-memory queue with the Redis-backed one in `worker/queue.py`; retry policy unchanged; deleted the stale durability caveat from `worker/README.md`" is.
 
 Re-run until it exits 0. Then stop (principle 4).
 
@@ -165,6 +165,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `comment-sentence` | warn | Full-line comments in changed source are complete sentences (capitalized, terminated); commented-out code is flagged |
 | `line-length` | warn | Changed source respects the repo's configured line length (`.editorconfig`, `pyproject`, `.prettierrc`, `setup.cfg`), or 80 if none is set |
 | `mixed-indent` | warn | No changed source file indents with both tabs and spaces |
+| `open-item-typo` | warn | No two `Still open` slugs are within two characters of each other, which is how one item silently becomes two |
 
 Subagent mode (`--mode subagent`) adds:
 
