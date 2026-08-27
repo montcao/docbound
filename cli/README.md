@@ -27,7 +27,9 @@ directly.
 
 `baseline` is the one command that is neither an install nor a pass-through. It
 resolves a ref with git, writes `audit.baseline` into `.docbound/config.json`,
-and leaves every other key in that file alone. It belongs here rather than in
+and leaves every other key in that file alone. It is also the one command that
+needs git: without a repository, or given a ref that is not a commit, it writes
+nothing and exits 1, which is a failed operation rather than malformed usage. It belongs here rather than in
 the skill because adopting docbound is an install-time act, not a step in the
 loop (`docs/decisions/0019-adoption-baseline.md`).
 

@@ -54,6 +54,12 @@ breaking change to any of them is a major version and carries a decision record.
   a comment naming this check were both being reported as shapeless TODOs.
 - An empty change set no longer asks for a worklog entry. Nothing changed, so no
   task happened, so there is nothing to have logged.
+- `docbound baseline` exits 1 rather than 2 outside a git repository and when
+  given a ref that is not a commit. Two is the code for malformed usage; in both
+  of those the flags were fine and the operation failed. It writes nothing in
+  either case.
+- A baseline configured in a tree with no git is reported on stderr instead of
+  being ignored silently, since the audit is then wider than the config reads.
 
 ### Changed
 

@@ -38,6 +38,10 @@ merge base. The doc checks that read the whole repository rather than the diff
 are `dead-ref`, `template-residue`, `orphan-doc`, `duplicate-block`, and
 `stale-marker`.
 
+With no git repository at all, the change set is the whole tree and
+`doc-coverage` is not evaluated, since there is no diff to ask what a change
+covered.
+
 A repository adopting docbound on existing history runs `docbound baseline`
 once. That records the current commit, and from then on the change set is
 everything since it and the whole-repository doc checks report only on docs that

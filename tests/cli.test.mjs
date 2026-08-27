@@ -300,8 +300,35 @@ describe("docbound baseline", () => {
   test("refuses a ref that is not a commit and writes nothing", () => {
     const repo = project();
     const result = cli(repo, ["baseline", "not-a-ref"]);
-    assert.notEqual(result.status, 0);
+    // 1, not 2: the flags were fine and the operation failed.
+    assert.equal(result.status, 1);
     assert.equal(fs.existsSync(path.join(repo, ".docbound", "config.json")), false);
+  });
+
+  test("says so in a directory with no git, and writes nothing", () => {
+    const dir = tempDir("nogit");
+    made.push(dir);
+    fs.writeFileSync(path.join(dir, "README.md"), "# nogit\n");
+
+    const result = cli(dir, ["baseline"]);
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /not a git repository/);
+    assert.equal(fs.existsSync(path.join(dir, ".docbound", "config.json")), false);
+  });
+
+  test("a stale baseline in a tree with no git is reported, not obeyed", () => {
+    const dir = tempDir("nogit-config");
+    made.push(dir);
+    fs.writeFileSync(path.join(dir, "README.md"), "# nogit\n");
+    fs.mkdirSync(path.join(dir, ".docbound"));
+    fs.writeFileSync(
+      path.join(dir, ".docbound", "config.json"),
+      JSON.stringify({ audit: { baseline: "deadbeef" } }),
+    );
+
+    const result = cli(dir, ["audit", "--root", dir]);
+    assert.match(result.stderr, /not a git repository/);
+    assert.match(result.stdout, /git=no/);
   });
 
   test("a second run says the baseline is already there", () => {

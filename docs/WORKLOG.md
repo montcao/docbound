@@ -5,6 +5,79 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Correct baseline's exit code and say what it does without git
+
+Agent: claude · Branch: main
+
+### Intent
+
+Every command was run in a directory with no git repository in it: audit,
+summary, scaffold, start, install, doctor, and the hook on both events. Nothing
+crashed. The audit reports `git=no`, scans the whole tree, and says that
+coverage is not evaluated; the hook writes its cache and still exits 2 on stop.
+
+Two things are wrong rather than broken.
+
+`docbound baseline` exits 2 when it is run outside a git repository, and again
+when the ref it is given is not a commit. Two is the code for malformed usage,
+and `cli/README.md` says so: 0 success, 1 findings or a failed operation, 2
+usage. In both of these the flags were fine and the operation failed, which is
+1. `notFound` in `cli/index.mjs` exists for exactly this and carries a comment
+saying so. It was not reached for.
+
+The other is silence. A `.docbound/config.json` carrying a baseline in a
+directory with no git is ignored without a word, because `detectChanges`
+returns before it reads the key. That configuration is stale, most likely
+copied in from a repository that had history, and the audit is quietly wider
+than the file says. There is already a warning for a baseline that does not
+resolve, and this is the same situation.
+
+### Expected to touch
+
+- `cli/index.mjs` — the two exit codes
+- `skill/docbound/scripts/lib/changes.mjs` — the ignored-baseline warning
+- `README.md`, `cli/README.md`, `docs/checks.md` — what baseline does without git
+- `tests/cli.test.mjs` — the exit codes, and the no-git case
+
+### Unknowns going in
+
+Whether the same exit-code mistake is elsewhere in `cli/index.mjs`. Three other
+calls to `fail` look like failed operations rather than usage errors, and they
+predate this work.
+
+### Outcome
+
+No git means no crash. Every command was exercised in a directory with no
+repository in it and all of them behaved: the audit reports `git=no`, walks the
+tree, and says coverage is not evaluated; `scaffold`, `summary`, `start`,
+`install`, and `doctor` work unchanged; the hook writes its cache, reports each
+finding once, and still exits 2 on stop.
+
+Two corrections rather than repairs.
+
+`commandBaseline` in `cli/index.mjs` now returns `notFound` in both of its
+failure paths, so running it outside a git repository or handing it a ref that
+is not a commit exits 1 rather than 2. The message in the first case also says
+what happens instead, since a directory with no history is not a problem to
+solve. `cli/README.md` and `README.md` say the same.
+
+`detectChanges` in `skill/docbound/scripts/lib/changes.mjs` writes a line to
+stderr when a baseline is configured in a tree with no git, instead of returning
+before it reads the key. That configuration is stale, and without the line the
+audit is quietly wider than `.docbound/config.json` reads.
+
+`docs/ARCHITECTURE.md` and `docs/checks.md` gained the no-git paragraph.
+`tests/cli.test.mjs` gained two cases and tightened a third from "not zero" to
+1, for 168 tests. Nothing deleted, no waivers, no decision record: neither
+change alters what the audit decides, only how a failure is reported.
+
+### Still open
+
+- [cli-exit-codes] Three other calls to `fail` in `cli/index.mjs` read as failed
+  operations rather than usage errors and still exit 2: a missing `--source`
+  target, an ADR file that exists already, and a next-number lookup that failed.
+  They predate this work and are left alone rather than swept into it.
+
 ## 2026-08-27 - Fix four false positives, add an adoption baseline, and test against real repositories
 
 Agent: claude · Branch: main

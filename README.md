@@ -242,7 +242,10 @@ repository. Measured on a 107-file project: 97 errors before this command, and a
 passing audit after it, with the next real edit producing exactly two findings
 about that edit (`docs/decisions/0019-adoption-baseline.md`).
 
-A brand new repository does not need it. There is no history to hold apart.
+A brand new repository does not need it. There is no history to hold apart, and
+neither does a directory that is not a git repository at all: docbound scans the
+whole tree there and evaluates no coverage, which is what a baseline would
+otherwise narrow.
 
 ## Turning it down, or off
 

@@ -271,11 +271,20 @@ function commandAudit(options) {
 function commandBaseline(options) {
   const root = gitRoot();
   if (root === null) {
-    return fail("not a git repository, so there is no commit to baseline at");
+    // A failed operation, not malformed usage: the flags were fine and there is
+    // simply no history here. The audit already handles this case on its own,
+    // scanning the whole tree with coverage not evaluated.
+    return notFound(
+      "not a git repository, so there is no commit to baseline at. " +
+        "The audit scans the whole tree here and evaluates no coverage, " +
+        "which is what a baseline would otherwise narrow.",
+    );
   }
   const requested = options.rest.find((arg) => !arg.startsWith("-")) ?? "HEAD";
   const resolved = gitOutput(root, ["rev-parse", "--verify", "--quiet", `${requested}^{commit}`]);
-  if (resolved === null) return fail(`${requested} is not a commit in this repository`);
+  if (resolved === null) {
+    return notFound(`${requested} is not a commit in this repository`);
+  }
 
   const { file, commit, previous } = setBaseline(root, resolved);
   const short = commit.slice(0, 12);

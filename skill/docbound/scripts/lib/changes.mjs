@@ -28,6 +28,16 @@ const BASE_CANDIDATES = ["origin/main", "main", "origin/master", "master"];
 
 export function detectChanges(root, base, extraExcludes = [], baseline = null) {
   if (run(["rev-parse", "--is-inside-work-tree"], root) === null) {
+    // A baseline here is stale configuration, most likely copied from a
+    // repository that had history. Saying so matters because the audit is then
+    // quietly wider than the config file reads: the whole tree, not what came
+    // after a commit.
+    if (baseline) {
+      process.stderr.write(
+        "docbound: audit.baseline is set but this is not a git repository; " +
+          "scanning the whole tree instead\n",
+      );
+    }
     return {
       changed: allFiles(root, extraExcludes),
       addedDirs: new Set(),

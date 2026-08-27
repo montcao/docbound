@@ -102,6 +102,11 @@ checks narrow with it. `docbound baseline` writes that key, which makes adopting
 docbound on existing history a passing first run rather than a wall
 (`docs/decisions/0019-adoption-baseline.md`).
 
+With no git repository at all, `skill/docbound/scripts/lib/changes.mjs` walks
+the tree instead and `doc-coverage` is not evaluated, since there is no diff to
+ask what a change covered. A baseline configured in a tree with no git is
+reported on stderr and ignored.
+
 The audit is entered from four places, all of which reach the same function:
 the agent running `skill/docbound/scripts/audit.mjs` directly, the hook on an
 edit or a stop, `npx docbound audit`, and CI.
