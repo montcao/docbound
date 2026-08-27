@@ -114,13 +114,13 @@ Tell: `duplicate-block` fires; or a doc restates something a link would have cov
 
 Link. If the canonical version is wrong, fix it there. Two copies will diverge, and the reader will not know which one is lying.
 
-## 15. The comment that should be a name
+## 15. The comment that stands in for a name
 
-`# user's primary email address` above `e = ...`.
+A comment whose whole content is the meaning of an identifier next to it.
 
-Tell: the comment is a noun phrase and the identifier beside it is one to three characters or a generic word.
+Tell: delete the comment and the only thing lost is a definition the reader could have got from a better name.
 
-Rename the identifier. Delete the comment.
+It reads as documentation and behaves like a liability: nothing keeps it in step with the code, and the next reader trusts it. Say what the code is *for*, which a name cannot carry, and record the naming mismatch under `Still open` rather than fixing it here.
 
 ## 16. The TODO that is a shrug
 
@@ -144,4 +144,56 @@ Delete it. Version control is the archive. A reader cannot tell whether a fossil
 
 Tell: a comment that defines the identifiers on its own line.
 
-Rename: `manifest = load(manifest_path)`. Delete the comment. Naming is the first mechanism; comments are the fourth.
+The comment is doing the name's job, so it will drift out of step with the code and mislead. Write what the line is *for* instead, and put the mismatch under `Still open` with the current name and what it appears to promise. This skill does not rename things.
+
+---
+
+The rest are sentence-level. They are what makes a document read as assembled rather than written, and each survives every check in this skill, because every one of them is a judgement about English. Adapted for technical documentation from a set of AI writing patterns; `NOTICE.md` has the attribution.
+
+## 19. The performed contrast
+
+"The question is not the model. It is the eval." "Not a linter. A discipline."
+
+Tell: a sentence that defines a thing by what it is not, or a pair where the first half exists to be knocked down.
+
+State the second half and delete the first. "The eval matters more than the model." A reader who needed the contrast to understand you needed a clearer sentence, and a reader who did not just paid for the setup.
+
+## 20. The reveal
+
+A short clause, a colon, then the payoff. Or the setup that promises something hidden: "the part everyone misses", "here is the thing", "what this really means".
+
+Tell: the sentence would lose nothing if the words before the colon were deleted.
+
+Write the plain sentence. Colons are for lists, labels, and quotes. A document that stages its own findings makes the reader wait for information they came to collect.
+
+## 21. Commentary instead of content
+
+"This is the important part." "Note that this matters." A trailing clause that explains the significance of the thing just said: "...highlighting the team's commitment", "...underscoring the need for care".
+
+Tell: a sentence that describes another sentence rather than the system.
+
+Cut it and let the fact carry the weight. If a point needs to be marked as important, it was not stated strongly enough. Replace the trailing clause with the consequence: "adds file search, so a reader finds an old draft without leaving the editor".
+
+## 22. The kicker
+
+A closing line that turns the section into an aphorism. "Documentation is a promise you keep." A final paragraph restating what the reader just read.
+
+Tell: the last sentence adds no fact, and rereading the section without it loses nothing.
+
+Delete it and end on the last concrete point, without replacing it with a better metaphor. A reader who has just finished the section does not need it summarised back to them.
+
+## 23. Assembled rhythm
+
+Stacked fragments. Three of them. Like this. Or the same sentence shape four paragraphs running. Or one thing called a check, then a rule, then a guard, then a gate, in four consecutive sentences.
+
+Tell: read it aloud. If the cadence is doing work the content is not, or a term changes clothes between paragraphs, this is it.
+
+Vary sentence length because the meaning calls for it, and repeat the correct word rather than rotating synonyms. In a document, a renamed concept reads as a second concept.
+
+## 24. Formatting that performs
+
+Bold sprinkled mid-sentence for emphasis. A bold phrase used as a heading over two sentences. A bullet list where two sentences of prose would read better. A heading over a section shorter than its own title.
+
+Tell: remove every bold and every bullet, and the passage reads the same or better.
+
+Use real headings for real sections. Bold marks a term being defined, not a sentence being insisted on. A list is for things that are genuinely a list.

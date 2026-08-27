@@ -8,7 +8,31 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Fixed
+
+- `README.npm.md`, which is what npmjs.com shows, advertised Codex, Gemini CLI,
+  GitHub Copilot, and opencode. All four were removed in
+  `docs/decisions/0008-verified-providers-only.md` and the file was never
+  updated. It also gave a check count two versions stale. The audit reads paths
+  and placeholders, not a document's claims about the world, so nothing caught
+  it.
+
 ### Changed
+
+- Six sentence-level patterns went into
+  `skill/docbound/references/anti-patterns.md`: the performed contrast, the
+  reveal, commentary instead of content, the kicker, assembled rhythm, and
+  formatting that performs. The standard already ruled out marketing and said
+  nothing about prose that sounds considered while carrying nothing, which is
+  the version that reaches a reader. Nothing enforces them, which is stated
+  rather than hidden. `docs/decisions/0028-write-it-do-not-perform-it.md`.
+- The six READMEs were edited against those patterns. Fake-strong verbs,
+  puffery, metadiscourse, a heading that argued with the reader, and bold
+  standing in for a heading in six places.
+- Patterns 15 and 18 in `skill/docbound/references/anti-patterns.md` still told
+  an agent to rename an identifier, which
+  `docs/decisions/0026-docbound-does-not-recommend-logic.md` stopped this skill
+  from doing and missed. Both now say to record the mismatch instead.
 
 - **The reader is a junior engineer six months from now, not a strong engineer.**
   That line in `skill/docbound/SKILL.md` is what every instruction downstream

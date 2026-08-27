@@ -1,8 +1,11 @@
 # tests
 
-Fixture-based. Every check has a scenario that produces it, and the assertion is
-an exact match on the set of check IDs the audit reports. Not a subset, so a
-check that fires where the scenario does not call for it is a failure.
+How this project proves the audit does what it says. Every check has a small
+repository built for it, and the test asserts the exact set of check IDs the
+audit reports against that repository.
+
+The assertion is an exact match rather than a subset, so a check that fires
+where the scenario does not call for it fails the suite.
 
 ## Start here
 

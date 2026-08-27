@@ -50,6 +50,21 @@ An accepted Architecture Decision Record (ADR) is an archive of the decision as 
 
 The third is the one that gets skipped and the one that matters most. "Reverse if p99 latency exceeds 200ms under 10k concurrent sessions" is a decision that can be revisited. "We chose X" is a decision that will be re-litigated from scratch.
 
+## Write it, do not perform it
+
+Documentation fails in two directions. One is marketing, which this standard has always ruled out. The other is prose that sounds considered while carrying nothing, and it is the one that reaches the reader, because it passes every check in this skill.
+
+Six shapes account for most of it, and `anti-patterns.md` has the full form of each with its tell. In short:
+
+- **State the claim, not the contrast.** "Not a linter, a discipline" becomes what it is.
+- **Skip the reveal.** A clause, a colon, then the payoff is a sentence with a delay in front of it. Colons are for lists, labels, and quotes.
+- **Do not comment on your own sentences.** "This is the important part" and a trailing "...which shows how careful the design is" describe the writing rather than the system.
+- **End on the last fact.** A closing aphorism and a paragraph restating the section both add nothing, and the reader was just there.
+- **Repeat the right word.** Rotating between check, rule, guard, and gate makes one concept read as four.
+- **Let the structure be the structure.** Bold marks a term being defined. A heading marks a section. A list holds things that are a list.
+
+One test catches most of it. Ask whether a sentence could move unchanged into another project's documentation, and if it could, it is not saying anything about this one. "The integration improved efficiency" is portable and empty. "The integration cut deploy time from 40 minutes to 4" belongs to one project only.
+
 ## Open plainly, then go deep
 
 Every README and `ARCHITECTURE.md` opens with a sentence a reader can enter: what the thing is and who it is for, with no identifier, path, or type in it. Names come after.

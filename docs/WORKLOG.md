@@ -5,6 +5,115 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Edit the READMEs and the writing standard against a no-slop rule set
+
+Agent: claude · Branch: main
+
+### Intent
+
+A rule set for removing AI writing patterns was pointed at this repository:
+petergyang/no-ai-slop, MIT licensed. Its word lists find almost nothing here.
+Scanning the six READMEs for the banned vocabulary returns seven hits and every
+one is a false positive: "harness" appears in its literal sense, "just" is
+temporal, and the one em dash sits inside quoted command output.
+
+The pattern rules are a different result. The root README carries a fake-strong
+verb in "docbound attacks that from both ends", importance puffery in "that is
+the entire value of the tool", metadiscourse in "worth repeating here, because
+this is the point where", a binary contrast in "an instruction competes and
+loses, an exit code does not compete", and a kicker in "a tool that accepted one
+would be helping you lie to yourself". A heading argues with the reader rather
+than labelling a section: "The gate, and why it is not as bad as it sounds".
+Two places use bold as a pseudo-heading followed by a colon reveal.
+
+None of that is caught by a word list, and none of it is caught by any check
+here. The existing standard, `skill/docbound/references/style.md`, asks for
+"declarative, present tense, dry" and for no praise or narrative. That rules out
+marketing and says nothing about the patterns above, which is why they are all
+over documents that pass the audit.
+
+Two jobs. Edit the READMEs, and put the pattern rules into the standard the
+agent follows so the documents it writes from here on do not need the same pass.
+
+The rules need adapting rather than copying. Half of that skill is about
+preserving a human writer's voice through an edit, and an agent writing a module
+README has no voice to preserve. What transfers is the list of patterns that
+make prose sound assembled rather than written: the contrast, the reveal, the
+kicker, the puffery, the metadiscourse.
+
+### Expected to touch
+
+- `README.md`, `README.npm.md`, and the four module READMEs
+- `skill/docbound/references/style.md` and `anti-patterns.md`
+- `skill/docbound/SKILL.md` — the writing standard
+- `NOTICE.md` — attribution, since the source is MIT
+
+### Unknowns going in
+
+Whether any of this can be checked. Every pattern is a judgement about English,
+and this repository decided twice already that a check reading intent out of a
+sentence either warns or does not exist. The likely answer is that the rules go
+in the standard and nothing enforces them, which is a weaker position than the
+rest of the skill occupies and should be said rather than hidden.
+
+### Outcome
+
+The word lists found nothing and the pattern rules found a lot, which is the
+useful half of the result.
+
+**The READMEs were edited, not rewritten.** `README.md` lost a fake-strong verb
+("attacks that from both ends"), puffery ("that is the entire value of the
+tool"), metadiscourse ("worth repeating here, because this is the point where"),
+a contrast built to be knocked down ("an instruction competes and loses; an exit
+code does not compete"), a closing aphorism about helping the reader lie to
+themselves, and six places where bold stood in for a heading. The heading "The
+gate, and why it is not as bad as it sounds" argued with the reader and is now
+"The gate". `tests/README.md` opened on a fragment and now opens on a sentence.
+
+**`README.npm.md` was worse than stylistically off.** It advertised Codex,
+Gemini CLI, GitHub Copilot, and opencode, four editors removed in
+`docs/decisions/0008-verified-providers-only.md`, and gave a check count two
+versions stale. That file is what npmjs.com renders. Nothing caught it because
+the audit reads paths and placeholders rather than a document's claims about the
+world. Rewritten, with `baseline` and `summary` added to the command list.
+
+**Six patterns went into the standard**, numbers 19 to 24 of
+`skill/docbound/references/anti-patterns.md`, each with a tell in the format
+that file already uses. Fourteen rules in the source collapsed to six because
+they are one disease. `skill/docbound/references/style.md` carries the rule and
+the portability test, and `skill/docbound/SKILL.md` carries two bullets pointing
+at both. `NOTICE.md` attributes the source, which the MIT licence requires and
+which also marks where the adaptation stops: the half of that skill about
+preserving a human writer's voice does not apply to a document an agent writes
+from a diff.
+
+Writing the new text against its own rules caught two instances. The paragraph
+introducing the portability test was itself a colon reveal, and the section
+about closing aphorisms closed on one.
+
+**Patterns 15 and 18 of that file still told an agent to rename an identifier**,
+which `docs/decisions/0026-docbound-does-not-recommend-logic.md` stopped this
+skill from doing three entries ago and missed. Both now say to record the naming
+mismatch under `Still open`.
+
+No check was added, and `docs/decisions/0028-write-it-do-not-perform-it.md` says
+why: every one of these is a judgement about English, and this project decided
+twice already that such a check either warns or does not exist.
+
+### Still open
+
+- [prose-rules-unenforced] Nothing holds patterns 19 to 24. An agent that
+  ignores them produces documents that pass the audit, and the only signal is a
+  person reading them. The same hole as the rules in records 0018 and 0026, and
+  all three were found by reading rather than by running anything.
+- [npm-readme-unchecked] `README.npm.md` claimed four unsupported editors for
+  two releases. No check reads a document's claims about what the software
+  supports, and the provider list is the one claim that could be compared
+  against `cli/providers.mjs` mechanically.
+- [anti-patterns-size] That reference is 24 patterns and 200 lines. It loads on
+  demand rather than with the skill, so the cost is bounded, but a reference
+  nobody reaches the end of is a reference with a tail nobody follows.
+
 ## 2026-08-27 - Aim the documentation at a junior engineer being trained
 
 Agent: claude · Branch: main

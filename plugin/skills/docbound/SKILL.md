@@ -204,6 +204,8 @@ Read `references/style.md` before writing any doc. Essentials:
 - Docs lead with constraints and invariants. What must be true, what must never happen. Features are visible in the code; constraints are not. This is also the part that teaches: a junior reading a `Must not` list learns that boundaries are a thing to look for.
 - Say the unfamiliar word once, in a clause, the first time it appears. Not a glossary, not a tutorial. One clause is the difference between a reader who continues and one who stops.
 - Declarative, present tense, dry. No "simply," no "just," no praise, no narrative.
+- Write it, do not perform it. No contrast set up to be knocked down, no clause-colon-payoff reveal, no sentence commenting on the sentence before it, no closing aphorism, no bold standing in for a heading. Repeat the correct word rather than rotating synonyms; a renamed concept reads as a second concept. `references/anti-patterns.md` has the tell for each.
+- Apply the portability test. A sentence that could move unchanged into another project's documentation is not saying anything about this one.
 - Every non-obvious claim points at a path: `see worker/queue.py:retry()`. No line numbers.
 - Link, never copy. One owner per fact.
 - Delete before you add.

@@ -4,14 +4,14 @@ A documentation discipline for coding agents. It checks one thing, whether the
 change you just made was written down, and your agent cannot call the task
 finished until it was.
 
-**What it checks.** The documentation for the change in front of it. Did a
-decision get recorded when it was made. Did the doc covering a changed file
-change with it. Does every path a doc mentions still exist.
+It reads the documentation for the change in front of it and asks three
+questions. Did a decision get recorded when it was made. Did the doc covering a
+changed file change with it. Does every path a doc mentions still exist.
 
-**What it does not check.** Whether your code works. That is what your tests are
-for. A green audit means the change is explained, not that it is correct, and
-the two gates are independent: your tests can pass while the audit fails, and
-the reverse.
+It has nothing to say about whether your code works. Your tests cover that. A
+green audit means the change is explained, not that it is correct, and the two
+gates run independently, so your tests can pass while the audit fails and the
+reverse.
 
 ## The problem it solves
 
@@ -28,11 +28,9 @@ reconstructed from code can only recover what the code does. The reasoning was
 never in the source to begin with, so the summary you get is a confident
 description of the *what* with the *why* quietly missing.
 
-docbound attacks that from both ends.
-
-It moves the explanation inside the task instead of after it, so the reasoning
-gets written down while the agent still has it, and the agent is not allowed to
-finish until it is. Then it gives you a command that answers "what is this
+docbound works on both ends of that. It moves the explanation inside the task
+rather than after it, so the reasoning gets written down while the agent still
+has it, and the agent cannot finish until it is. Then it answers "what is this
 project" from those documents alone:
 
 ```
@@ -43,10 +41,10 @@ Purpose, shape, what each module owns and is forbidden from doing, every
 decision with the condition that would reverse it, recent work, and what is
 still open.
 
-**It reads no source file.** That is the claim worth checking, and you can: a
-test plants a marker string in a source file and requires it never to appear in
-the output. How much smaller that makes the answer depends on your repository,
-so measure it there rather than taking a number from here.
+It reads no source file. A test plants a marker string in a source file and
+requires it never to appear in the output, so you can check that yourself. How
+much smaller it makes the answer depends on your repository, so measure it
+there rather than taking a number from here.
 
 On a repository with no documentation it says so, lists the files it looked for,
 and names the command that creates them.
@@ -95,18 +93,18 @@ npx docbound scaffold
 ```
 
 That writes template files full of placeholders, and the audit fails on those
-placeholders on purpose. An empty heading is not documentation, and a tool that
-accepted one would be helping you lie to yourself.
+placeholders on purpose. An empty heading under a filled-in title reads as
+documentation from a distance and answers nothing up close.
 
 ## What changes about your day
 
-Five steps. Your agent runs them, not you, once the skill is installed.
+Once the skill is installed your agent runs these five steps, not you.
 
 1. **Orient.** Before writing code, read the docs that already exist for the
    area being touched, and notice anything that has stopped being true.
 2. **Declare.** Open an entry in `docs/WORKLOG.md` saying what you are about to
-   do, before the first edit. Written beforehand it is a prediction. Written
-   afterwards it is a summary of a diff, which nobody needs.
+   do, before the first edit. An entry written beforehand is a prediction, which
+   is the only version worth reading later.
 3. **Work.** When a change alters behaviour or a contract, the doc covering it
    changes in the same commit. Not batched to the end.
 4. **Decide.** The moment you pick option A over option B is the only moment you
@@ -115,11 +113,10 @@ Five steps. Your agent runs them, not you, once the skill is installed.
 5. **Reconcile.** Delete what has stopped being true, run the audit, and when it
    exits 0, stop. There is no extra credit for polishing past that.
 
-The parts that feel unfamiliar are steps 2 and 4. Both exist for the same
-reason: they capture something that is only available before the work is
-finished.
+Steps 2 and 4 are the unfamiliar ones. Both capture something that stops being
+available once the work is finished.
 
-## The gate, and why it is not as bad as it sounds
+## The gate
 
 Installing wires two hooks into your editor.
 
@@ -131,24 +128,22 @@ exits with code 2, which your editor reads as *do not stop, here is why*. The
 agent gets the findings at the exact moment it believed it was done, and keeps
 working.
 
-That is the entire value of the tool. An instruction that says "please document
-this" competes with everything else in the agent's context and loses. An exit
-code does not compete.
+An instruction that says "please document this" competes with everything else in
+the agent's context and usually loses. An exit code is not in that competition,
+which is why the hook does the work the instruction could not.
 
-Worth repeating here, because this is the point where a gate starts to feel like
-an authority on your work: the audit is reading documentation and nothing else.
-It has no opinion on whether the code is right. Wire your tests into the same
-stop hook if you want that gate too.
+The audit reads documentation and nothing else, so a failing gate is not a
+verdict on your code. Wire your tests into the same stop hook if you want that
+gate too.
 
-**What it feels like in practice:** the agent adds a paragraph to a README,
-writes two sentences in the worklog, and continues. Usually under a minute,
-because it still has the reasoning loaded. The cost lands on the agent, not on
-you.
+In practice the agent adds a paragraph to a README, writes two sentences in the
+worklog, and continues. Usually under a minute, because it still has the
+reasoning loaded. The cost lands on the agent rather than on you.
 
 ## When you think a finding is wrong
 
-Sometimes it is. A generated file has no meaningful doc to write. Say so, in one
-line in the worklog entry:
+Sometimes it is. A generated file has no meaningful doc to write, and you say so
+in one line in the worklog entry:
 
 ```
 waiver: doc-coverage src/generated/api_types.ts - emitted by the codegen step;
@@ -158,14 +153,13 @@ the contract lives in the schema, not in this file.
 The finding stops blocking, and it stays visible in the output under `WAIVED`
 so a reviewer sees the exception and the reason next to it.
 
-Two things to understand about waivers. They apply to the current worklog entry
-only, so one does not quietly outlive the task that justified it. And they need
-a reason a reviewer would accept, because "not relevant" teaches everyone to
-skim the section that most needs reading.
+Waivers apply to the current worklog entry only, so one does not outlive the task
+that justified it, and they need a reason a reviewer would accept. "Not relevant"
+teaches everyone to skim the section that most needs reading.
 
-If you find yourself writing waivers in more than one task out of five, the
-checks are wrong for your repository, not you. That threshold is written into
-the adoption record the tool generates.
+Writing waivers in more than one task out of five means the checks are mistuned
+for your repository. That threshold is written into the adoption record the tool
+generates.
 
 ## The checks
 
@@ -196,8 +190,8 @@ recorded in the output.
 Four more apply in subagent mode. `docs/checks.md` covers every check: what it
 detects, what is exempt from it, and a waiver a reviewer would accept.
 
-**If you read only one:** `doc-coverage`. It is the check that produces most of
-the value and most of the friction, and understanding what counts as covering a
+Start with `doc-coverage` if you only read one. It produces most of the value
+and most of the friction, and understanding what counts as covering a
 file explains the shape of everything else.
 
 ## Installing it
@@ -248,25 +242,29 @@ otherwise narrow.
 
 ## Turning it down, or off
 
-Adopt this in the order that suits you. All four of these are supported
-positions, not workarounds.
+Adopt this in the order that suits you. Each of these is supported and tested.
 
-**Run the checks by hand, no hooks:**
+### Run the checks by hand, with no hooks
 
 ```
 npx docbound install --no-hooks
 ```
 
-**Keep the hooks but stop the blocking.** Set `hook.blockOnStop` to `false` in
-the gitignored local override beside `.docbound/config.json`. That file is per
-developer and nobody reviews it.
+### Keep the hooks but stop the blocking
 
-**Ignore a whole directory.** Add it to `audit.exclude` in
-`.docbound/config.json`, which is tracked, so the exclusion is reviewed like any
-other change to what the repository considers documented.
+Set `hook.blockOnStop` to `false` in the gitignored local override beside
+`.docbound/config.json`. That file is per developer and nobody reviews it.
 
-**Run it in CI only.** `npx docbound audit` exits 0, 1, or 2, so it drops into a
-workflow without the editor integration.
+### Ignore a whole directory
+
+Add it to `audit.exclude` in `.docbound/config.json`, which is tracked, so the
+exclusion is reviewed like any other change to what the repository considers
+documented.
+
+### Run it in CI only
+
+`npx docbound audit` exits 0, 1, or 2, so it drops into a workflow without the
+editor integration.
 
 Keep the per-developer override out of git with a marker block in `.gitignore`:
 
@@ -279,15 +277,14 @@ Keep the per-developer override out of git with a marker block in `.gitignore`:
 
 ## Supported editors
 
-**Claude Code** and **Cursor**. Both were verified against the editor itself,
-against the files it ships rather than a description of them, and each entry in
+Claude Code and Cursor. Both were verified against the editor itself, against
+the files it ships rather than a description of them, and each entry in
 `cli/providers.mjs` records what that evidence was.
 
-Nothing else ships, and the reason is worth knowing before you go looking for
-your editor in that list. A provider entry written from a guess fails silently:
-the files copy, the install prints success, the editor reads a different path,
-and the skill never loads. There is no error to search for. A missing editor is
-a feature request; a broken one wastes an afternoon.
+Nothing else ships. A provider entry written from a guess fails silently: the
+files copy, the install prints success, the editor reads a different path, and
+the skill never loads. There is no error to search for. A missing editor is a
+feature request; a broken one wastes an afternoon.
 
 `docs/providers.md` lists the candidates and the four questions each needs
 answered before it can be added. Answering them for your editor is a good first
@@ -298,21 +295,23 @@ no path claim attached, ready to copy wherever that tool reads skills from.
 
 ## Other ways to install
 
-**Claude Code plugin:**
+### As a Claude Code plugin
 
 ```
 /plugin marketplace add montcao/docbound
 /plugin install docbound@montcao
 ```
 
-**Submodule,** if you want the skill to stay a checkout you update with git:
+### As a submodule
+
+Keeps the skill a checkout you update with git.
 
 ```
 git submodule add https://github.com/montcao/docbound .docbound-src
 npx --prefix .docbound-src docbound link --source=.docbound-src
 ```
 
-**Copy,** with no toolchain at all:
+### As a copy, with no toolchain
 
 ```
 cp -R dist/payload .claude/skills/docbound
@@ -320,8 +319,8 @@ cp -R dist/payload .claude/skills/docbound
 
 ## Subagent mode
 
-For when one agent writes code and a second agent documents it afterwards. The
-second one never had the moment where the decision was made, so it works under
+One agent writes the code and a second one documents it afterwards. The second
+agent never had the moment where the decision was made, so it works under
 stricter rules: every reconstructed reason is marked `Inferred:` and queued for
 a human to confirm, and it may edit comments but never logic or names. A missing
 handoff from the first agent is an error the second one is not allowed to paper
