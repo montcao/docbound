@@ -10,6 +10,14 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- A span scanner that answers what kind of span a character sits in: code, line
+  comment, block comment, or string. A lexer with a per-language delimiter
+  table, in the manner of `tokei`, rather than a parser, so it costs no
+  dependency and every install path survives. No check reads it yet; it lands
+  alone so it can be judged on its own tests.
+  `docs/decisions/0016-span-scanner-not-a-parser.md` records why this was built
+  rather than taken from tree-sitter.
+
 - `docbound close retry-jitter "added jitter"`: closes a tracked open item and
   refuses a slug that is not open, printing the ones that are. A mistyped slug
   was previously a second item that looked like the first.

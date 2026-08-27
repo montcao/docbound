@@ -16,6 +16,11 @@ edited; everything under `dist/` and `plugin/` is a copy of it produced by
 - `skill/docbound/scripts/summary.mjs`: step 1 of the loop as a command. Reads
   the documentation set and no source at all; see
   `docs/decisions/0012-summary-from-docs.md`.
+- `skill/docbound/scripts/lib/scan.mjs` and
+  `skill/docbound/scripts/lib/languages.mjs`: what kind of span
+  a character sits in, so a comment marker inside a string is not read as a
+  comment. A lexer with a delimiter table, not a parser
+  (`docs/decisions/0016-span-scanner-not-a-parser.md`). Nothing reads it yet.
 - `skill/docbound/scripts/lib/digest.mjs`: the documentation set parsed as data.
   Module contracts, decisions and their reversal conditions, worklog entries,
   and the open items tracked across them

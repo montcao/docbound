@@ -5,6 +5,113 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Add a span scanner, with no check depending on it yet
+
+Agent: claude · Branch: main
+
+### Intent
+
+Four checks read source with regular expressions and each is approximate in a
+way that shows. `logic-touched` strips comments with a regex, so a comment
+marker inside a string literal is misread, which `docs/ARCHITECTURE.md` lists as
+a known gap. `comment-sentence` reads line by line and calls the continuation of
+a wrapped sentence a fragment. A doc citing `src/app.py:refresh()` has its path
+checked and its symbol thrown away, so the style guide asks for a reference the
+audit never verifies.
+
+All of that wants one capability, and it is smaller than it looks: knowing what
+kind of span a character sits in. Code, line comment, block comment, or string.
+That is a lexer with a per-language delimiter table, which is how `tokei` and
+`cloc` work, and not a parser. Tree-sitter builds a concrete syntax tree because
+editors need one; nothing here does.
+
+Buying it instead would cost a native module or a WASM runtime plus a grammar
+per language, which ends `cp -R dist/payload` as an install path and ends the
+claim of no dependencies. It would also make a finding depend on what someone
+installed, and a check that reports differently on two machines is worse than
+one that is consistently approximate.
+
+This lands the scanner alone. No check reads it yet, so the audit behaves
+identically and every fixture keeps its current expectations. The scanner is
+judged on its own tests before anything depends on it.
+
+Two things shape the implementation rather than decorate it. The hook runs this
+after every file edit, over source from repositories nobody here has read, so a
+pathological input must not hang a developer's session: hard caps, guaranteed
+forward progress, and no backtracking-prone matching in the loop. And an
+unsupported language degrades to today's behaviour rather than to a worse guess.
+
+### Expected to touch
+
+- `skill/docbound/scripts/lib/scan.mjs` - the state machine
+- `skill/docbound/scripts/lib/languages.mjs` - the delimiter table
+- `tests/scan.test.mjs` - including the cases regular expressions get wrong
+- `docs/decisions/` - the build-versus-buy record
+- `skill/README.md` - what the new surface is for
+
+### Unknowns going in
+
+- How many languages are worth a table entry before the table becomes the
+  maintenance burden the dependency was going to be.
+- Whether interpolated strings need handling in this pass. Treating the inside
+  of a template literal as string rather than code is the safer error, since it
+  suppresses a finding rather than inventing one.
+
+### Outcome
+
+**The scanner**, `skill/docbound/scripts/lib/scan.mjs`, with the delimiter table
+in `skill/docbound/scripts/lib/languages.mjs`. A state machine over the text
+emitting contiguous spans of code, line comment, block comment, or string.
+Twenty-six languages in the table; anything else returns null and the caller
+keeps the line-based path.
+
+Four surfaces on top of it. `maskNonCode` blanks non-code while keeping length
+and line breaks, so a pattern run over the result reports a line number that
+matches the original file. `comments` returns comment spans with their line.
+`definitions` reads names from masked code, so prose cannot supply one.
+`defines` answers the question a doc reference asks.
+
+**Nothing reads it.** No check imports it, the check count is unchanged at
+nineteen and four, and every fixture keeps its expectations. That was the point
+of landing it alone.
+
+**It gets right what the regular expressions get wrong.** A comment marker
+inside a string, a hash inside a Python string, an escaped quote, a Python
+docstring containing a hash, nesting Rust block comments against non-nesting C
+ones, a quote inside a comment, and a backslash before a Go raw string's closing
+backtick. Each of those is a test naming the check that is wrong about it today.
+
+**The safety properties are tested, not asserted.** Every iteration advances, so
+an unterminated block comment, a file of unbalanced quotes, and twenty thousand
+nested comment openers all terminate. Input above two megabytes is declined. The
+loop compares strings at an index and runs no backtracking-capable pattern over
+untrusted text, and a test asserts no definition pattern nests a quantifier.
+This runs from a hook after every file edit, so a file that hangs it hangs a
+developer's session.
+
+One test was wrong rather than the scanner: my Go sample opened a second raw
+string, and the scanner had handled it correctly.
+
+`docs/decisions/0016-span-scanner-not-a-parser.md` records why this was built
+rather than taken, and the rule that keeps the two apart: an optional dependency
+may add checks, and may never change what an existing check reports.
+
+145 tests.
+
+### Still open
+
+- [scanner-interpolation] The scanner reads the inside of a template literal or
+  an f-string as string rather than code. That suppresses a finding rather than
+  inventing one, which is the safer error, and it is still wrong.
+- [scanner-jsx] The TSX, JSX, Vue, and Svelte extensions are deliberately
+  absent from the table, since each nests a second syntax. They fall back to
+  the line-based path.
+- [scanner-regex-literal] A JavaScript regex literal containing a quote or a
+  comment marker is read wrongly. Telling a regex literal from division needs a
+  parser.
+- [symbol-refs] `dead-ref` still discards the symbol half of a reference. The
+  scanner now makes checking it cheap, and that is the next check to move.
+
 ## 2026-08-27 - Make slugs findable, close them by command, and scan for secrets
 
 Agent: claude · Branch: main
