@@ -4,7 +4,6 @@
   "description": "Continuous documentation discipline for AI coding agents, with a blocking audit that defines done.",
   "type": "module",
   "license": "Apache-2.0",
-  "readme": "README.npm.md",
   "bin": {
     "docbound": "cli/index.mjs"
   },
@@ -17,7 +16,6 @@
     "skill/",
     "!skill/docbound/scripts/reference/",
     "skills-lock.json",
-    "README.npm.md",
     "LICENSE"
   ],
   "scripts": {

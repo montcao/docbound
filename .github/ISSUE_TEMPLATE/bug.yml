@@ -1,0 +1,57 @@
+name: Bug report
+description: A check fired where it should not have, or a command did the wrong thing.
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The most useful report names the shape of the repository it happened on
+        and pastes the full output. If a check fired where it should not have,
+        the construct that triggered it is the whole bug.
+
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: The command you ran and the output it gave, in full.
+      render: shell
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: What you expected instead
+    validations:
+      required: true
+
+  - type: textarea
+    id: repo
+    attributes:
+      label: The repository it happened on
+      description: >
+        Languages, roughly how many files, whether it is a monorepo, and whether
+        `docbound baseline` has been run. If a check misread a specific
+        construct, paste the smallest version of that construct.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "`npx docbound --version`, and `node --version`."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: editor
+    attributes:
+      label: Editor
+      options:
+        - Claude Code
+        - Cursor
+        - No editor, running the CLI directly
+        - Other
+    validations:
+      required: true

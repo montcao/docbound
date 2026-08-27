@@ -10,6 +10,28 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- `.github/workflows/publish.yml`. A version tag runs the three gates CI runs,
+  checks that the tag matches `package.json`, prints the tarball contents, and
+  publishes with provenance. Releasing is `node scripts/release.mjs --version
+  X.Y.Z` followed by `git push --follow-tags`.
+- `CONTRIBUTING.md`, `SECURITY.md`, three issue templates, and a pull request
+  template. `SECURITY.md` carries the threat model, which is specific here: the
+  hook runs automatically after every edit, over repositories nobody has read,
+  so untrusted configuration, inputs that could hang it, and file contents
+  reaching a transcript are the three things that matter.
+- `README.md` opens on the audit stopping an agent mid-turn, then a command a
+  reader can run on their own repository without installing anything, then the
+  evidence. It also explains why over half the files here are generated.
+
+### Removed
+
+- `README.npm.md`, and the `readme` field in `package.json`. npm ignores that
+  field and always renders the `README.md` at the tarball root, so the file was
+  shipped in every tarball and shown to nobody. It carried four unsupported
+  editors for as long as it existed, which is what an unread file does.
+
+### Added
+
 - Unix seconds, in three places. `docbound audit` prints `t=` in its header and
   a `timestamp` field in its JSON. `docbound start` writes `t=` onto the entry's
   Agent line, and the entry template carries the field for a hand-written one.
@@ -29,7 +51,7 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Fixed
 
-- `README.npm.md`, which is what npmjs.com shows, advertised Codex, Gemini CLI,
+- `README.npm.md` advertised Codex, Gemini CLI,
   GitHub Copilot, and opencode. All four were removed in
   `docs/decisions/0008-verified-providers-only.md` and the file was never
   updated. It also gave a check count of twenty-one when there were

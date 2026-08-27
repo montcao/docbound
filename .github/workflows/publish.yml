@@ -1,0 +1,66 @@
+name: publish
+
+# Fires on a version tag, which is what `node scripts/release.mjs --version
+# X.Y.Z` creates. The whole release is then: run that script, push with
+# --follow-tags, and this does the rest.
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+  # Required for npm provenance, and for trusted publishing if it is configured
+  # on npmjs.com. Without it a publish still works over a token but ships no
+  # provenance attestation.
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The audit diffs against the merge base, and a shallow clone has none.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing needs a newer npm than the one bundled with Node 22.
+      # Harmless when publishing over a token.
+      - name: Use a current npm
+        run: npm install -g npm@latest
+
+      - name: Tag matches package.json
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          pkg="$(node -p "require('./package.json').version")"
+          if [ "$tag" != "$pkg" ]; then
+            echo "tag $GITHUB_REF_NAME does not match package.json version $pkg"
+            exit 1
+          fi
+
+      # The same three gates CI runs on every push. A tag can be pushed without
+      # passing through a green CI run, so they run again here rather than being
+      # assumed.
+      - name: Tests
+        run: npm test
+
+      - name: dist is current
+        run: node scripts/check-dist-fresh.mjs
+
+      - name: docbound audits itself
+        run: node cli/index.mjs audit
+
+      - name: What would be published
+        run: npm pack --dry-run
+
+      - name: Publish
+        run: npm publish --provenance --access public
+        env:
+          # Empty when trusted publishing is configured on npmjs.com, which is
+          # the better arrangement: no long-lived secret in this repository.
+          # Set NPM_TOKEN as a repository secret to publish over a token instead.
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

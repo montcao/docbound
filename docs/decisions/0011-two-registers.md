@@ -94,3 +94,12 @@ instead of linking to `docs/checks.md`.
 If a claim in the README turns out to be unsupported by a test, the register has
 started doing harm rather than work, and the front door goes back to stating
 what is true and letting it stand on its own.
+
+## Corrections
+
+- t=1787863142: this record says the adoption register applies to `README.md` and
+  `README.npm.md`. `README.npm.md` was deleted, because npm ignores the
+  `readme` field in `package.json` and always renders the `README.md` at the
+  package root. The file was shipped in every tarball and shown to nobody. The
+  two registers themselves are unchanged, and the adoption register now applies
+  to `README.md` alone.

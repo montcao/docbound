@@ -203,25 +203,44 @@ node   skill/docbound/scripts/audit.mjs          --root /some/repo --json
 
 ```
 node scripts/release.mjs --version 0.2.0
+git push --follow-tags
 ```
 
-It refuses to run on a dirty tree, sets the version in `package.json`,
-`.claude-plugin/plugin.json`, and `.claude-plugin/marketplace.json`, rebuilds,
-runs the freshness check and the tests, moves the `Unreleased` section of
-`CHANGELOG.md` under the new version, commits, and tags. Pushing the tag is left
-to you.
+The script sets the version everywhere it appears, rebuilds, verifies on a clean
+tree, moves the changelog's Unreleased section under the new number, writes its
+own worklog entry, commits, and tags. It refuses to start on a dirty tree and
+refuses to finish on a red one. `--dry-run` writes nothing.
 
-`CHANGELOG.md` records releases. Task history is `docs/WORKLOG.md`, and the two
-do not overlap.
+Pushing the tag is the whole of publishing.
+`.github/workflows/publish.yml` fires on `v*`, checks that the tag matches
+`package.json`, runs the same three gates CI runs, prints what would go into the
+tarball, and publishes with provenance. Nothing is published by hand.
+
+The version lives in four files plus `skills-lock.json`, which is why setting it
+by hand is four chances to leave one behind.
+
+### The npm side, once
+
+Trusted publishing has to be configured on npmjs.com against this repository and
+`publish.yml`, which requires the package to exist, so the first release is
+published from a maintainer's machine and every one after it is automatic. Until
+that is configured, the workflow falls back to an `NPM_TOKEN` repository secret;
+with it configured, no long-lived secret lives in this repository at all.
+
+npm ignores the `readme` field in `package.json` and always renders the
+`README.md` at the tarball root, whatever `files` says. A second README written
+for the registry is shipped and shown to nobody, which is what happened to
+`README.npm.md`.
+
 
 ## Style
 
 Two registers, and which one applies depends on who is reading. The full
 reasoning is `docs/decisions/0011-two-registers.md`.
 
-`README.md` and `README.npm.md` are the adoption register. Their reader has
-committed to nothing and is deciding whether to spend attention, so those two
-files address the reader directly, use worked examples, and answer the objection
+`README.md` is the adoption register. Its reader has committed to nothing and is
+deciding whether to spend attention, so it addresses the reader directly, opens
+on output rather than prose, uses worked examples, and answers the objection
 before it is raised.
 
 Everything else follows the standard in

@@ -1,8 +1,44 @@
 # docbound
 
-A documentation discipline for coding agents. It checks one thing, whether the
-change you just made was written down, and your agent cannot call the task
-finished until it was.
+Your agent cannot say it is done until the change it just made is written down.
+
+docbound is a skill and a blocking audit. It runs inside your agent's loop, and
+when the agent tries to end its turn with undocumented work behind it, the audit
+stops it and says what is missing.
+
+```
+$ # the agent edits a file, then tries to finish
+
+docbound: the task is not done — the audit reports 2 error(s).
+  [worklog-entry] docs/WORKLOG.md
+      missing; run `docbound scaffold` to create the docs structure, then
+      `docbound start "<what you are about to do>"`
+  [doc-coverage] src/billing/invoice.ts
+      changed with no covering doc in the diff: touch its module README, or a
+      system doc that names this file or its directory
+Fix each one, or add a `waiver: <check-id> [target] - <reason>` line to the
+Waivers section of the current worklog entry, then continue.
+```
+
+The agent reads that, writes the missing paragraph, and continues. The cost
+lands on the agent rather than on you, usually in under a minute, because it
+still has the reasoning loaded.
+
+## Try it on your own repository, right now
+
+Both of these read your repository and change nothing in it.
+
+```
+cd your-repo
+npx docbound summary     # what is already here, according to your docs
+npx docbound audit       # what the last change failed to write down
+```
+
+`summary` reads documentation and never source. A test plants a marker string
+in a source file and requires it never to appear in the output, so that claim is
+one you can check rather than one you have to take.
+
+## What it checks, and what it does not
 
 It reads the documentation for the change in front of it and asks three
 questions. Did a decision get recorded when it was made. Did the doc covering a
@@ -12,6 +48,21 @@ It has nothing to say about whether your code works. Your tests cover that. A
 green audit means the change is explained, not that it is correct, and the two
 gates run independently, so your tests can pass while the audit fails and the
 reverse.
+
+## Evidence, rather than claims
+
+- The audit runs on this repository in CI, on Node 20, 22, and 24, alongside the
+  test suite and a check that the committed build output matches a fresh build.
+- 170 tests. Each check has a small repository built for it, and the assertion
+  is the exact set of check IDs the audit reports, not a subset.
+- Zero dependencies, at runtime and for development. `package.json` has neither
+  key.
+- 29 decision records in `docs/decisions/`, each with the condition that would
+  reverse it. Several of them record this project being wrong and what it did
+  about it.
+- Pointed at three repositories it had never seen, it found four blocking false
+  positives in itself. Those are fixed, and
+  `tests/fixtures/real-world-shapes/` holds the constructs that caused them.
 
 ## The problem it solves
 
@@ -49,15 +100,7 @@ there rather than taking a number from here.
 On a repository with no documentation it says so, lists the files it looked for,
 and names the command that creates them.
 
-## Try it without installing anything
-
-Both of these read your repository and change nothing in it.
-
-```
-cd your-repo
-npx docbound summary     # what is already here, according to the docs
-npx docbound audit       # what is missing
-```
+## What a finding looks like
 
 `summary` on a repository that has never used docbound comes back thin, and it
 says so rather than padding it. That is a true report of the state of its docs.
@@ -337,6 +380,19 @@ whole tree if there is no git repository.
 0.1.0. The audit, the hooks, and the CLI are covered by a test suite that packs
 the real npm tarball and installs from it. Editor support is deliberately
 narrow; see `docs/providers.md`.
+
+## What is in this repository
+
+`skill/docbound/` is the only place skill content is edited. Everything under
+`dist/` and `plugin/` is a copy of it produced by `node scripts/build.mjs`, and
+those copies are committed on purpose: they are what `npx docbound install`
+copies into your project, and a build that runs at install time would be a
+build you have to trust. CI rebuilds from source on every push and fails if the
+committed copies differ by a byte.
+
+That is why over half the files here are generated. `cli/` is the command line
+tool, `scripts/` is tooling that never ships, `tests/` holds the fixtures, and
+`docs/` holds the reference and the decision records.
 
 ## Where to go next
 

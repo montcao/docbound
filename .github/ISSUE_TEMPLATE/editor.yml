@@ -1,0 +1,48 @@
+name: Editor support
+description: Ask for an editor that docbound does not ship support for.
+labels: ["provider"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        An entry written from a guess fails silently: the files copy, the
+        install prints success, the editor reads a different path, and the skill
+        never loads. There is no error to search for, which is why every entry
+        needs evidence from the editor's own files.
+
+        `docs/providers.md` has the candidates and the questions below in
+        context.
+
+  - type: input
+    id: editor
+    attributes:
+      label: Which editor
+    validations:
+      required: true
+
+  - type: textarea
+    id: skills
+    attributes:
+      label: Where does it read skills from
+      description: >
+        The path, and where you saw it. A quote from a file the editor ships
+        counts. A blog post or a model's answer does not.
+    validations:
+      required: true
+
+  - type: textarea
+    id: hooks
+    attributes:
+      label: Does it support hooks, and in what format
+      description: >
+        The manifest path, the event names, and how a hook signals "do not
+        stop". Say so if it has none; a provider without hooks is still worth
+        adding, it just gets no gate.
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Paths on your machine, or files in the editor's own distribution.
+    validations:
+      required: true

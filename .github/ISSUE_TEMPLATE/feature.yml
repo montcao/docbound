@@ -1,0 +1,34 @@
+name: Feature or check request
+description: Something docbound should do and does not.
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Every check here reads a fact about the text rather than a judgement
+        about prose, because a check that reads English is one somebody turns
+        off. A request that names the fact it would read is much easier to act
+        on than one that names the quality it would improve.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What went undocumented
+      description: >
+        The situation where something was not written down and nothing said so.
+        A real one you hit, rather than one you can imagine.
+    validations:
+      required: true
+
+  - type: textarea
+    id: signal
+    attributes:
+      label: What a check could read
+      description: >
+        The thing in the files that would be true when this happens. Skip this
+        if you are not sure; it is a question, not a requirement.
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: What you do about it today

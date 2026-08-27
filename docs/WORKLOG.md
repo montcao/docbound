@@ -5,6 +5,114 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Make the repository publishable and legible to a stranger
+
+Agent: claude · Branch: main · t=1787862681
+
+### Intent
+
+Nothing here has been pushed. There is no git remote, the npm name is
+unregistered, and the first command in `README.md` is `npx docbound summary`,
+which fails for everyone because the package does not exist. The headline call
+to action is broken.
+
+`npm pack --dry-run` shows a second problem. The tarball carries both
+`README.md` and `README.npm.md`, because npm always includes a README whatever
+`files` says, and the `readme` field in `package.json` is not a thing npm reads.
+So npmjs.com renders the full 354-line README and the short one written for it
+has never been shown to anyone. It also carried four unsupported editors until
+an entry ago, which is what an unread file does.
+
+The README's own shape is the other half. A visitor sees 354 lines of prose,
+no output, and no image. The strongest asset this project has is the audit
+stopping an agent mid-turn, which is six lines of terminal text and appears
+nowhere near the top. The second strongest is that it runs its own audit in CI
+across three Node versions, which appears nowhere at all.
+
+And there is no `CONTRIBUTING.md`, `SECURITY.md`, issue template, or pull
+request template. None of those earn attention. Their absence tells a reader
+this is one person's project, which is currently true and does not need
+advertising.
+
+### Expected to touch
+
+- `README.md` — output and proof above the fold, and `dist/` explained
+- `CONTRIBUTING.md`, `SECURITY.md`, `.github/ISSUE_TEMPLATE/`, `.github/PULL_REQUEST_TEMPLATE.md`
+- `.github/workflows/publish.yml` — publish on a version tag
+- `package.json` and `README.npm.md` — remove the file npm never reads
+
+### Unknowns going in
+
+Whether npm's trusted publishing can be configured for a package name that has
+never been published. If it cannot, the first release is manual and every one
+after it is automatic, and the plan has to say so rather than imply the whole
+thing is hands-off from the start.
+
+### Outcome
+
+**`README.md` opens on output.** The first thing a visitor sees below the title
+is the audit stopping an agent mid-turn, which is the product in six lines.
+Under it, two commands that read a stranger's repository and change nothing, so
+the first thing anyone can do costs nothing and needs no install. Then what the
+audit checks and does not check, then a section of evidence rather than claims:
+CI on three Node versions, 170 fixture-based tests, zero dependencies, 29
+decision records, and the four blocking false positives found by pointing this
+at repositories it had never seen.
+
+A section near the end says why over half the files here are generated, since a
+visitor meets `dist/` as the second entry in the file browser and has no way to
+know it is build output that CI rebuilds and compares byte for byte.
+
+**`README.npm.md` is gone.** `npm pack --dry-run` showed the tarball carrying
+both READMEs, because npm always includes one whatever `files` says, and the
+`readme` field in `package.json` is not something npm reads. npmjs.com renders
+the `README.md` at the tarball root. So the short README written for the
+registry was shipped in every tarball and shown to nobody, and it carried four
+unsupported editors for as long as it existed. The field and the entry in
+`files` went with it. `docs/decisions/0011-two-registers.md` says the adoption
+register covers both files, so it carries a correction; the two registers
+themselves are unchanged.
+
+That also means a claim in this changelog was wrong. It described
+`README.npm.md` as "what npmjs.com shows". It never was.
+
+**Publishing is a tag push.** `.github/workflows/publish.yml` fires on `v*`,
+checks the tag against `package.json`, runs the same three gates CI runs, prints
+the tarball contents, and publishes with provenance. `id-token: write` is set so
+provenance works and so trusted publishing can be used once configured. The
+release path is now `node scripts/release.mjs --version X.Y.Z` and
+`git push --follow-tags`, with nothing done by hand.
+
+**Furniture.** `CONTRIBUTING.md`, `SECURITY.md`, three issue templates, a
+template config pointing security reports at the private advisory form, and a
+pull request template whose checklist is the four gates plus the worklog entry.
+`SECURITY.md` states the threat model rather than a process, because this hook
+runs automatically after every edit over repositories nobody here has read, and
+the three properties that matter are untrusted configuration, input that could
+hang it, and file contents reaching a transcript.
+
+`docs/DEVELOP.md` gained the release path and the npm README behaviour.
+
+The unknown going in was whether trusted publishing can be configured for a name
+that has never been published. It cannot be answered from here, so the workflow
+supports both: it publishes over an `NPM_TOKEN` secret if one exists and over
+OIDC if trusted publishing is configured, and `docs/DEVELOP.md` says the first
+release is manual and every one after it is not.
+
+### Still open
+
+- [first-publish-manual] The npm name `docbound` returns 404, so nothing has
+  been published and trusted publishing cannot be configured against a package
+  that does not exist. The first release is a `npm publish` from a maintainer's
+  machine.
+- [no-remote] There is still no git remote configured on this repository.
+- [tarball-size] The package is 221 files and 943 kB, most of it three copies of
+  a byte-identical payload in three layouts. Shipping one copy and a layout map
+  would cut it, and would change what `install` does.
+- [publish-workflow-untested] `publish.yml` has never run. Its YAML parses and
+  its steps are the ones CI already runs, and that is the whole of the evidence
+  behind it.
+
 ## 2026-08-27 - Timestamp the audit so elapsed time is read rather than guessed
 
 Agent: claude · Branch: main · t=1787855693
