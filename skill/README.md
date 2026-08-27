@@ -20,7 +20,11 @@ edited; everything under `dist/` and `plugin/` is a copy of it produced by
   `skill/docbound/scripts/lib/languages.mjs`: what kind of span
   a character sits in, so a comment marker inside a string is not read as a
   comment. A lexer with a delimiter table, not a parser
-  (`docs/decisions/0016-span-scanner-not-a-parser.md`). Nothing reads it yet.
+  (`docs/decisions/0016-span-scanner-not-a-parser.md`). Read by
+  `skill/docbound/scripts/lib/checks/logic-touched.mjs`,
+  `skill/docbound/scripts/lib/checks/comment-sentence.mjs`, and
+  `skill/docbound/scripts/lib/checks/todo-shape.mjs`, each of which falls back
+  to the line-based path for a language the table has no entry for.
 - `skill/docbound/scripts/lib/digest.mjs`: the documentation set parsed as data.
   Module contracts, decisions and their reversal conditions, worklog entries,
   and the open items tracked across them

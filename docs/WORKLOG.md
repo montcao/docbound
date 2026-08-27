@@ -5,6 +5,81 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Move comment-sentence and todo-shape onto the scanner
+
+Agent: claude · Branch: main
+
+### Intent
+
+`comment-sentence` reads one line at a time, so the continuation of a wrapped
+sentence is judged as its own comment and found to be a fragment. Every file in
+this repository whose header is a wrapped paragraph trips it. The item has been
+restated in six entries, which is more than any other, and it is the clearest
+evidence the check is wrong rather than the code.
+
+The scanner makes the fix structural rather than another heuristic. A run of
+adjacent comment lines is one thing a reader reads, so it is one thing to judge.
+`todo-shape` moves at the same time because it currently searches any line
+containing a comment marker, which includes a marker inside a string.
+
+The counts in the existing fixtures must not move. If they do, either the
+grouping is wrong or a fixture was passing for a reason nobody checked.
+
+### Expected to touch
+
+- `skill/docbound/scripts/lib/scan.mjs` - comment bodies, opener stripped
+- `skill/docbound/scripts/lib/checks/comment-sentence.mjs` - judge runs
+- `skill/docbound/scripts/lib/checks/todo-shape.mjs` - read comment spans
+- `tests/` - a fixture for the wrapped sentence
+- `docs/` - the check reference and this entry
+
+### Unknowns going in
+
+- What breaks a run. A directive and a line of commented-out code are not prose
+  and should not be swallowed into a paragraph beside them, but deciding that
+  means classifying each line before grouping rather than after.
+- Whether grouping changes the ratio the fragment finding is based on. Fewer,
+  longer units means a different denominator, and the threshold was chosen
+  against the old one.
+
+### Outcome
+
+**`comment-sentence` judges runs.** `runsOf` classifies each comment first, then
+groups the prose ones that sit on adjacent lines. Classification comes first so
+a directive or a line of commented-out code ends a run rather than being
+absorbed into the paragraph beside it, which would change what that paragraph
+appears to say.
+
+**The counts did not move.** `code-style`, `code-style-editorconfig`,
+`test-file-exempt`, and the subagent fixtures all report exactly what they
+reported before. The denominator changes, since runs are fewer than lines, but
+the finding does not, which is what the Unknown asked about.
+
+**The payoff is on this repository.** Every `comment-sentence` warning it was
+carrying is gone. That is the item restated in six entries, and the warnings
+were the check being wrong rather than the comments being bad.
+
+**`todo-shape` reads comments only**, so a marker inside a string literal is no
+longer a TODO. It now reports two warnings against
+`skill/docbound/scripts/lib/checks/todo-shape.mjs`, whose own prose names the
+markers it looks for. That is [self-referential-checks], already open, and it is
+the check being right about text that happens to be about itself.
+
+**The fixture is evidence.** `wrapped-comment` holds two wrapped paragraphs
+across five comment lines. Run through the old line-based path directly: five
+comments, five fragments, fires. Through runs: two sentences, silent.
+
+186 tests.
+
+### Still open
+
+- [comment-sentence-wrapping] closed: `comment-sentence` groups adjacent comment
+  lines into a run and judges the run, so a wrapped sentence is one sentence.
+- [scanner-adoption] `restating-comments` is the last check reading source with
+  a regular expression. It compares a comment against whichever line sits
+  nearby, and moving it means deciding what a comment is attached to, which is
+  a question the scanner does not answer.
+
 ## 2026-08-27 - Move logic-touched onto the scanner
 
 Agent: claude · Branch: main

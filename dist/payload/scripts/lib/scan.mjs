@@ -212,17 +212,51 @@ export function maskDocumentation(text, suffix) {
     .join("\n");
 }
 
-/** Comment spans only, with their text and the line each starts on. */
+/**
+ * Comment spans only, with the line each starts on and its body.
+ *
+ * `body` is the comment without its opener, closer, or the decorative asterisks
+ * a block comment carries down its left edge, because every caller wants what
+ * the comment says rather than how it was delimited.
+ */
 export function comments(text, suffix) {
+  const spec = resolve(suffix);
   const spans = scan(text, suffix);
   if (spans === null) return null;
+
   return spans
     .filter((span) => span.kind === LINE_COMMENT || span.kind === BLOCK_COMMENT)
-    .map((span) => ({
-      ...span,
-      line: lineOf(text, span.start),
-      text: text.slice(span.start, span.end),
-    }));
+    .map((span) => {
+      const raw = text.slice(span.start, span.end);
+      return {
+        ...span,
+        line: lineOf(text, span.start),
+        text: raw,
+        body: bodyOf(raw, span.kind, spec),
+      };
+    });
+}
+
+function bodyOf(raw, kind, spec) {
+  if (kind === LINE_COMMENT) {
+    for (const opener of spec.line) {
+      if (raw.startsWith(opener)) return raw.slice(opener.length).trim();
+    }
+    return raw.trim();
+  }
+  let inner = raw;
+  for (const [open, close] of spec.block) {
+    if (inner.startsWith(open)) {
+      inner = inner.slice(open.length);
+      if (inner.endsWith(close)) inner = inner.slice(0, -close.length);
+      break;
+    }
+  }
+  return inner
+    .split("\n")
+    .map((line) => line.replace(/^\s*\*+\s?/, "").trim())
+    .join("\n")
+    .trim();
 }
 
 /** Names this file defines, read from masked code so prose cannot supply one. */

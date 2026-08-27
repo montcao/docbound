@@ -273,6 +273,8 @@ in six or more words, and names an owner, ticket, or reference.
 a specific problem, and the skill also asks that it appear under `Still open` in
 the worklog so a human sees it without grepping.
 
+Only comments are searched, so a marker inside a string literal is not a TODO.
+
 Test files are **not** exempt: a stale TODO in a test is as misleading as one
 anywhere else.
 
@@ -286,6 +288,11 @@ the next sync is a clean diff.
 Full-line comments in changed source are complete sentences, opening with a
 capital letter, a digit, or a quote and closing with terminal punctuation. No
 comment line looks like commented-out code.
+
+A run of adjacent comment lines is judged as one comment, because that is what
+a reader reads. Judging each line separately made every continuation of a
+wrapped sentence a fragment. A directive and a line of commented-out code end a
+run rather than joining it, since neither is prose.
 
 Two findings from one pass. Commented-out code is reported whenever any is
 found, because version control already has it and a reader cannot tell whether a

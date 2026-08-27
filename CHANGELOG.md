@@ -10,6 +10,13 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Fixed
 
+- `comment-sentence` judged each comment line separately, so the continuation of
+  a wrapped sentence was a fragment and every wrapped paragraph in a file tripped
+  it. A run of adjacent comment lines is now judged as one comment. A directive
+  or a line of commented-out code ends a run rather than joining it.
+- `todo-shape` searched any line holding a comment marker, including one inside
+  a string literal. It reads comments only.
+
 - `logic-touched` reported a logic edit when a subagent reworded a comment on a
   line whose string contained a comment marker, which is an edit its own
   contract allows. It now reads the span scanner, which tells the two apart. An
