@@ -74,22 +74,32 @@ describe("summary", () => {
     assert.ok(!out.includes(marker), "source content reached the summary");
   });
 
-  test("says nothing about what it cost unless asked", () => {
-    // The reader asked what the project is. What the command cost is a question
-    // about the command, and an agent loading this pays tokens to read it.
+  test("makes no claim about what it saved anyone", () => {
+    // Any such claim rests on what reading the source would have cost, which
+    // nobody measured (`docs/decisions/0018-no-self-serving-metrics.md`).
+    //
+    // Asserted against the fixture, whose documentation is controlled. Running
+    // it over this repository would flag the words in its own records, which
+    // the summary is quoting rather than claiming.
     const out = summarize(baseline());
-    assert.ok(!/tokens/i.test(out), `the summary volunteered its own cost:\n${out}`);
+    for (const pattern of [/token/i, /would have (cost|read)/i, /saving/i]) {
+      assert.ok(!pattern.test(out), `${pattern} appeared in the summary`);
+    }
   });
 
-  test("--cost reports it, flattering or not", () => {
-    const self = summarize(REPO_ROOT, ["--cost"]);
-    assert.match(self, /Read \d+ document\(s\) and no source/);
-    assert.match(self, /estimates at four characters per token/);
-
-    // A small repository gets an unflattering number rather than silence: a
-    // figure that appears only when it is good is not a measurement.
-    const small = summarize(baseline(), ["--cost"]);
-    assert.match(small, /Read \d+ document\(s\) and no source/);
+  test("no run ends with a footer about the command", () => {
+    // Narrower, so it can be asserted against real content too: these are the
+    // phrasings the removed footer used, whatever a repository's docs say.
+    for (const repo of [baseline(), REPO_ROOT]) {
+      const out = summarize(repo);
+      for (const gone of [
+        "and no source. About",
+        "an answer from the code",
+        "characters per token",
+      ]) {
+        assert.ok(!out.includes(gone), `the footer survived: ${gone}`);
+      }
+    }
   });
 
   test("--open lists unfinished work and nothing else", () => {
@@ -107,13 +117,32 @@ describe("summary", () => {
     assert.equal(digest.decisions[0].status, "accepted");
   });
 
-  test("says so when a repository has nothing to summarise", () => {
+  test("a repository with nothing is told so, and what to run", () => {
     const bare = tempDir("summary-bare");
     made.push(bare);
     fs.writeFileSync(path.join(bare, "a.py"), "def a():\n    return 1\n");
 
     const out = summarize(bare);
-    assert.match(out, /little documentation for this to read/);
+    assert.match(out, /## Nothing to summarise/);
+    assert.match(out, /Looked for and did not find/);
+    for (const wanted of ["README.md", "docs/ARCHITECTURE.md", "docs/WORKLOG.md"]) {
+      assert.ok(out.includes(wanted), `${wanted} is named as missing`);
+    }
+    assert.match(out, /docbound scaffold/);
+  });
+
+  test("a repository with some of it gets the list of what is missing", () => {
+    const partial = tempDir("summary-partial");
+    made.push(partial);
+    fs.writeFileSync(path.join(partial, "README.md"), "# svc\n\nAccepts webhooks.\n");
+    fs.writeFileSync(path.join(partial, "a.py"), "def a():\n    return 1\n");
+
+    const out = summarize(partial);
+    assert.match(out, /Accepts webhooks/, "what it does have is reported");
+    assert.match(out, /## Not found/);
+    assert.ok(!out.includes("Nothing to summarise"), "it does have something");
+    assert.ok(!out.includes("- README.md"), "a file that exists is not listed missing");
+    assert.match(out, /docs\/ARCHITECTURE\.md/);
   });
 
   test("an unknown flag is a usage error", () => {

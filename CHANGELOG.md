@@ -10,6 +10,16 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Changed
 
+- `docbound summary` makes no claim about what it saved anyone. Every such claim
+  rested on what reading the source would have cost, which nobody measured. The
+  `--cost` flag, the ratio in the README, and the claim in the skill text are all
+  gone; what replaces them is the mechanism, which a test checks by planting a
+  marker in a source file and requiring the output never to contain it.
+  `docs/decisions/0018-no-self-serving-metrics.md`.
+- A repository with no documentation is told there is nothing to summarise,
+  given the list of files that were looked for, and pointed at `scaffold`. A
+  repository with some of them gets the list of what is missing.
+
 - `docbound summary` stops ending every run with what it cost. Someone running
   it asked what their project is, and an agent loading the output pays tokens
   for a sentence about how few tokens it is paying. `--cost` reports it when

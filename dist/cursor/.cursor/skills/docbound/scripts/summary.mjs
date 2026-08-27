@@ -3,27 +3,25 @@
 //
 // This is step 1 of the loop, Orient, done in one command instead of by hand.
 // It reads the root README, ARCHITECTURE, the module READMEs, the decision
-// records, and the worklog. It reads no source file at all, which is the whole
-// point: asking an agent what a project does normally costs a re-read of the
-// tree, and answers with a reconstruction that can recover what the code does
-// and never why it is that way. The documents hold the why, and they are a
-// rounding error next to the source.
+// records, and the worklog, and it reads no source file at all.
+//
+// That is the whole point. A summary reconstructed from code recovers what the
+// code does and never why it is that way, because the why was never in the
+// source. The documents hold it.
 //
 // Usage:
-//   node summary.mjs [--root DIR] [--entries N] [--open] [--cost] [--json]
+//   node summary.mjs [--root DIR] [--entries N] [--open] [--json]
 //
 //   --entries N   how many worklog entries to include, five by default
 //   --open        only the unfinished work, across every entry
-//   --cost        what this read, against what reading the source would have
 //   --json        the same content as data
 //
-// The output describes the project and nothing else. What the command cost is a
-// question about the command, and an agent loading this into context should not
-// pay tokens for a sentence about how few tokens it is paying.
+// The output describes the project and nothing else. This project makes no claim
+// here about what it saved anyone, because that would rest on a counterfactual
+// nobody measured. What it reads is checkable, and a test checks it.
 //
-// A repository that has not adopted the discipline produces a thin summary, and
-// the output says so rather than padding it. That is a true answer about the
-// state of its documentation.
+// A repository with no documentation is told so plainly, along with the files
+// that were looked for and the command that creates them.
 
 import process from "node:process";
 import path from "node:path";
@@ -31,8 +29,8 @@ import path from "node:path";
 import { loadConfig } from "./lib/config.mjs";
 import {
   architecture,
-  cost,
   decisions,
+  missing,
   modules,
   openItems,
   project,
@@ -42,7 +40,7 @@ import { ignoreEpipe, isEntryPoint } from "./lib/entry.mjs";
 import { topLevel } from "./lib/git.mjs";
 
 const USAGE =
-  "usage: summary.mjs [--root DIR] [--entries N] [--open] [--cost] [--json]";
+  "usage: summary.mjs [--root DIR] [--entries N] [--open] [--json]";
 const DEFAULT_ENTRIES = 5;
 
 export function parseArgs(argv) {
@@ -50,7 +48,6 @@ export function parseArgs(argv) {
     root: null,
     entries: DEFAULT_ENTRIES,
     open: false,
-    cost: false,
     json: false,
     help: false,
   };
@@ -62,7 +59,6 @@ export function parseArgs(argv) {
     if (flag === "--root") options.root = value();
     else if (flag === "--entries") options.entries = Number(value());
     else if (flag === "--open") options.open = true;
-    else if (flag === "--cost") options.cost = true;
     else if (flag === "--json") options.json = true;
     else if (flag === "-h" || flag === "--help") options.help = true;
     else return { error: `unrecognized argument: ${arg}` };
@@ -108,6 +104,7 @@ export function renderOpen(digest) {
 export function render(digest) {
   const lines = [];
   const say = (line = "") => lines.push(line);
+  const nothing = thin(digest);
 
   say(`# ${digest.project?.name ?? path.basename(digest.root)}`);
   say();
@@ -214,14 +211,25 @@ export function render(digest) {
     }
   }
 
-  if (thin(digest)) {
-    say("## Note");
+  const absent = missing(digest.root, digest);
+  if (absent.length > 0) {
+    say(nothing ? "## Nothing to summarise" : "## Not found");
+    say();
+    if (nothing) {
+      say(
+        "This repository has no documentation for docbound to read, so there " +
+          "is nothing above. That is a report about the repository rather than " +
+          "a failure of this command.",
+      );
+      say();
+    }
+    say("Looked for and did not find:");
+    say();
+    for (const item of absent) say(`- ${item}`);
     say();
     say(
-      "This repository has little documentation for this to read, so the " +
-        "summary above is thin. That is an accurate report of its state rather " +
-        "than a failure of the command. `docbound scaffold` lays down the " +
-        "structure and `docbound audit` says what is missing.",
+      "`docbound scaffold` creates the structure, and `docbound audit` says " +
+        "what is still missing once it exists.",
     );
     say();
   }
@@ -229,11 +237,14 @@ export function render(digest) {
   return lines.join("\n");
 }
 
+/** Nothing docbound reads exists here, so the summary has no subject. */
 function thin(digest) {
   return (
     digest.modules.length === 0 &&
     digest.decisions.length === 0 &&
-    digest.entryCount === 0
+    digest.entryCount === 0 &&
+    digest.architecture === null &&
+    digest.project === null
   );
 }
 
@@ -261,19 +272,6 @@ export function main(argv) {
   const body = options.open ? renderOpen(digest) : render(digest);
   process.stdout.write(body);
 
-  // Asked for, never volunteered. Printing it on every run is the tool
-  // advertising in the place it is supposed to be working, and suppressing it
-  // when the ratio is unflattering, as an earlier version did, is worse.
-  if (options.cost) {
-    const spend = cost(root, body, digest.excludes);
-    process.stdout.write(
-      `---\nRead ${spend.docsRead} document(s) and no source. About ` +
-        `${spend.summaryTokens} tokens here, against roughly ` +
-        `${spend.sourceTokens} in the ${spend.sourceFiles} source file(s) an ` +
-        "answer from the code would have read. Both are estimates at four " +
-        "characters per token.\n",
-    );
-  }
   return 0;
 }
 

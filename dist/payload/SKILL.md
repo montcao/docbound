@@ -70,7 +70,7 @@ Run this on every task, in order. Steps 1 and 2 happen before the first code edi
 
 ### 1. Orient — read before you write
 
-Run `node scripts/summary.mjs`. It assembles what the repository already says about itself from the docs alone, reading no source: purpose, shape, each module's contract and must-not list, every decision with its reversal condition, recent worklog entries, and what is still open. On a large repository this is the difference between orienting for a few thousand tokens and re-reading the tree.
+Run `node scripts/summary.mjs`. It assembles what the repository already says about itself from the docs alone, reading no source: purpose, shape, each module's contract and must-not list, every decision with its reversal condition, recent worklog entries, and what is still open. Where the docs are missing it names what it looked for.
 
 Without it, read in this order whatever exists: root `README.md`; `docs/ARCHITECTURE.md`; the three most recent entries in `docs/WORKLOG.md`; `README.md` in every directory you expect to touch; any ADR in `docs/decisions/` whose title touches your area.
 

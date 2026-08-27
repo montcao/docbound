@@ -5,6 +5,93 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Remove every self-serving metric, and say when there is nothing to summarise
+
+Agent: claude · Branch: main
+
+### Intent
+
+The cost footer moved behind a flag in the previous entry, which treated the
+symptom. Searching for the rest of the pattern finds four places where this
+project measures its own virtue: the ratio in `README.md`, a claim in
+`skill/docbound/SKILL.md` about the difference between a few thousand tokens and
+re-reading the tree, the `--cost` output, and the `cost` function computing it.
+
+Every one of them rests on a counterfactual the tool invented about itself: what
+reading the source *would have* cost. Nobody measured that. It is a number
+chosen to make a comparison come out well, and a flag does not fix that, it just
+makes it opt-in.
+
+What is verifiable is the mechanism. The summary reads documentation and never
+source, and a test proves it by planting a marker in a source file and requiring
+the output never to contain it. That claim a reader can check. Anyone wanting to
+know the size of the output can measure it, and does not need this project's
+arithmetic to do so.
+
+Second: on a repository with no documentation the summary prints a heading and a
+paragraph of apology. It should say plainly that there is nothing, name the files
+it looked for, and give the command that creates them. A developer trying this
+for the first time most likely has an undocumented repository, so that path is
+the first impression, not the edge case.
+
+### Expected to touch
+
+- `skill/docbound/scripts/summary.mjs` - drop `--cost`, report what is missing
+- `skill/docbound/scripts/lib/digest.mjs` - drop `cost`, add what was not found
+- `README.md`, `skill/docbound/SKILL.md` - claim the mechanism, not a ratio
+- `docs/decisions/` - a record superseding 0017
+- `tests/summary.test.mjs`
+
+### Unknowns going in
+
+- Whether anything else in the repository is shaped the same way. The two found
+  so far were both caught by reading rather than by a check, so the search has
+  to be by hand.
+
+### Outcome
+
+**All four removed.** `--cost`, the `cost` function, the ratio in `README.md`,
+and the claim in `skill/docbound/SKILL.md` about a few thousand tokens against
+re-reading the tree. Each rested on what reading the source *would have* cost,
+which nobody measured.
+
+What replaces them is the mechanism: the summary reads documentation and never
+source. `README.md` says so and points at the test that proves it, by planting a
+marker in a source file and requiring the output never to contain it. How much
+that saves depends on the repository, and the reader has one.
+
+**The empty case says so plainly.** A repository with nothing gets
+`## Nothing to summarise`, the list of files that were looked for, and the
+command that creates them. A repository with some of them gets `## Not found`
+and the list, without the apology, since it does have something.
+
+**The rule this generalises to**, in
+`docs/decisions/0018-no-self-serving-metrics.md`: a metric this project reports
+about itself must be something a reader could measure without it. Sizes, counts,
+and findings qualify. A comparison against work that was never done does not.
+
+**The first test I wrote for this was wrong.** It scanned the whole summary of
+this repository for the word "token" and failed, because the summary faithfully
+quotes an open item and a record title containing it. The summary was reproducing
+content, not making a claim. Narrowed to the fixture for the broad check and to
+the removed footer's exact phrasings for the real one.
+
+`docs/decisions/0017-summary-describes-the-project.md` is superseded, its Status
+line changed and its body untouched. Third supersession, and the chain reads
+0012 built it, 0017 hid it, 0018 removed it.
+
+### Still open
+
+- [self-serving-metrics] closed: all four removed, and
+  `docs/decisions/0018-no-self-serving-metrics.md` states the rule that would
+  catch the next one. Nothing checks for it, which the record says outright,
+  because a check would have to recognise a counterfactual.
+- [readme-cost-figures] closed: the figures are gone rather than kept accurate.
+- [empty-repo-guidance] The summary now names the files it looked for, and
+  `scaffold` creates all of them at once. Someone with a partially documented
+  repository has no command that creates only what is missing.
+- [token-estimates] closed: the token figures are gone; the summary makes no claim about what it saved
+
 ## 2026-08-27 - Take the cost footer out of the summary
 
 Agent: claude · Branch: main

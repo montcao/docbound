@@ -1,7 +1,7 @@
 # 0017. The summary describes the project, and nothing else
 
 - Date: 2026-08-27
-- Status: accepted
+- Status: superseded by 0018
 - Supersedes: 0012
 
 ## Context

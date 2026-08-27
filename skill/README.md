@@ -15,8 +15,9 @@ edited; everything under `dist/` and `plugin/` is a copy of it produced by
   refuses a slug that is not open.
 - `skill/docbound/scripts/summary.mjs`: step 1 of the loop as a command. Reads
   the documentation set and no source at all; see
-  `docs/decisions/0017-summary-describes-the-project.md`. What it cost is
-  reported by `--cost` and never volunteered.
+  `docs/decisions/0018-no-self-serving-metrics.md`. It makes no claim about
+  what it saved anyone, since that would rest on a counterfactual nobody
+  measured.
 - `skill/docbound/scripts/lib/worklog.mjs`: the entry that governs a run, its
   waivers, and the two findings about whether a task was opened and closed.
 - `skill/docbound/scripts/lib/scan.mjs` and

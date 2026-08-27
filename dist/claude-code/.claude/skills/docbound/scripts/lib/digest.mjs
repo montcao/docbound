@@ -12,7 +12,7 @@
 import fs from "node:fs";
 import path from "node:path";
 
-import { allDocs, excluded, readText, splitLines } from "./paths.mjs";
+import { allDocs, readText, splitLines } from "./paths.mjs";
 import { sectionBody } from "./text.mjs";
 import { entrySection } from "./worklog.mjs";
 
@@ -238,52 +238,18 @@ function firstSentence(text) {
 }
 
 /**
- * What the summary cost against what reading the source would have cost.
+ * The documents the summary looks for that this repository does not have.
  *
- * Characters divided by four, which is the usual rough conversion for English
- * prose and code. It is an estimate and the output says so; the point is the
- * ratio, which is large enough that precision would not change a decision.
+ * Reported rather than apologised for. Someone running this on an undocumented
+ * repository needs to know what is missing and how to create it, which is more
+ * useful than a thin summary that does not say why it is thin.
  */
-export function cost(root, summaryText, excludes = []) {
-  const docs = allDocs(root, excludes);
-  let docChars = 0;
-  for (const doc of docs) docChars += (readText(root, doc) ?? "").length;
-
-  let sourceChars = 0;
-  let sourceFiles = 0;
-  walk(root, "");
-
-  return {
-    docsRead: docs.length,
-    sourceFiles,
-    summaryTokens: Math.round(summaryText.length / 4),
-    docTokens: Math.round(docChars / 4),
-    sourceTokens: Math.round(sourceChars / 4),
-  };
-
-  function walk(base, prefix) {
-    let entries;
-    try {
-      entries = fs.readdirSync(path.join(base, prefix), { withFileTypes: true });
-    } catch {
-      return;
-    }
-    for (const entry of entries) {
-      const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
-      if (entry.isSymbolicLink()) continue;
-      if (entry.isDirectory()) {
-        if (!entry.name.startsWith(".") && !excluded(rel, excludes)) walk(base, rel);
-        continue;
-      }
-      // Build output is a copy of files already counted, and counting it would
-      // inflate the very ratio this function exists to report honestly.
-      if (rel.endsWith(".md") || excluded(rel, excludes)) continue;
-      try {
-        sourceChars += fs.statSync(path.join(base, rel)).size;
-        sourceFiles += 1;
-      } catch {
-        // A file that vanished between listing and reading is not worth failing over.
-      }
-    }
-  }
+export function missing(root, found) {
+  const absent = [];
+  if (found.project === null) absent.push("README.md");
+  if (found.architecture === null) absent.push("docs/ARCHITECTURE.md");
+  if (found.entryCount === 0) absent.push("docs/WORKLOG.md");
+  if (found.decisions.length === 0) absent.push("docs/decisions/");
+  if (found.modules.length === 0) absent.push("a README.md in each package");
+  return absent;
 }
