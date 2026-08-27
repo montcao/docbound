@@ -144,8 +144,13 @@ export function worklogEntries(root) {
     const entry = `## ${chunk}`;
     const heading = splitLines(entry)[0].replace(/^##\s*/, "").trim();
     const dated = /^(\d{4}-\d{2}-\d{2})\s*[-—:]?\s*(.*)$/.exec(heading);
+    const stamped = /\bt=(\d{9,11})\b/.exec(entry);
     entries.push({
       date: dated ? dated[1] : null,
+      // Unix seconds if the entry carries them. Entries written before this
+      // field existed do not, so every reader treats null as "unknown age"
+      // rather than filling it in.
+      timestamp: stamped ? Number(stamped[1]) : null,
       title: dated ? dated[2].trim() : heading,
       intent: entrySection(entry, "Intent"),
       outcome: entrySection(entry, "Outcome"),

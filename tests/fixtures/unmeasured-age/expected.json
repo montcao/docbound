@@ -1,0 +1,10 @@
+{
+  "note": "One finding. The architecture doc states a duration nobody measured. The record's appended Corrections section is the one body edit allowed, so adr-immutable stays quiet.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "stale-marker": 1
+  },
+  "waived": {},
+  "exit": 0
+}

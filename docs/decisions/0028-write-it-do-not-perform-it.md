@@ -94,3 +94,10 @@ stopped this skill from doing. Both now say to record the naming mismatch under
 If documents keep arriving with these patterns despite the standard, the
 standard is not the mechanism, and the answer is a separate editing pass invoked
 after writing rather than more rules in a file nobody re-reads mid-task.
+
+## Corrections
+
+- t=1787855825: the Context section says the npm README "gave a check count two
+  versions stale". There has been one version, 0.1.0, and it has never been
+  released twice. The file said twenty-one checks where there were
+  twenty-three. The original claim was never measured.

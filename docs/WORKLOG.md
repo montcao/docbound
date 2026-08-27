@@ -5,6 +5,107 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Timestamp the audit so elapsed time is read rather than guessed
+
+Agent: claude · Branch: main · t=1787855693
+
+### Intent
+
+<!-- docbound-ignore-start -->
+I wrote that four provider entries were removed "months ago" and that a check
+count was "two versions stale".
+<!-- docbound-ignore-end --> The first commit in this repository is
+1787760161 and the most recent is 1787855275, which is 95114 seconds, or
+26 hours. There has been one version, 0.1.0, and it has never been released
+twice. Both claims were invented and neither was checked.
+
+<!-- docbound-ignore-start -->
+The "months ago" was in conversation. The other one is committed, in
+`CHANGELOG.md`, and it is the same fault
+<!-- docbound-ignore-end -->
+`docs/decisions/0018-no-self-serving-metrics.md` is about: a number nobody
+measured is not a number.
+
+The reason it is worth building something for rather than resolving to be more
+careful is that nothing anywhere in this repository states elapsed time. Every
+date is an ISO day string in a heading. An agent reading a worklog sees
+2026-08-26 and 2026-08-27 and has to subtract them to know anything, so it
+reaches for a phrase instead. The number is not hard to get. It is just not
+there.
+
+So put it there. Unix seconds, because they subtract, sort, and compare without
+a timezone or a parser, and every language reads them.
+
+### Expected to touch
+
+- `skill/docbound/scripts/audit.mjs` and `lib/report.mjs` — the run's timestamp
+- `skill/docbound/scripts/start.mjs` — a timestamp on the entry it opens
+- `skill/docbound/scripts/summary.mjs` — ages computed, not left to the reader
+- `skill/docbound/scripts/lib/checks/stale-marker.mjs` — vague elapsed time
+- `CHANGELOG.md` — the claim that started this
+
+### Unknowns going in
+
+Whether the entry timestamp can go on the `Agent:` line without breaking the
+worklog parser, the templates, or the two checks that read entries. Whether
+extending `stale-marker` covers the case, given it exempts the worklog and the
+decision records by design, and those are the two documents where an agent is
+<!-- docbound-ignore -->
+most likely to reach for an unmeasured phrase.
+
+### Outcome
+
+Unix seconds in three places, and errata for the records that already got it
+wrong.
+
+`audit` prints `t=` in its header and carries `timestamp` in its JSON, which is
+an addition to a documented interface. `start` writes `t=` onto the Agent line
+and `skill/docbound/templates/WORKLOG-entry.md` carries the field for an entry
+written by hand. `skill/docbound/scripts/lib/digest.mjs` reads it back, and
+`summary` renders an age beside each entry heading, blank for the entries that
+predate the field rather than filled in.
+
+`stale-marker` gained a second fault: a span of time asserted without a number.
+It runs on the worklog and the decision records for that half, unlike the
+changelog-phrasing half, because an unmeasured span is a claim about the world.
+Building it caught two committed fabrications immediately, one in `CHANGELOG.md`
+and one in the body of `docs/decisions/0027-open-plainly-then-go-deep.md`.
+
+The second of those had nowhere to go. A record's body is immutable, superseding
+is wrong when the decision stands, and there was no mechanism for marking a
+statement false. So `adr-immutable` now accepts one more edit: a `## Corrections`
+section appended at the end, anchored so it cannot hide an edit above it.
+Records 0027 and 0028 carry one each, and the earlier worklog entry that made
+the same claim carries the same kind of note.
+
+Two narrowings came out of testing rather than out of planning. The first
+pattern included "recently", which fired on the scaffolded README line "what has
+changed recently" — a phrase naming a section rather than claiming a duration.
+It and its neighbours came out. And `stale-marker` did not read the
+`docbound-ignore` markers, so a document quoting the phrasing it was reporting
+flagged itself; it reads them now, as `dead-ref` and `template-residue` already
+did.
+
+The measurement that started this: first commit 1787760161, this entry opened at
+1787855693, which is 95532 seconds. Not months, and not two versions.
+
+170 tests, with `tests/fixtures/unmeasured-age/` covering both the asserted span
+and the appended correction that `adr-immutable` allows.
+
+### Still open
+
+- [correction-coverage] One `## Corrections` section quiets `stale-marker` for a
+  whole record, so a second false claim added later goes unreported. A record
+  takes a bullet per error, and nothing enforces that.
+- [worklog-errata] The worklog has no equivalent mechanism. The convention that
+  emerged here is a `Correction, t=` paragraph carrying Unix seconds, above the original text
+  with the original wrapped in `docbound-ignore` markers, so the claim stays
+  readable and stops being reported. No check knows what that looks like.
+- [phrase-coverage] The pattern lists the phrasings that have caused a real
+  error here. An unmeasured span written some other way passes.
+- [timestamp-backfill] Every entry written before this field has no timestamp,
+  so `summary` shows no age for the existing history.
+
 ## 2026-08-27 - Edit the READMEs and the writing standard against a no-slop rule set
 
 Agent: claude · Branch: main
@@ -70,10 +171,19 @@ themselves, and six places where bold stood in for a heading. The heading "The
 gate, and why it is not as bad as it sounds" argued with the reader and is now
 "The gate". `tests/README.md` opened on a fragment and now opens on a sentence.
 
+<!-- docbound-ignore-start -->
+Correction, t=1787856400: this entry says the file "gave a check count two
+versions stale". There has been one version, 0.1.0, released once. The file said
+twenty-one checks where there were twenty-three. The original claim was never
+measured.
+<!-- docbound-ignore-end -->
+
+<!-- docbound-ignore-start -->
 **`README.npm.md` was worse than stylistically off.** It advertised Codex,
 Gemini CLI, GitHub Copilot, and opencode, four editors removed in
 `docs/decisions/0008-verified-providers-only.md`, and gave a check count two
-versions stale. That file is what npmjs.com renders. Nothing caught it because
+versions stale. That file is what npmjs.com renders.
+<!-- docbound-ignore-end --> Nothing caught it because
 the audit reads paths and placeholders rather than a document's claims about the
 world. Rewritten, with `baseline` and `summary` added to the command list.
 

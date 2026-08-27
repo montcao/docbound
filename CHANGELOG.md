@@ -8,14 +8,33 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Added
+
+- Unix seconds, in three places. `docbound audit` prints `t=` in its header and
+  a `timestamp` field in its JSON. `docbound start` writes `t=` onto the entry's
+  Agent line, and the entry template carries the field for a hand-written one.
+  `docbound summary` computes an age from it rather than printing a date and
+  leaving the subtraction to the reader.
+
+  This project published two claims about elapsed time that nobody measured, one
+  of them describing a removal as happening months before, in a repository under
+  thirty hours old. Nothing here recorded elapsed time, so an agent reading a
+  worklog saw two ISO dates and reached for a phrase.
+  `docs/decisions/0029-unix-timestamps-for-elapsed-time.md`.
+- A `## Corrections` section appended to a decision record is now the one edit
+  to its body the audit accepts, alongside the Status line. It is for a false
+  statement of fact in a record whose decision still stands, where superseding
+  would be wrong and leaving it would keep something untrue in an archive with
+  no way to mark it. Anchored to the end so it cannot hide an edit above it.
+
 ### Fixed
 
 - `README.npm.md`, which is what npmjs.com shows, advertised Codex, Gemini CLI,
   GitHub Copilot, and opencode. All four were removed in
   `docs/decisions/0008-verified-providers-only.md` and the file was never
-  updated. It also gave a check count two versions stale. The audit reads paths
-  and placeholders, not a document's claims about the world, so nothing caught
-  it.
+  updated. It also gave a check count of twenty-one when there were
+  twenty-three. The audit reads paths and placeholders, not a document's claims
+  about the world, so nothing caught it.
 
 ### Changed
 

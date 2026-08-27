@@ -2,6 +2,12 @@
 // Open a worklog entry, before the first edit.
 //
 // The shape of an entry is structure, not judgement, and an agent hand-writing
+// The entry also carries `t=` on its Agent line, Unix seconds at the moment it
+// opened. The ISO date in the heading says which day; the seconds are what any
+// later reader subtracts to get elapsed time, which is the number an agent
+// otherwise guesses at with a phrase like "a while back"
+// (`docs/decisions/0029-unix-timestamps-for-elapsed-time.md`).
+//
 // it spends attention on a heading and a date that a command can produce
 // identically every time. Hand-written headings are also why this project's own
 // worklog mixed an em dash into one heading and hyphens into the rest, which
@@ -73,12 +79,12 @@ export function templateSections() {
     .map((line) => line.slice(4).trim());
 }
 
-export function renderEntry({ title, date, agent, branch }) {
+export function renderEntry({ title, date, agent, branch, timestamp }) {
   const known = templateSections();
   const lines = [
     `## ${date} - ${title}`,
     "",
-    `Agent: ${agent} · Branch: ${branch}`,
+    `Agent: ${agent} · Branch: ${branch} · t=${timestamp}`,
     "",
   ];
   for (const section of [...OPENING, ...CLOSING]) {
@@ -137,6 +143,7 @@ export function main(argv) {
   const entry = renderEntry({
     title: options.title,
     date: new Date().toISOString().slice(0, 10),
+    timestamp: Math.floor(Date.now() / 1000),
     agent: options.agent ?? "agent",
     branch: branch || 'n/a',
   });

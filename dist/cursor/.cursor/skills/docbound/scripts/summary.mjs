@@ -101,7 +101,24 @@ export function renderOpen(digest) {
   return lines.join("\n");
 }
 
-export function render(digest) {
+/**
+ * How long ago an entry was opened, from the Unix seconds it carries.
+ *
+ * Empty when the entry has no timestamp, which is every entry written before
+ * the field existed. An absent age reads as unknown; a guessed one reads as
+ * fact, and this project has already published a guessed one
+ * (`docs/decisions/0029-unix-timestamps-for-elapsed-time.md`).
+ */
+export function ageOf(entry, now) {
+  if (typeof entry.timestamp !== "number") return "";
+  const seconds = now - entry.timestamp;
+  if (seconds < 0) return "";
+  if (seconds < 3600) return ` (${Math.floor(seconds / 60)}m ago)`;
+  if (seconds < 172800) return ` (${Math.floor(seconds / 3600)}h ago)`;
+  return ` (${Math.floor(seconds / 86400)}d ago)`;
+}
+
+export function render(digest, now = Math.floor(Date.now() / 1000)) {
   const lines = [];
   const say = (line = "") => lines.push(line);
   const nothing = thin(digest);
@@ -177,7 +194,7 @@ export function render(digest) {
     say(`## Recent work (${digest.recent.length} of ${digest.entryCount} entries)`);
     say();
     for (const entry of digest.recent) {
-      say(`### ${entry.date ?? "undated"} ${entry.title}`);
+      say(`### ${entry.date ?? "undated"}${ageOf(entry, now)} ${entry.title}`);
       say();
       if (entry.outcome) say(entry.outcome);
       say();

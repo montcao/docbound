@@ -1,6 +1,6 @@
 ## <YYYY-MM-DD> - <task title, as a verb phrase>
 
-Agent: <claude | codex | gemini | copilot | other> · Branch: <branch or "n/a">
+Agent: <claude | codex | gemini | copilot | other> · Branch: <branch or "n/a"> · t=<unix seconds, from `date +%s`>
 <In subagent mode, both: `Agent: codex (code) · claude (docs)`>
 
 ### Intent

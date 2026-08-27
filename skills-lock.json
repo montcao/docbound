@@ -1,26 +1,26 @@
 {
   "version": "0.1.0",
-  "payloadHash": "sha256:41866cfd4adb1583f571d27fb8dd6b42feb36068f464f470ffbf373a0de1cc40",
+  "payloadHash": "sha256:dd8997149dd608cb68ba3ceca314d419fa3af6c486bfa34f50ae83555bef4bc8",
   "providers": {
     "claude-code": {
       "payload": ".claude/skills/docbound",
       "hookFile": ".claude/settings.json",
       "files": 54,
-      "hash": "sha256:e070d83f57781f4de059f6a2df267f3287d4c86ed846e7089bf32a95b86260ff"
+      "hash": "sha256:1671618d2b86dd54c4d5957e774f69674744bdce25c8328c903660077e346fe7"
     },
     "cursor": {
       "payload": ".cursor/skills/docbound",
       "hookFile": ".cursor/hooks.json",
       "files": 54,
-      "hash": "sha256:510ef1c91671b3b494e14576a481493e17c0412e4e8685f0206ac0450c3527a5"
+      "hash": "sha256:8c11aaa04d6684a4257333baa5bfa04abd199fb34d6d473974a7cdc03333ffb5"
     }
   },
   "payload": {
     "files": 52,
-    "hash": "sha256:41866cfd4adb1583f571d27fb8dd6b42feb36068f464f470ffbf373a0de1cc40"
+    "hash": "sha256:dd8997149dd608cb68ba3ceca314d419fa3af6c486bfa34f50ae83555bef4bc8"
   },
   "plugin": {
     "files": 54,
-    "hash": "sha256:a2f0b99aece605a521cd35aae2bc790d63c61add96524fbeef12f929e2d41441"
+    "hash": "sha256:05f778642b039555709ebd666ff5da577e57c492698e2cd8d44b22f559187c0a"
   }
 }

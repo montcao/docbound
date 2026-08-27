@@ -252,8 +252,22 @@ An existing decision record was not edited except on its `Status` line.
 
 A record is an archive of what was believed when the decision was made. Editing
 the body to match what the code does now destroys the only thing the record was
-for. Supersede instead: write a new record naming the old one in `Supersedes`,
-and change the old one's `Status` to `superseded by NNNN`.
+for. Supersede instead, by writing a new record that names the old one in
+`Supersedes` and changing the old one's `Status` to `superseded by NNNN`.
+
+One other edit is allowed: a `## Corrections` section appended at the end. It is
+for a false statement of fact inside a record whose decision still stands, where
+superseding would be wrong and leaving it would keep something untrue in an
+archive with no way to mark it. The original text is never touched, and each
+correction carries the Unix timestamp it was made at. The pattern is anchored to
+the end of the file so the section cannot hide an edit above it.
+
+```
+## Corrections
+
+- t=1787856400: the Context section says the removal happened months earlier.
+  The repository was 26 hours old. The claim was never measured.
+```
 
 ```
 waiver: adr-immutable docs/decisions/0002-queue.md - repairing a path in the
@@ -342,21 +356,39 @@ must match the one in the organisation profile exactly.
 
 ### `stale-marker`
 
-Docs do not contain changelog phrasing, meaning the tense-mixing vocabulary a
-section picks up when it is patched instead of rewritten. The word list is in
-`skill/docbound/scripts/lib/checks/stale-marker.mjs`.
+Docs state current truth rather than history, and a duration is measured rather
+than asserted.
 
-The worklog is the changelog; every other doc is rewritten to be true now. A
-section that accumulates dated update paragraphs instead of being rewritten has
-more than one tense and no owner.
-
-The worklog and the decision records are exempt, since both are historical by
+<!-- docbound-ignore-start -->
+Two faults share the check. Changelog phrasing in a document that should say
+what is true now: "previously", "now uses", "as of 2025", "TBD". The worklog and
+the decision records are exempt from that half, since both are historical by
 design.
-One finding per doc, at the first line that matches.
+<!-- docbound-ignore-end -->
+
+The second fault is a span of time claimed without a number:
+<!-- docbound-ignore-start -->
+"months ago", "a while back", "two versions stale". This project published two
+of those, describing a removal as happening months earlier in a repository under
+thirty hours old.
+<!-- docbound-ignore-end -->
+Nothing is exempt from this half, because an unmeasured
+span is a claim about the world and is as wrong in an archive as anywhere else.
+Every worklog entry carries `t=` in Unix seconds and the audit prints one, so
+the number is a subtraction away
+(`docs/decisions/0029-unix-timestamps-for-elapsed-time.md`).
+
+Words that describe rather than assert a span are not in the pattern. "Recently"
+and "these days" appear in sentences like "what has changed recently", which
+names a section rather than claiming a duration.
+
+A record carrying a `## Corrections` section goes quiet for the second half,
+because appending one is the only thing an immutable record is allowed to do
+about a false statement.
 
 ```
-waiver: stale-marker docs/MIGRATION.md - the whole document is about moving off
-the old format and cannot be written without naming what came before.
+waiver: stale-marker docs/MIGRATION.md - the document is a migration history and
+the dated past tense is its subject.
 ```
 
 ### `restating-comments`

@@ -98,3 +98,10 @@ that they are the part doing the teaching.
 If repositories start satisfying the check with a sentence of filler above an
 unchanged opening, it is measuring the wrong thing and buying nothing, and the
 rule belongs in the skill text alone with the check removed.
+
+## Corrections
+
+- t=1787855778: the Consequences section says this repository "was told a week ago"
+  that its complexity was the problem. It was told earlier the same day. The
+  repository was 26 hours old when this record was written, and no event in it
+  is a week old. The claim was never measured.

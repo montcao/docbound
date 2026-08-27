@@ -100,7 +100,7 @@ While reading, note anything already false. Stale docs you encounter are in scop
 
 ### 2. Declare — open the worklog entry before the first edit
 
-Run `node scripts/start.mjs "Add rate limiting"`, or prepend an entry to `docs/WORKLOG.md` from `templates/WORKLOG-entry.md` by hand. It records intent *before* you know how it turns out: what you are trying to do, which modules you expect to touch, what you do not yet know. Its value is that it is written before the code.
+Run `node scripts/start.mjs "Add rate limiting"`, or prepend an entry to `docs/WORKLOG.md` from `templates/WORKLOG-entry.md` by hand. The entry carries `t=` on its Agent line, Unix seconds from `date +%s`, which is what any later reader subtracts to get elapsed time rather than guessing at a phrase. It records intent *before* you know how it turns out: what you are trying to do, which modules you expect to touch, what you do not yet know. Its value is that it is written before the code.
 
 Leave `Outcome` and `Still open` empty until step 5.
 
@@ -135,7 +135,7 @@ Two tiers. Pick by consequence, not by how much you feel like writing.
 
 If unsure which tier, it is structural. An unnecessary ADR costs two minutes. A missing one costs a future engineer re-deriving your reasoning, wrongly.
 
-ADRs are archives (principle 5). Once accepted, never edit the body. If the decision changes, write a new ADR that names the old one in `Supersedes`, and change only the old one's `Status` line to `superseded by NNNN`. The audit rejects any other edit to an existing ADR. `scripts/audit.mjs --next-adr` prints the next number.
+ADRs are archives (principle 5). Once accepted, never edit the body. If the decision changes, write a new ADR that names the old one in `Supersedes`, and change only the old one's `Status` line to `superseded by NNNN`. If the decision stands but the record states something factually false, append a `## Corrections` section at the end with a bullet carrying the Unix timestamp and what is wrong. Those two edits are the only ones the audit accepts. `scripts/audit.mjs --next-adr` prints the next number.
 
 ### 5. Reconcile — trim, then audit
 
@@ -177,7 +177,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `template-residue` | error | No unfilled template placeholders in any doc |
 | `orphan-doc` | warn | Every doc under `docs/` (other than ARCHITECTURE, WORKLOG, decisions) is linked from at least one other doc |
 | `duplicate-block` | warn | No paragraph of substance appears verbatim in two docs |
-| `stale-marker` | warn | Docs do not contain changelog-style phrasing ("previously", "now uses", "as of 2025", "TBD") |
+| `stale-marker` | warn | Docs do not contain changelog-style phrasing ("previously", "now uses", "as of 2025", "TBD"), and no document claims a span of time without a number. Every worklog entry carries `t=` in Unix seconds and the audit prints one, so state the number or say nothing |
 | `restating-comments` | warn | Changed source files do not have mostly comments that restate the adjacent code |
 | `todo-shape` | warn | Every TODO/FIXME in changed source states a problem and an action (six or more words) and names an owner, ticket, or reference |
 | `comment-sentence` | warn | Full-line comments in changed source are complete sentences (capitalized, terminated); commented-out code is flagged |

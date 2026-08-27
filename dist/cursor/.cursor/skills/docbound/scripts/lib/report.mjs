@@ -1,6 +1,12 @@
 // Waiver application and both output formats. The JSON shape is what the hook
 // and the CLI parse, so its keys are an interface: root, git, changed, errors,
-// warnings, waived.
+// warnings, waived, timestamp.
+//
+// `timestamp` is Unix seconds. Every other time in this project is an ISO day
+// string in a heading, which means anything wanting elapsed time has to parse
+// two of them and subtract. Seconds subtract on their own, sort without a
+// parser, and carry no timezone to be wrong about
+// (`docs/decisions/0029-unix-timestamps-for-elapsed-time.md`).
 
 import { isSource } from "./paths.mjs";
 
@@ -39,6 +45,7 @@ export function toJson(ctx, findings) {
   return JSON.stringify(
     {
       root: ctx.root,
+      timestamp: ctx.timestamp,
       git: ctx.git,
       changed: [...ctx.changed].sort(),
       errors,
@@ -60,7 +67,7 @@ export function toText(ctx, findings) {
   const out = [
     `docbound audit · mode=${ctx.mode} · root=${name} · ` +
       `git=${ctx.git ? "yes" : "no"} · ${ctx.changed.size} changed file(s), ` +
-      `${sourceCount} source`,
+      `${sourceCount} source · t=${ctx.timestamp}`,
   ];
   if (!ctx.git) {
     out.push("  (no git: whole tree scanned; doc-coverage not evaluated)");

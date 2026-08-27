@@ -171,6 +171,9 @@ export function audit(options) {
   const beforeCache = new Map();
   const ctx = {
     root,
+    // Unix seconds. Passed in by a caller that needs a fixed clock, so a test
+    // can assert on output without the number moving underneath it.
+    timestamp: options.timestamp ?? Math.floor(Date.now() / 1000),
     excludes,
     config,
     changed: detected.changed,
