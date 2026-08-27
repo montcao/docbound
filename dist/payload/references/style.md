@@ -50,6 +50,24 @@ An accepted Architecture Decision Record (ADR) is an archive of the decision as 
 
 The third is the one that gets skipped and the one that matters most. "Reverse if p99 latency exceeds 200ms under 10k concurrent sessions" is a decision that can be revisited. "We chose X" is a decision that will be re-litigated from scratch.
 
+## Open plainly, then go deep
+
+Every README and `ARCHITECTURE.md` opens with a sentence a reader can enter: what the thing is and who it is for, with no identifier, path, or type in it. Names come after.
+
+This is not a request to simplify. It is a request to let somebody in before the depth starts, because a reader who stops at the first sentence never reaches the boundaries and invariants that would have taught them something.
+
+The failure is easy to write and hard to notice, because it is accurate:
+
+> `catalog.LookupProduct` returns a project type string, the lockfile it matched on, and an error when nothing matches.
+
+Every word is true and a reader who already knows the package is well served. Nothing before it says what the package does, so a reader who does not know it has no way in. The fix is one sentence, not a rewrite:
+
+> Works out what kind of project a directory holds, so the build knows which steps to run. Everything here reads; nothing here writes.
+>
+> `catalog.LookupProduct` returns a project type string, the lockfile it matched on, and an error when nothing matches.
+
+Two other habits do most of the remaining work. Say an unfamiliar word once, in a clause, the first time it appears: one clause is the difference between a reader who continues and one who stops. And put the constraint before the feature, which is both the clearer order and the one that teaches, since a reader who meets a hundred `Must not` lists learns that boundaries are a thing to go looking for.
+
 ## Names are documentation you do not own
 
 The first tier of documentation is the identifier. A name carries more per character than any sentence about it, which is why a comment saying what a variable, function, file, or directory *is* usually adds nothing the name did not already say.

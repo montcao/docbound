@@ -11,7 +11,19 @@ Terms used throughout: **ADR** — Architecture Decision Record, a short file re
 
 This skill exists because agent-written code has a specific failure: the author does not persist. Every session is a new engineer with no memory of why anything is shaped the way it is. If the *why* is not written down in the moment it is decided, it is gone.
 
-The reader: a strong engineer who joins in six months with no chat history and no access to you. Every doc you touch should let that person act correctly without asking anyone.
+## Who you are writing for
+
+**A junior engineer, six months from now, with no chat history and no access to you.**
+
+They have two needs and you are serving both at once.
+
+They have to act correctly today. That means every doc they open lets them do the thing without asking anyone, which is why a document that assumes what it is explaining is a document that failed.
+
+And a year of reading these docs should leave them thinking the way a senior does. That part is not extra writing. It is already what this skill asks for: a `Must not` list is a boundary, an invariant is what has to hold no matter what, and a decision record's reversal condition is a principal engineer stating in advance what would change their mind. A junior who reads a hundred of those learns to look for them. Keep writing them, and name them plainly enough that the habit transfers.
+
+The failure mode is not writing too little. It is writing something correct that a junior cannot get into. Documentation nobody can enter teaches nobody anything, however accurate it is.
+
+So: **open plainly, then go deep.** The first paragraph of any README or `ARCHITECTURE.md` says what the thing is and who it is for, in a sentence with no identifiers, paths, or types in it. Names come after. Once the reader is in, do not simplify: the depth is the teaching.
 
 ## Foundation
 
@@ -171,6 +183,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `comment-sentence` | warn | Full-line comments in changed source are complete sentences (capitalized, terminated); commented-out code is flagged |
 | `open-item-typo` | warn | No two `Still open` slugs are within two characters of each other, which is how one item silently becomes two |
 | `open-item-form` | warn | A slug is closed by the bullet form and not by prose, and an item already open is carried forward rather than restated |
+| `plain-opening` | warn | A README or `ARCHITECTURE.md` opens with a sentence carrying no identifier, so a reader who does not already know the code can get in |
 
 Subagent mode (`--mode subagent`) adds:
 
@@ -187,7 +200,9 @@ Read `references/style.md` before writing any doc. Essentials:
 
 - Contract docstrings on the public surface: arguments, returns, errors, restrictions, gotchas. Tested. Nothing on private helpers unless they surprise.
 - Inline comments explain *why*, in complete sentences. Never restate the code. TODOs carry problem, action, owner.
-- Docs lead with constraints and invariants. What must be true, what must never happen. Features are visible in the code; constraints are not.
+- Open plainly. The first paragraph of a README or `ARCHITECTURE.md` says what the thing is and who it is for, with no identifier in it. A reader who cannot get through the first sentence never reaches the rest.
+- Docs lead with constraints and invariants. What must be true, what must never happen. Features are visible in the code; constraints are not. This is also the part that teaches: a junior reading a `Must not` list learns that boundaries are a thing to look for.
+- Say the unfamiliar word once, in a clause, the first time it appears. Not a glossary, not a tutorial. One clause is the difference between a reader who continues and one who stops.
 - Declarative, present tense, dry. No "simply," no "just," no praise, no narrative.
 - Every non-obvious claim points at a path: `see worker/queue.py:retry()`. No line numbers.
 - Link, never copy. One owner per fact.

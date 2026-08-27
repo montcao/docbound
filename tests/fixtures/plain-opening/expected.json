@@ -1,0 +1,10 @@
+{
+  "note": "One finding. `identify/README.md` opens by naming things the reader has not met; `router/README.md` carries identifiers too but opens with a sentence that has none, which is all the check asks for.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "plain-opening": 1
+  },
+  "waived": {},
+  "exit": 0
+}

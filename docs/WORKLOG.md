@@ -5,6 +5,110 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-27 - Aim the documentation at a junior engineer being trained
+
+Agent: claude · Branch: main
+
+### Intent
+
+Line 12 of `skill/docbound/SKILL.md` names the reader every doc is written for:
+a strong engineer joining in six months. Every downstream instruction follows
+from it, including a writing standard whose word for the target register is
+"dry". The result is accurate and closed to anyone who is not already senior.
+
+A module README this skill produced on a Go repository yesterday opens with
+"`catalog.LookupProduct` returns a project type string, the lockfile it
+matched on, and an error when nothing matches". True, useful to a senior, and it
+teaches a junior nothing because nothing before it says what the package is for.
+
+The reader should be a junior engineer, and the documentation should train them.
+That is a better target than the one it has, and it does not mean writing less.
+The senior thinking is already in these documents: a `Must not` list is a
+boundary, an invariant is what must always hold, and a decision record's
+reversal condition is a principal engineer saying in advance what would change
+their mind. A junior who reads those for a year learns to think that way. They
+just have to be able to get through the first paragraph.
+
+So the change is the door, not the house. Every README and ARCHITECTURE opens
+with a sentence a reader can enter, before any identifier appears. Then the
+depth stays exactly as it is.
+
+### Expected to touch
+
+- `skill/docbound/SKILL.md` — the reader, the writing standard, the check table
+- `skill/docbound/references/style.md` — what a plain opening is, with examples
+- `skill/docbound/templates/` — the slot exists; say who it is for
+- a new check, its fixture, `docs/checks.md`, `README.md`
+
+### Unknowns going in
+
+Whether a check can tell a plain sentence from a dense one without firing on
+good writing. The only honest signal is that the opening contains a sentence
+with no identifiers in it, which is crude and might be enough. It is also a
+twenty-third check in a repository that was just told its complexity is the
+problem, so it has to earn the slot or not exist.
+
+### Outcome
+
+The reader changed and almost nothing else did, which was the point.
+
+`skill/docbound/SKILL.md` now opens on who it is writing for: a junior engineer
+six months from now, with two needs. Act correctly today, and learn to think
+like a senior from a year of reading these documents. The section says outright
+that the second need is not extra writing, because the material is already
+there: a `Must not` list is a boundary, an invariant is what has to hold, and a
+reversal condition is a principal engineer saying in advance what would change
+their mind. It also names the failure mode, which is not writing too little but
+writing something correct that a junior cannot get into.
+
+Three rules went into the writing standard. Open plainly, with the first
+paragraph carrying no identifier. Say an unfamiliar word once, in a clause, the
+first time it appears. Put the constraint before the feature, which is both the
+clearer order and the one that teaches.
+
+`plain-opening` holds the first of those. It reads the first paragraph after the
+title of a root README or `docs/ARCHITECTURE.md` and asks for one sentence of
+five words or more with no backticks in it, skipping badges, HTML comments, and
+a `Status:` line. A document opening straight into a heading or a list is
+reported too. It checks a fact about the text rather than a judgement about
+prose, which is the only version of this check that can be right.
+
+`skill/docbound/references/style.md` carries the worked example, before and
+after, since the failure is easy to write and hard to see. The three templates
+say who the opening sentence is for.
+
+Two of this repository's own module READMEs were reported and rewritten rather
+than waived: `scripts/README.md` and `skill/README.md` both opened with a
+two-word fragment and went straight into paths. Then the same check was run
+against the Go repository from the previous entry, flagged the two READMEs this
+skill had written there, and both were rewritten to open with a sentence
+somebody outside the project could read. That is the shortest description of
+what this change does.
+
+169 tests, with `tests/fixtures/plain-opening/` carrying the real failing
+opening and a near-miss that names identifiers and passes because it also has a
+plain sentence. `docs/decisions/0027-open-plainly-then-go-deep.md`,
+`docs/checks.md`, `README.md`, and `CHANGELOG.md` all updated.
+
+The unknown going in was whether a check could tell a plain sentence from a
+dense one. It cannot, and it does not try. What it can tell is whether a reader
+was handed a term before a meaning, and that turned out to be enough to catch
+every real case put in front of it.
+
+### Still open
+
+- [plain-opening-proxy] The check measures whether the opening contains a
+  sentence without backticks, which a paragraph of filler satisfies. If
+  repositories start doing that, it is buying nothing and the rule belongs in
+  the skill text alone.
+- [depth-untested] Nothing checks the second half of the brief. Whether a year
+  of reading these documents actually trains anybody is not measurable here, and
+  the argument for it rests on the material already being present rather than on
+  evidence that it lands.
+- [teaching-register] The rules added here cover the door. The body of a
+  document is still written in the register the skill has always asked for, and
+  whether that is right for a junior three paragraphs in has not been looked at.
+
 ## 2026-08-27 - Remove every recommendation docbound makes about logic
 
 Agent: claude · Branch: main

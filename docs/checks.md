@@ -1,6 +1,6 @@
 # Checks
 
-Twenty-two checks. Errors block; warnings print and do not block, but leaving
+Twenty-three checks. Errors block; warnings print and do not block, but leaving
 one is a choice made on the record. The level below is the level a check
 reports at, and `dead-ref` is the one check that reports at both: it blocks on a
 reference that says it is a path and warns on one that only might be.
@@ -279,6 +279,38 @@ fence.
 ```
 
 ## Warnings
+
+### `plain-opening`
+
+A README or `ARCHITECTURE.md` opens with a sentence a reader can enter.
+
+The documentation this skill produces is written for a junior engineer six
+months from now, and it was passing every accuracy check while opening like
+this:
+
+<!-- docbound-ignore-start -->
+> `catalog.LookupProduct` returns a project type string, the lockfile it
+> matched on, and an error when nothing matches.
+<!-- docbound-ignore-end -->
+
+Accurate, and useful to somebody who already knows the package. Nothing before
+it says what the package is for, so a reader who does not know it stops there
+and never reaches the boundaries and invariants further down, which are the part
+that would have taught them how to think about the system.
+
+Reads the first paragraph after the title of a root README or
+`docs/ARCHITECTURE.md`, skipping badges, HTML comments, and a `Status:` line.
+It asks for one sentence of five words or more with no backticks in it. Whether
+prose is clear is a judgement no check can make; whether a reader was handed a
+term before a meaning is a fact about the text.
+
+A document that opens straight into a heading, a list, or a table is reported
+too, for the same reason.
+
+```
+waiver: plain-opening docs/ARCHITECTURE.md - the opening is a quoted protocol
+definition that the rest of the document explains line by line.
+```
 
 ### `orphan-doc`
 

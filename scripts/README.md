@@ -1,8 +1,11 @@
 # scripts
 
-Repository tooling. None of it ships: `package.json` does not list this
-directory in `files`, and nothing in `skill/` or `cli/` imports from it except
-the provider table.
+Tooling this repository runs on itself, and the only directory here that never
+reaches a user. It builds the skill into the distributions, checks that what is
+committed matches what a build would produce, and cuts a release.
+
+None of it ships: `package.json` does not list this directory in `files`, and
+nothing in `skill/` or `cli/` imports from it except the provider table.
 
 ## Start here
 

@@ -8,6 +8,26 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Changed
+
+- **The reader is a junior engineer six months from now, not a strong engineer.**
+  That line in `skill/docbound/SKILL.md` is what every instruction downstream
+  follows from, and the old one produced documentation that passed every
+  accuracy check while being impossible to enter. The depth is unchanged and is
+  now stated as the point: a `Must not` list is a boundary, an invariant is what
+  has to hold, and a reversal condition is a principal engineer saying in
+  advance what would change their mind. A junior who reads a year of those
+  learns to look for them.
+  `docs/decisions/0027-open-plainly-then-go-deep.md`.
+
+### Added
+
+- `plain-opening` (warn): a README or `docs/ARCHITECTURE.md` opens with a
+  sentence a reader can enter, before any identifier. Not a readability score.
+  Whether prose is clear is a judgement no check can make; whether a reader was
+  handed a term before a meaning is a fact about the text. Two of this
+  repository's own module READMEs were reported and rewritten.
+
 ### Removed
 
 <!-- docbound-ignore-start -->

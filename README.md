@@ -184,6 +184,7 @@ recorded in the output.
 | `adr-shape` | error | A decision record does not say what would reverse it |
 | `adr-immutable` | error | An accepted decision record was edited below its Status line |
 | `template-residue` | error | A scaffolded placeholder was left in a doc |
+| `plain-opening` | warn | A README or ARCHITECTURE opens with a sentence someone new can read |
 | `orphan-doc` | warn | A doc nothing links to |
 | `duplicate-block` | warn | The same paragraph has two owners |
 | `stale-marker` | warn | Changelog phrasing where current truth belongs |

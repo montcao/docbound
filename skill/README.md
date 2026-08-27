@@ -1,8 +1,12 @@
 # skill
 
-The canonical skill. `skill/docbound/` is the only place skill content is
-edited; everything under `dist/` and `plugin/` is a copy of it produced by
-`scripts/build.mjs`.
+The skill itself: the instructions an agent reads, the audit that decides when a
+task is done, and the templates a new document starts from. Everything a user
+installs is a copy of what is in here.
+
+This is the only place skill content is edited. Everything under `dist/` and
+`plugin/` is a copy produced by `scripts/build.mjs`, and editing a copy is
+reverted by the next build.
 
 ## Start here
 

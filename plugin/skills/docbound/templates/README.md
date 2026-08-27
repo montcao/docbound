@@ -1,6 +1,6 @@
 # <project name>
 
-<One sentence: what this is and what it is used for. No adjectives.>
+<One or two sentences a reader who has never seen this project can enter: what this is, what it is used for, and who for. No adjectives, and no identifier, path, or type. Names come after.>
 
 Status: <active | experimental | deprecated — and what that means for a reader>
 Owner: <person, team, or channel a reader should contact>

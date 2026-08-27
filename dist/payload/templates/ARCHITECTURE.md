@@ -1,6 +1,6 @@
 # Architecture
 
-<State of the system as it stands. Present tense. No history — that is the worklog. No "this change" — that is a PR description. Getting started, testing, debugging, and release live in the root README; this file is shape and seams.>
+<Open with one or two sentences a reader who has never seen this system can enter: what it does and what it is made of, with no identifier or path in them. Then the state of the system as it stands. Present tense. No history — that is the worklog. No "this change" — that is a PR description. Getting started, testing, debugging, and release live in the root README; this file is shape and seams.>
 
 ## Diagram
 

@@ -1,6 +1,6 @@
 # <module name>
 
-<One sentence: what this directory holds and what it is used for. "Owns" means it is the single authority for it.>
+<One or two sentences a reader who has never seen this code can enter: what this directory holds and what it is used for. No identifier, path, or type in it. Names come after. "Owns" means it is the single authority for it.>
 
 Status: <active | experimental | deprecated | internal — delete the line if the root README status applies>
 Owner: <delete the line if the root README owner applies>
