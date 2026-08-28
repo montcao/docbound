@@ -128,6 +128,20 @@ what happened. Both are describing the world as it was.
 `skill/docbound/scripts/lib/checks/dead-ref.mjs` reports those as warnings, the
 same exemption `stale-marker` already makes.
 
+## Examples in shipped text are invented
+
+Every path, symbol, and schema in `README.md`, `docs/`, and anything under
+`skill/docbound/` is made up. A real example is clearer than an invented one and
+carries a cost the reader never agreed to: three unfamiliar repositories were
+used to test this project, and their service names, file names, and function
+names ended up in the documentation and in the skill payload copied into every
+project that installs it.
+
+Nothing checks this. `skill/docbound/scripts/lib/checks/plain-opening.mjs`
+quotes an example opening, `skill/docbound/references/style.md` quotes it twice
+more, and no check can tell an invented path from a borrowed one. It is held by
+reading, like the rules in records 0018, 0026, and 0028.
+
 ## Boundaries
 
 | Interface | Defined in | Consumers | Change requires |

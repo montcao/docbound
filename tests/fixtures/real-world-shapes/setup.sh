@@ -7,7 +7,7 @@
 # has to be licence-clean and deterministic. What is distilled is the shape:
 #
 #   * a gofmt-clean Go file whose raw string contains space-indented JSON
-#   * a URL route written `/scan`, and `owner/repo` standing in for an argument
+#   * a URL route written `/search`, and `owner/repo` standing in for an argument
 #   * a documented commit format whose `<type>` is not an unfilled placeholder
 #   * a doc inside a package writing paths the way that package's tooling does
 #   * a container image reference, which has slashes and dots and is not a path
@@ -33,7 +33,7 @@ package, the way its own tooling writes them.
 
 ## Start here
 
-- `prompt.go` — the request schema and the route.
+- `prompt.go` — the response template and the route.
 
 ## Contract
 
@@ -63,7 +63,7 @@ names the package the change lands in.
 
 ## Endpoints
 
-The audit endpoint is mounted at `/scan`. Passing a repository to it means
+The query endpoint is mounted at `/search`. Passing a repository to it means
 passing `owner/repo`, which the service resolves against the host it is
 configured for.
 

@@ -74,10 +74,19 @@ describe("audit surface", () => {
   test("waivers name the finding they dismiss", () => {
     const { repo, args } = build("waiver");
     const { json } = runAudit(repo, args);
-    assert.equal(json.waived.length, 1);
-    assert.equal(json.waived[0].check, "doc-coverage");
-    assert.equal(json.waived[0].path, "src/app.py");
-    assert.equal(json.waived[0].level, "waived");
+    const byCheck = Object.fromEntries(json.waived.map((f) => [f.check, f]));
+
+    assert.equal(json.waived.length, 2);
+    assert.equal(byCheck["doc-coverage"].path, "src/app.py");
+    assert.equal(byCheck["doc-coverage"].level, "waived");
+
+    // The target the grammar used to truncate at its first hyphen. Every
+    // decision record filename carries one, so this waiver had never worked.
+    assert.equal(
+      byCheck["adr-immutable"].path,
+      "docs/decisions/0001-adopt-docbound.md",
+    );
+    assert.equal(byCheck["adr-immutable"].level, "waived");
   });
 
   test("--fast runs only the cheap checks", () => {

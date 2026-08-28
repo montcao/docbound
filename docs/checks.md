@@ -26,9 +26,11 @@ src/legacy/parser.g; the grammar carries the contract and the generator is
 documented in src/legacy/README.md.
 ```
 
-The target is optional. With one, the waiver dismisses findings whose path is
-that path or sits beneath it; without one, it dismisses every finding from that
-check for this entry. Waivers apply to the top entry only, so one does not
+The target is optional and is one token with no spaces in it. The separator
+carries whitespace on both sides, and is a hyphen or an em dash, one or two of
+them. With a target, the waiver dismisses findings whose path is that path or
+sits beneath it; without one, it dismisses every finding from that check for
+this entry. Waivers apply to the top entry only, so one does not
 outlive the task that justified it. A waived finding still appears in the
 output, under `WAIVED`, and in the `waived` array of the JSON.
 

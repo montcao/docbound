@@ -86,3 +86,11 @@ check it is silencing is mistuned and the fix is that check, not more markers.
 
 If a monorepo needs the anchor on more than a handful of docs, the right unit is
 the package rather than the file, and this becomes a per-directory setting.
+
+## Corrections
+
+- t=1787878318: the examples in Context and Decision originally used a service and
+  directory name taken from a third-party repository this project was tested
+  against. They are replaced with invented ones. The reasoning, the options, and
+  the decision are unchanged, and the edit carries a waiver in the worklog entry
+  that made it.

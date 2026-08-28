@@ -1,9 +1,10 @@
 {
-  "note": "One uncovered file, dismissed by a waiver line rather than by a doc.",
+  "note": "One uncovered file and one edited record, each dismissed by a waiver line. The record path carries hyphens, which the grammar used to truncate the target at.",
   "git": true,
   "errors": {},
   "warnings": {},
   "waived": {
+    "adr-immutable": 1,
     "doc-coverage": 1
   },
   "exit": 0

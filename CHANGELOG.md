@@ -61,6 +61,19 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Fixed
 
+- A waiver target containing a hyphen was truncated at the first one.
+  `waiver: adr-immutable docs/decisions/0020-doc-local-directives.md - reason`
+  parsed with a target of `docs/decisions/0020`, matched no finding, and
+  dismissed nothing without saying so. Every record filename is hyphenated, so
+  waiving a check against a specific record had never worked. The target is now
+  one whitespace-free token and the separator needs whitespace on both sides;
+  every documented form parses the same as before.
+  `docs/decisions/0030-waiver-targets-hold-hyphens.md`.
+- Examples in `README.md`, `docs/checks.md`, two shipped skill files, a decision
+  record, and a fixture used a service name, a file name, a function name, and a
+  response schema taken from repositories this project was tested against.
+  Replaced with invented ones.
+
 - `README.npm.md` advertised Codex, Gemini CLI,
   GitHub Copilot, and opencode. All four were removed in
   `docs/decisions/0008-verified-providers-only.md` and the file was never

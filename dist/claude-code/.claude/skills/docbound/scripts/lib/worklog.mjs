@@ -34,8 +34,14 @@ export function filled(text) {
   return /[\p{L}\p{N}_]/u.test(stripped);
 }
 
+// The separator needs whitespace on both sides and the target is one
+// whitespace-free token, because the previous pattern let the target end at the
+// first hyphen inside it. `waiver: adr-immutable docs/decisions/0020-doc-local-directives.md - reason`
+// parsed with a target of `docs/decisions/0020`, matched no finding, and
+// reported nothing: every record filename is hyphenated, so waiving a check
+// against one had never worked (`docs/decisions/0030-waiver-targets-hold-hyphens.md`).
 const WAIVER_RE =
-  /^\s*(?:[-*]\s*)?waiver:\s*([a-z-]+)\s*([^\s—-][^—]*?)?\s*[—-]{1,2}\s*(.+)$/;
+  /^\s*(?:[-*]\s*)?waiver:\s*([a-z-]+)(?:\s+(\S+))?\s+[—-]{1,2}\s+(.+)$/;
 
 /**
  * Parse the worklog once. Returns the top entry, its waivers, and the problems

@@ -5,6 +5,115 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-28 - Remove third-party project details from the public surface
+
+Agent: claude · Branch: main · t=1787878278
+
+### Intent
+
+Three unfamiliar repositories were used to test this project, and details from
+two of them are sitting in files about to become public. None of it is a
+credential. All of it is somebody else's.
+
+A service directory name appears in `docs/checks.md`, in an accepted decision
+record, and twice in shipped skill source. A real file name from a security
+module appears in `README.md`, in the example directly under the title, which is
+the most-read paragraph in the repository. A real exported function name appears
+five times, twice inside the skill payload that gets copied into every project
+that installs this. A response schema and a route were reproduced closely enough
+in a fixture to be recognisable.
+
+Examples are better when they are real, which is why they went in. They are not
+better when the reality belongs to a project that did not agree to be quoted.
+
+A scan of the tracked tree finds no credentials, no keys, and no email addresses
+beyond a fixture placeholder. Git authorship carries one address, which is
+ordinary for a public repository and is the maintainer's own. The leak is
+organisational detail rather than anything exploitable.
+
+Each name entered the history in exactly one commit and neither repository's own
+name appears anywhere. Nothing is pushed, so the history is still open to being
+rewritten, and that is a decision for the maintainer rather than something to do
+unasked.
+
+### Expected to touch
+
+- `README.md`, `docs/checks.md`, `docs/decisions/0020-doc-local-directives.md`
+- `skill/docbound/references/style.md`, `skill/docbound/scripts/lib/refs.mjs`,
+  `skill/docbound/scripts/lib/checks/plain-opening.mjs`
+- `tests/fixtures/real-world-shapes/`
+- `docs/WORKLOG.md` — the entries that quoted the same names
+
+### Unknowns going in
+
+The decision record is accepted and its body is immutable. Redaction is not a
+correction, since nothing in it is false, so the existing mechanism does not fit
+and the edit needs a waiver with a reason a reviewer would accept.
+
+### Waivers
+
+waiver: adr-immutable docs/decisions/0020-doc-local-directives.md - replacing a
+third-party project's service and directory names with invented ones in the
+examples. The reasoning, the options, and the decision are untouched, and a
+Corrections entry records what was replaced and why.
+
+### Outcome
+
+Nothing exploitable was found, and something else was.
+
+The sweep of the tracked tree turns up no credentials, no keys, and no email
+address beyond the fixture placeholder and the co-author trailer. Git authorship
+carries the maintainer's own address on every commit, which is ordinary for a
+public repository. No absolute path and no username appears anywhere.
+
+What it did turn up is other people's detail. A service directory name, a file
+name from a security module, an exported function name, and a response schema,
+taken from two repositories this project was tested against and reproduced
+closely enough to be recognisable. All of it was in examples, which is why it
+went in: a real example is better than an invented one, right up until the
+reality belongs to somebody who did not agree to be quoted. The file name was
+sitting in the paragraph directly under the title of `README.md`, and the
+function name was inside the skill payload copied into every project that
+installs this.
+
+Replaced with invented names across `README.md`, `docs/checks.md`,
+`docs/decisions/0020-doc-local-directives.md`,
+`skill/docbound/references/style.md`,
+`skill/docbound/scripts/lib/refs.mjs`,
+`skill/docbound/scripts/lib/checks/plain-opening.mjs`, this worklog, and
+`tests/fixtures/real-world-shapes/`. Each name entered the history in exactly
+one commit and neither repository's own name appears anywhere, so the history
+is a small and self-contained problem rather than a diffuse one.
+
+**Writing the waiver for the record edit found a bug in the waiver grammar.**
+The target ended at the first hyphen inside it, so
+`waiver: adr-immutable docs/decisions/0020-doc-local-directives.md - reason`
+parsed with a target of `docs/decisions/0020`, matched no finding, and dismissed
+nothing. It also said nothing, which makes it the same shape as two faults found
+in earlier entries: a line that looks like it worked and did not. Every record
+filename is hyphenated, so waiving `adr-immutable` against one had never worked
+at all.
+
+The target is now one whitespace-free token and the separator needs whitespace
+on both sides. Every form in `docs/checks.md` and in the skill text parses
+identically before and after; the two that silently produced a wrong target now
+produce the right one, and the change can only turn a reported finding into a
+waived one. `tests/fixtures/waiver/` waives `adr-immutable` against a record
+path, and the assertion names that path rather than counting findings.
+`docs/decisions/0030-waiver-targets-hold-hyphens.md` has the reasoning.
+
+### Still open
+
+- [history-carries-redacted-names] The three replaced names are still in the git
+  history, each introduced in one commit. Nothing has been pushed, so a rewrite
+  before the first push is possible and is a maintainer's call rather than
+  something to do unasked.
+- [waiver-space-in-target] A path containing a space cannot be waived. Quoting
+  the target would be the fix and is a grammar change rather than an adjustment.
+- [example-provenance] Nothing distinguishes an invented example from a borrowed
+  one, and no check could. The rule is that examples in shipped text are
+  invented, and it is held by reading.
+
 ## 2026-08-28 - Gate the publish job and stop it racing itself
 
 Agent: claude · Branch: main · t=1787877815
