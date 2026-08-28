@@ -5,6 +5,58 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-28 - Genericise the last borrowed sample
+
+Agent: claude · Branch: main · t=1787879140
+
+### Intent
+
+The history rewrite is done and verified: 41 commits, the tag, and the author
+all survived, the tree hash is byte-identical to what it was before, and no
+name from either tested repository appears in any blob.
+
+Two words survive a sweep and both are fine. A public container image name is
+public, and naming one says nothing about anybody. The word verdict appears once
+as prose in `README.md` and once as a JSON key in a Go sample in
+`tests/scan.test.mjs`.
+
+That sample is the last thing here modelled directly on a file from a tested
+repository. It is three generic keys and identifies nobody, and leaving one
+borrowed sample while replacing every other one makes the rule harder to follow
+than it needs to be.
+
+### Expected to touch
+
+- `tests/scan.test.mjs` — the sample keys
+
+### Unknowns going in
+
+None. The scanner test asserts indentation behaviour and does not read the key
+names, so replacing them should change nothing about what it proves.
+
+### Outcome
+
+`tests/scan.test.mjs` uses invented keys. The test asserts what the scanner does
+with indentation inside a Go raw string and never reads the key names, so it
+proves exactly what it did before.
+
+Closing out the rewrite, since this entry is where it lands. `git filter-repo`
+replaced nine strings across all 41 commits. The tree hash before and after is
+`da0a6c29708e61c0c39855acf319cc357d387bc3` in both cases, which is the strongest
+available statement that no file content changed: only history did. The tag
+`v0.1.0` survived, the author survived, and a bundle of the pre-rewrite
+repository sits outside the working tree in case any of that turns out to be
+wrong.
+
+Sweeping every blob in every commit for both tested repositories' names, their
+service directories, their file names, and their exported symbols returns
+nothing. What remains is a public container image name, which is public.
+
+### Still open
+
+Nothing new. [example-provenance] carries forward and is now the only thing
+holding the rule that examples in shipped text are invented.
+
 ## 2026-08-28 - Remove third-party project details from the public surface
 
 Agent: claude · Branch: main · t=1787878278
