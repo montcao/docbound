@@ -14,6 +14,14 @@ on:
   # For re-running a publish that failed after the version was already bumped.
   workflow_dispatch:
 
+# One publish at a time. Two pushes close together would otherwise start two
+# jobs that both read the same version, both find it absent, and race: one
+# publishes and the other fails on a version that is now taken. Queueing rather
+# than cancelling, because a publish that has started should finish.
+concurrency:
+  group: publish
+  cancel-in-progress: false
+
 permissions:
   contents: read
   # Required for npm provenance, and for trusted publishing if it is configured
@@ -24,6 +32,14 @@ permissions:
 jobs:
   publish:
     runs-on: ubuntu-latest
+    # The gate between a push to main and a version nobody can take back after
+    # seventy-two hours. Configure required reviewers on this environment in the
+    # repository settings, and scope NPM_TOKEN to it if a token is used at all.
+    # An environment with no rules configured is a label and blocks nothing,
+    # which is the state it starts in.
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/docbound
     steps:
       - uses: actions/checkout@v4
         with:

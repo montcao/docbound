@@ -59,6 +59,12 @@ the one commit on main that cannot pass this repository's own audit.
 
 `.github/workflows/ci.yml` runs the freshness check.
 
+`scripts/release.mjs` cuts a release and stops there. It verifies on a clean
+tree, sets the version everywhere, rebuilds, commits, and tags, and it does not
+push. Pushing to main is what publishes, through
+`.github/workflows/publish.yml`, so the decision to release stays with a person
+and the mechanics do not.
+
 ## Decisions
 
 | Decision | Rejected | Why | Reverse if |

@@ -19,6 +19,11 @@ breaking change to any of them is a major version and carries a decision record.
   A registry version is immutable, so publishing on every push without that
   guard fails with E403 on every push that does not change the version. With it,
   a re-run, a revert, and a merge that leaves the version alone all skip.
+
+  The job runs in an environment named `npm`, which is where required reviewers
+  are configured and where a token should be scoped if one is used. It also
+  takes a concurrency group, so two pushes close together queue rather than
+  racing for the same version number.
 - `CONTRIBUTING.md`, `SECURITY.md`, three issue templates, and a pull request
   template. `SECURITY.md` carries the threat model, which is specific here: the
   hook runs automatically after every edit, over repositories nobody has read,

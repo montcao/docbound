@@ -226,6 +226,21 @@ trigger.
 The version lives in four files plus `skills-lock.json`, which is why setting it
 by hand is four chances to leave one behind.
 
+### What has to exist on the GitHub side
+
+The publish job names an environment called `npm`. GitHub creates it implicitly
+on first use with no rules, so the workflow runs either way, and it blocks
+nothing until required reviewers are configured on it in the repository
+settings. A push to main that carries a new version publishes without review
+until they are.
+
+Branch protection on main is the other half. Without it, a direct push from
+anyone with write access reaches the registry, and a published version cannot be
+removed after seventy-two hours.
+
+If a token is used rather than trusted publishing, scope `NPM_TOKEN` to that
+environment rather than to the repository, so no other workflow can read it.
+
 ### The npm side, once
 
 Trusted publishing has to be configured on npmjs.com against this repository and

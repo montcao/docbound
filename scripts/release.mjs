@@ -185,7 +185,10 @@ function main(argv) {
   ]);
   git(["commit", "-m", `release: ${version}`]);
   git(["tag", "-a", `v${version}`, "-m", `docbound ${version}`]);
-  process.stdout.write(`tagged v${version}. Push with: git push --follow-tags\n`);
+  process.stdout.write(
+    `tagged v${version}. Push with: git push --follow-tags\n` +
+      "The push to main is what publishes; the tag is a marker.\n",
+  );
   return 0;
 }
 

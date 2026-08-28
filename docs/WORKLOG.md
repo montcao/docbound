@@ -5,6 +5,79 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-28 - Gate the publish job and stop it racing itself
+
+Agent: claude · Branch: main · t=1787877815
+
+### Intent
+
+The publish workflow runs on a push to main, which means anyone with write
+access to this repository can publish to the registry by bumping a version. No
+review stands between the two, and a published version cannot be taken back
+after seventy-two hours. That is the largest gap in it.
+
+GitHub environments are the control. A job naming one waits for whatever
+protection rules that environment has, and a secret scoped to the environment is
+not readable by any other job. Naming one costs a line and does nothing until
+the environment is configured, which makes it safe to add now and useful later.
+
+Second, two pushes close together start two publish jobs. Both read the same
+version, both find it absent, and one of them fails on a version the other has
+already taken. A concurrency group with queueing rather than cancelling makes
+the second wait and then skip at its own guard.
+
+Third, `scripts/release.mjs` still ends by printing `git push --follow-tags`.
+The tag is a marker now and the trigger is the push to main, so that line sends
+the reader to a flag that no longer matters.
+
+### Expected to touch
+
+- `.github/workflows/publish.yml` — the environment and the concurrency group
+- `scripts/release.mjs` — the closing message
+- `docs/DEVELOP.md` — what has to exist on the GitHub side
+
+### Unknowns going in
+
+Whether naming an environment that has not been created fails the run or creates
+it implicitly with no rules. If it fails, the line cannot be added before the
+environment exists and the order of the setup steps changes.
+
+### Outcome
+
+Three changes, none of them large, one of them the difference between a workflow
+that publishes and a workflow that is allowed to.
+
+The publish job now runs in an environment named `npm`, with the package page as
+its URL so a run links to what it produced. GitHub creates an environment
+implicitly on first use, so the line is safe to add before the environment
+exists and blocks nothing until required reviewers are configured on it. That
+answers the unknown going in: it does not fail, it starts as a label. What it
+buys is a place for those reviewers to be configured and a scope for a token to
+live in, so no other workflow in the repository can read it.
+
+A concurrency group named `publish`, queueing rather than cancelling. Two pushes
+close together would otherwise start two jobs that both read the same version,
+both find it absent on the registry, and race for it. Queued, the second one
+reaches its own guard after the first has published and skips.
+
+`scripts/release.mjs` prints one more line, saying the push to main is what
+publishes and the tag is a marker. It still refuses to push, which is right: the
+mechanics are automated and the decision is not.
+
+`docs/DEVELOP.md` gained what has to exist on the GitHub side, which is the
+environment, branch protection on main, and a token scoped to the environment if
+trusted publishing is not used. `scripts/README.md` says why the release script
+stops short of pushing.
+
+### Still open
+
+- [environment-unconfigured] The `npm` environment has no protection rules,
+  because it does not exist yet. Until required reviewers are set on it, a push
+  to main carrying a new version publishes with nothing between the two.
+- [no-branch-protection] main is unprotected, so a direct push from anyone with
+  write access reaches the registry. A published version cannot be removed after
+  seventy-two hours.
+
 ## 2026-08-27 - Publish from main when the version changes, not from a tag
 
 Agent: claude · Branch: main · t=1787865686
