@@ -40,6 +40,7 @@ import { ignoreEpipe, isEntryPoint } from "./lib/entry.mjs";
 
 import * as worklogEntry from "./lib/checks/worklog-entry.mjs";
 import * as worklogClosed from "./lib/checks/worklog-closed.mjs";
+import * as entryLength from "./lib/checks/entry-length.mjs";
 import * as docCoverage from "./lib/checks/doc-coverage.mjs";
 import * as newDirReadme from "./lib/checks/new-dir-readme.mjs";
 import * as deadRef from "./lib/checks/dead-ref.mjs";
@@ -65,7 +66,7 @@ import * as logicTouched from "./lib/checks/logic-touched.mjs";
 // Order is the order findings are reported in. Adding a check is a line here
 // and a fixture; see `docs/DEVELOP.md`.
 export const AUTHOR_CHECKS = [
-  worklogEntry, worklogClosed, docCoverage, newDirReadme, deadRef, diagramRefs,
+  worklogEntry, worklogClosed, entryLength, docCoverage, newDirReadme, deadRef, diagramRefs,
   depAdr,
   adrShape, adrImmutable, templateResidue, orphanDoc, duplicateBlock,
   staleMarker, restatingComments, todoShape, commentSentence,

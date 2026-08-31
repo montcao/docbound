@@ -1,6 +1,6 @@
 # Checks
 
-Twenty-three checks. Errors block; warnings print and do not block, but leaving
+Twenty-four checks. Errors block; warnings print and do not block, but leaving
 one is a choice made on the record. The level below is the level a check
 reports at, and `dead-ref` is the one check that reports at both: it blocks on a
 reference that says it is a path and warns on one that only might be.
@@ -122,7 +122,28 @@ waiver: worklog-closed - the audit is being run mid-task to check the docs so
 far; the entry closes before this branch is pushed.
 ```
 
-### `doc-coverage`
+### `entry-length`
+
+The newest worklog entry is under twelve lines of prose.
+
+An entry that carries its own reasoning is one nobody reads. This project's log
+reached 3,016 lines across 32 entries in two days, averaging 94 lines each,
+while the skill asked for two to four sentences throughout. The instruction did
+not hold, including against the agent that wrote it.
+
+Counts prose only. Headings, the `Agent:` line, blank lines, and list items are
+structure rather than prose, and a task with eight open items is not the failure
+this is about.
+
+Reasoning goes in a decision record, which the entry links to.
+`docs/decisions/0032-worklog-entries-are-short.md`.
+
+```
+waiver: entry-length docs/WORKLOG.md - a migration touching forty files, where
+the list of what moved where is the outcome and has nowhere shorter to live.
+```
+
+### `doc-coverage`### `doc-coverage`
 
 Every changed source file is covered in the same diff. Covered means one of two
 things: its own or an ancestor module README was touched, or a system-level doc
@@ -135,6 +156,13 @@ would measure diligence rather than coverage.
 
 Exempt: test files, files at or under fifteen non-blank lines, deleted files,
 and everything when there is no git repository to diff against.
+
+Also exempt is a file whose edit touched only comments and docstrings. There is
+no contract change to document, and blocking a typo fix is how a gate gets
+switched off (`docs/decisions/0031-comment-edits-need-no-doc.md`). The comparison
+is against the reference commit with documentation masked, which is what
+`logic-touched` already did. Not knowing counts as not exempt, so a new file and
+a language the scanner has no table entry for still need a doc.
 
 ```
 waiver: doc-coverage src/generated/api_types.ts - emitted by the codegen step in

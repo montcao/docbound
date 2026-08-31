@@ -5,15 +5,7 @@ Agent: <claude | codex | gemini | copilot | other> · Branch: <branch or "n/a"> 
 
 ### Intent
 
-<Written before the first edit. What this task is trying to achieve and why. Two to four sentences.>
-
-### Expected to touch
-
-- `<path/>` — <what you expect to change there>
-
-### Unknowns going in
-
-- <what you do not know yet that could change the plan>
+<Written before the first edit. One or two lines: what this task is for. Not a plan, not a file list, not what you might find. The diff carries all of that.>
 
 ### Handoff
 
@@ -25,11 +17,11 @@ Agent: <claude | codex | gemini | copilot | other> · Branch: <branch or "n/a"> 
 
 ### Outcome
 
-<Filled at the end. What actually changed, by path. Which docs were updated, which sections or docs were deleted, which Architecture Decision Records (ADRs) written or superseded, which stale claims removed. Where reality diverged from Intent, say so.>
+<Filled at the end. One or two lines: what changed and anything that surprised you. Reasoning goes in a decision record, not here. An entry longer than a few lines is one nobody reads.>
 
 ### Still open
 
-<Filled at the end. What is not done, deferred, or discovered. Each item specific enough that someone else could pick it up.>
+<Filled at the end. One line each, specific enough that somebody else could pick it up.>
 
 <Give an item a slug in square brackets and it becomes trackable: declared once, open until an entry closes it, never restated. Without one it is a note attached to this task, which is fine for something that will not outlive it.>
 

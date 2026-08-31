@@ -100,7 +100,9 @@ While reading, note anything already false. Stale docs you encounter are in scop
 
 ### 2. Declare — open the worklog entry before the first edit
 
-Run `node scripts/start.mjs "Add rate limiting"`, or prepend an entry to `docs/WORKLOG.md` from `templates/WORKLOG-entry.md` by hand. The entry carries `t=` on its Agent line, Unix seconds from `date +%s`, which is what any later reader subtracts to get elapsed time rather than guessing at a phrase. It records intent *before* you know how it turns out: what you are trying to do, which modules you expect to touch, what you do not yet know. Its value is that it is written before the code.
+Run `node scripts/start.mjs "Add rate limiting"`, or prepend an entry to `docs/WORKLOG.md` from `templates/WORKLOG-entry.md` by hand. The entry carries `t=` on its Agent line, Unix seconds from `date +%s`, which is what any later reader subtracts to get elapsed time rather than guessing at a phrase.
+
+**Keep it to two or three lines.** One or two for what the task is for, one or two for what changed, one line per open item. Reasoning goes in a decision record and detail is in the diff. An entry that carries its own reasoning is one nobody reads: this project's log averaged 94 lines an entry before `entry-length` existed. It records intent *before* you know how it turns out: what you are trying to do, which modules you expect to touch, what you do not yet know. Its value is that it is written before the code.
 
 Leave `Outcome` and `Still open` empty until step 5.
 
@@ -167,7 +169,8 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 |---|---|---|
 | `worklog-entry` | error | `docs/WORKLOG.md` was modified in this change set and its top entry is dated within the session window |
 | `worklog-closed` | error | That entry has non-empty `Outcome` and `Still open` sections |
-| `doc-coverage` | error | Every changed source file is covered in the same diff: its own or an ancestor module README was touched, or a system doc (root README, ARCHITECTURE, an ADR) was touched *and names the file or its directory*. Tests and trivially small files are exempt |
+| `entry-length` | warn | The newest worklog entry is under twelve lines of prose. Reasoning goes in a decision record; the entry is the index |
+| `doc-coverage` | error | Every changed source file is covered in the same diff: its own or an ancestor module README was touched, or a system doc (root README, ARCHITECTURE, an ADR) was touched *and names the file or its directory*. Tests, trivially small files, and edits that touched only comments and docstrings are exempt |
 | `new-dir-readme` | error | Every new directory containing source has a `README.md` |
 | `dead-ref` | error | No doc references a file path that does not exist. A token carrying an extension or a trailing slash is unambiguous and blocks; a slash between two bare words is reported as a warning |
 | `diagram-refs` | error | No Mermaid diagram names a path that does not exist. A file is written with its extension, a directory with a trailing slash; anything else in a label is prose |

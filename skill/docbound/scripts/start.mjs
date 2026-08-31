@@ -49,7 +49,7 @@ const USAGE =
 // Sections an entry opens with. Outcome and Still open are written at the end,
 // and the two optional ones are left out rather than created empty: a heading
 // with nothing under it tells the reader the document is unreliable.
-const OPENING = ["Intent", "Expected to touch", "Unknowns going in"];
+const OPENING = ["Intent"];
 const CLOSING = ["Outcome", "Still open"];
 
 export function parseArgs(argv) {

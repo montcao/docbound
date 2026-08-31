@@ -2,9 +2,16 @@
 // an ancestor) module README was touched, or a system-level doc — root README,
 // ARCHITECTURE, or an ADR — was touched *and names the file or its directory*.
 // Touching an unrelated ADR does not cover a file.
+//
+// A file whose edit touched only comments and docstrings is skipped. There is no
+// contract change to document, so demanding a doc for one blocks a typo fix and
+// teaches people to turn the gate off
+// (`docs/decisions/0031-comment-edits-need-no-doc.md`).
 
+import { logicOf } from "../scan.mjs";
 import {
   TRIVIAL_LINES,
+  suffixOf,
   exists,
   isDoc,
   isSource,
@@ -39,6 +46,7 @@ export function run(ctx) {
     // A deleted file needs no covering doc; `dead-ref` owns removals.
     if (!exists(ctx.root, file)) continue;
     if (nonblankLines(ctx.root, file) <= TRIVIAL_LINES) continue;
+    if (commentsOnly(ctx, file)) continue;
 
     let covered = false;
     let parent = parentOf(file);
@@ -66,4 +74,20 @@ export function run(ctx) {
         "file or its directory",
     );
   }
+}
+
+/**
+ * True when the only difference from the reference commit is documentation.
+ *
+ * False when there is nothing to compare against: a new file, an untracked
+ * tree, or a language the scanner cannot read all answer "not known to be
+ * comment-only", which keeps the check demanding a doc rather than excusing one.
+ */
+function commentsOnly(ctx, file) {
+  const before = ctx.beforeVersion(file);
+  if (before === null) return false;
+  const after = readText(ctx.root, file);
+  if (after === null) return false;
+  const suffix = suffixOf(file);
+  return logicOf(before, suffix) === logicOf(after, suffix);
 }

@@ -213,7 +213,8 @@ recorded in the output.
 |---|---|---|
 | `worklog-entry` | error | You started work without saying what you were about to do |
 | `worklog-closed` | error | The entry has no outcome, or nothing under Still open |
-| `doc-coverage` | error | A source file changed and no doc covering it changed with it |
+| `entry-length` | warn | A worklog entry long enough that nobody will read it |
+| `doc-coverage` | error | A source file changed and no doc covering it changed with it. Comment-only edits are exempt |
 | `new-dir-readme` | error | A new package arrived with no README |
 | `dead-ref` | error | A doc points at a file path that does not exist |
 | `diagram-refs` | error | A Mermaid diagram has a box naming a path that does not exist |

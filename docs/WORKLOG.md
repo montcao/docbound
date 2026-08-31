@@ -5,6 +5,29 @@ edit; Outcome and Still open are written after the audit passes.
 Entries older than a quarter can be pruned once their content is reflected
 in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
 
+## 2026-08-31 - Stop doc-coverage firing on comment-only edits, and bound entry length
+
+Agent: claude · Branch: main · t=1788188517
+
+### Intent
+
+`doc-coverage` fires on any source edit, including comment-only ones, so a typo
+fix blocks. And entries here average 94 lines over 32 entries, which nobody reads.
+
+### Outcome
+
+`doc-coverage` skips a file whose masked content is unchanged, reusing `logicOf`
+from `logic-touched`, now moved into `skill/docbound/scripts/lib/scan.mjs`. The
+template drops `Expected to touch` and `Unknowns going in`, and `entry-length`
+warns above twelve prose lines. Records 0031 and 0032.
+
+### Still open
+
+- [entry-limit-arbitrary] Twelve lines has no evidence behind it beyond being
+  four times what the old instruction asked for.
+- [reasoning-may-go-unwritten] Short entries push reasoning into decision
+  records or out of existence, and nothing tells the two apart.
+
 ## 2026-08-28 - Genericise the last borrowed sample
 
 Agent: claude · Branch: main · t=1787879140

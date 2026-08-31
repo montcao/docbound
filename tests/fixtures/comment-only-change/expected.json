@@ -1,0 +1,8 @@
+{
+  "note": "Nothing. The only change is inside a docstring, so there is no contract to document and doc-coverage stays quiet.",
+  "git": true,
+  "errors": {},
+  "warnings": {},
+  "waived": {},
+  "exit": 0
+}

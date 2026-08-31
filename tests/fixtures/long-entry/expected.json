@@ -1,0 +1,10 @@
+{
+  "note": "One finding. The entry carries sixteen lines of prose where the limit is twelve.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "entry-length": 1
+  },
+  "waived": {},
+  "exit": 0
+}

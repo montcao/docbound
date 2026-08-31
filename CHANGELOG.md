@@ -8,6 +8,22 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Fixed
+
+- `doc-coverage` no longer fires when a source edit touched only comments and
+  docstrings. Appending one comment line to a file blocked, with no contract
+  change to document, which is how a gate gets switched off.
+  `docs/decisions/0031-comment-edits-need-no-doc.md`.
+
+### Changed
+
+- A worklog entry is two or three lines. `Expected to touch` and `Unknowns going
+  in` are gone from the template, since both were plans and the diff carries a
+  plan better. `entry-length` (warn) counts prose in the newest entry and argues
+  above twelve lines. This project's own log averaged 94 lines an entry while
+  the skill asked for two to four sentences, so the instruction is now a count.
+  `docs/decisions/0032-worklog-entries-are-short.md`.
+
 ### Added
 
 - `.github/workflows/publish.yml`. Every push to main asks the registry whether

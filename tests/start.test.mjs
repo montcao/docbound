@@ -50,11 +50,14 @@ describe("start", () => {
     runNode(START, ["Add rate limiting", "--root", repo]);
     const entry = worklog(repo).split(/^## /m)[1];
 
-    for (const section of ["Intent", "Expected to touch", "Unknowns going in"]) {
-      assert.ok(entry.includes(`### ${section}`), `${section} is opened`);
-    }
+    assert.ok(entry.includes("### Intent"), "Intent is opened");
     assert.ok(entry.includes("### Outcome"), "Outcome exists to be filled later");
     assert.ok(entry.includes("### Still open"));
+
+    // Three sections and nothing else. `Expected to touch` and `Unknowns going
+    // in` were plans, and a diff carries a plan better than a prediction of one
+    // (`docs/decisions/0032-worklog-entries-are-short.md`).
+    assert.equal((entry.match(/^### /gm) ?? []).length, 3);
   });
 
   test("brings no guidance text with it", () => {

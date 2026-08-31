@@ -24,6 +24,7 @@
 
 import { resolve } from "./languages.mjs";
 import { suffixOf } from "./paths.mjs";
+import { stripComments } from "./text.mjs";
 
 /** Two megabytes of source is a generated file, and not what a check is about. */
 export const MAX_BYTES = 2_000_000;
@@ -286,6 +287,21 @@ export function defines(text, suffix, name) {
   const found = definitions(text, suffix);
   if (found === null) return null;
   return found.some((entry) => entry.name === name);
+}
+
+/**
+ * The file with its documentation removed, for comparing two revisions.
+ *
+ * Two checks ask whether an edit changed anything but comments and docstrings.
+ * `logic-touched` asks it of a subagent's diff; `doc-coverage` asks it before
+ * demanding a doc, because a comment edit has no contract to document.
+ *
+ * A language the scanner has no table entry for falls back to the line-based
+ * strip, which is worse at telling a comment marker inside a string from a
+ * comment and is better than refusing to answer.
+ */
+export function logicOf(text, suffix) {
+  return maskDocumentation(text, suffix) ?? stripComments(text, suffix);
 }
 
 /** Whether the scanner knows anything about this file's language. */
