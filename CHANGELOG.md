@@ -8,6 +8,8 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+## 0.2.0 — 2026-09-03
+
 ### Fixed
 
 - `stale-marker` and `dead-ref` exempt every document that records the past:

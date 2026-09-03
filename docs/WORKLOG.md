@@ -11,6 +11,25 @@ Older entries are archived:
 
 - `docs/worklog/2026-Q3.md`
 
+## 2026-09-03 — Release 0.2.0
+
+Agent: release script · Branch: main
+
+### Intent
+
+Cut 0.2.0. Written by `scripts/release.mjs`, which refuses to run
+unless the tests, the audit, and the freshness check pass against a clean
+tree first.
+
+### Outcome
+
+Set the version in `package.json`, `.claude-plugin/plugin.json`, and
+`.claude-plugin/marketplace.json`; rolled `CHANGELOG.md`; rebuilt `dist/`,
+`plugin/`, and `skills-lock.json`; tagged.
+
+### Still open
+
+- Nothing from the release itself. Open work is in the entries below.
 ## 2026-09-02 - Fix what blocks a public release: the historical set, path-shaped refs, release-script exit codes, and workflow permissions
 
 Agent: claude · Branch: main · t=1788374480
