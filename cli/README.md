@@ -33,7 +33,7 @@ nothing and exits 1, which is a failed operation rather than malformed usage. It
 the skill because adopting docbound is an install-time act, not a step in the
 loop (`docs/decisions/0019-adoption-baseline.md`).
 
-`audit`, `scaffold`, `summary`, `start`, and `close` are pass-throughs: they hand their arguments
+`audit`, `scaffold`, `summary`, `start`, `close`, and `prune` are pass-throughs: they hand their arguments
 to the skill's own scripts unchanged and return the exit code unchanged. The CLI adds
 nothing to them, so a finding reported through `npx docbound audit` is the same
 finding an agent sees.

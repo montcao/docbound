@@ -62,7 +62,7 @@ comparison can be made against a tree that was never written to disk.
 
 ## Gotchas
 
-- `tests/fixtures/code-style/pricing.py.txt` and
+- `tests/fixtures/restating-comments/pricing.py.txt` and
   `tests/fixtures/real-world-shapes/prompt.go.txt` are deliberately bad sample
   files. The extension keeps them out of the audit's source set, so their marker
   comments are not findings against *this* repository.

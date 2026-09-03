@@ -5,6 +5,12 @@ on:
     branches: [main]
   pull_request:
 
+# Nothing here writes. The default for a repository can be write-all, and a
+# workflow that runs a pull request's code should not carry a token that can
+# push to it.
+permissions:
+  contents: read
+
 jobs:
   verify:
     runs-on: ubuntu-latest

@@ -28,9 +28,15 @@ function failing() {
 
 // The edit hook runs the fast subset, so a test about it has to use a check
 // that is in that subset. `doc-coverage` is not; `template-residue` is.
+//
+// The planted text is the Owner placeholder the module template ships, because
+// the check matches that vocabulary exactly rather than a shape
+// (`docs/decisions/0033-template-residue-is-a-closed-set.md`).
+const PLACEHOLDER = "Owner: <person, team, or channel a reader should contact>";
+
 function plantPlaceholder(repo) {
   const doc = path.join(repo, "src", "README.md");
-  fs.appendFileSync(doc, "\nOwner: <who owns this>\n");
+  fs.appendFileSync(doc, `\n${PLACEHOLDER}\n`);
   return doc;
 }
 
@@ -64,7 +70,7 @@ describe("the edit hook", () => {
     const withPlaceholder = fs.readFileSync(doc, "utf8");
     assert.match(hook(repo, "after-edit").stdout, /template-residue/);
 
-    fs.writeFileSync(doc, withPlaceholder.replace("Owner: <who owns this>", "Owner: the team"));
+    fs.writeFileSync(doc, withPlaceholder.replace(PLACEHOLDER, "Owner: the team"));
     assert.equal(hook(repo, "after-edit").stdout, "");
 
     fs.writeFileSync(doc, withPlaceholder);

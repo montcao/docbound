@@ -1,0 +1,10 @@
+{
+  "note": "Thirty open items against a cap of twenty-five. The check says nothing until the list stops being readable.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "open-item-debt": 1
+  },
+  "waived": {},
+  "exit": 0
+}

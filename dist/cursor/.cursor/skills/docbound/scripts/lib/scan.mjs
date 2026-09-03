@@ -225,13 +225,14 @@ export function comments(text, suffix) {
   const spans = scan(text, suffix);
   if (spans === null) return null;
 
+  const lineAt = lineIndex(text);
   return spans
     .filter((span) => span.kind === LINE_COMMENT || span.kind === BLOCK_COMMENT)
     .map((span) => {
       const raw = text.slice(span.start, span.end);
       return {
         ...span,
-        line: lineOf(text, span.start),
+        line: lineAt(span.start),
         text: raw,
         body: bodyOf(raw, span.kind, spec),
       };
@@ -268,13 +269,14 @@ export function definitions(text, suffix) {
   if (masked === null) return null;
 
   const found = new Map();
+  const lineAt = lineIndex(masked);
   for (const pattern of spec.define) {
     // A fresh regex per use: a shared one carries `lastIndex` between calls.
     const scoped = new RegExp(pattern.source, pattern.flags);
     let match = scoped.exec(masked);
     while (match !== null) {
       const name = match[1];
-      if (name && !found.has(name)) found.set(name, lineOf(masked, match.index));
+      if (name && !found.has(name)) found.set(name, lineAt(match.index));
       if (scoped.lastIndex === match.index) scoped.lastIndex += 1;
       match = scoped.exec(masked);
     }
@@ -309,10 +311,31 @@ export function scannable(relpath) {
   return resolve(suffixOf(relpath)) !== null;
 }
 
-function lineOf(text, index) {
-  let line = 1;
-  for (let i = 0; i < index; i += 1) {
-    if (text[i] === "\n") line += 1;
+/**
+ * A line-number lookup over one text, built once and searched per offset.
+ *
+ * Counting newlines from the start on every call is linear in the file and the
+ * callers below ask once per span, which is quadratic in the number of spans. A
+ * 1 MB file of line comments took nine seconds through `comments()` while
+ * `scan()` itself took four milliseconds, and the hook that runs on every stop
+ * carries that cost on a file well inside the size limit
+ * (`docs/decisions/0040-line-numbers-are-looked-up-not-counted.md`).
+ */
+function lineIndex(text) {
+  const starts = [0];
+  for (let i = 0; i < text.length; i += 1) {
+    if (text[i] === "\n") starts.push(i + 1);
   }
-  return line;
+  // The line an offset sits on is the number of line starts at or before it,
+  // which is a binary search rather than a scan.
+  return (index) => {
+    let low = 0;
+    let high = starts.length - 1;
+    while (low < high) {
+      const mid = (low + high + 1) >> 1;
+      if (starts[mid] <= index) low = mid;
+      else high = mid - 1;
+    }
+    return low + 1;
+  };
 }

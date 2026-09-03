@@ -26,6 +26,22 @@ import { run } from "./git.mjs";
 
 const BASE_CANDIDATES = ["origin/main", "main", "origin/master", "master"];
 
+/**
+ * The default branch this clone was made from, or null.
+ *
+ * Asked first, because the guessed list is wrong whenever a repository's default
+ * branch is not main or master. A clone whose default is `init-product` and
+ * which also carried a stale `origin/main` had every one of its 128 files
+ * reported as undocumented, with nothing in the output naming the ref it had
+ * compared against (`docs/decisions/0034-ask-git-for-the-default-branch.md`).
+ */
+function defaultBranch(root) {
+  const ref = run(["symbolic-ref", "--quiet", "refs/remotes/origin/HEAD"], root);
+  if (ref === null) return null;
+  const name = ref.trim().replace(/^refs\/remotes\//, "");
+  return name === "" ? null : name;
+}
+
 export function detectChanges(root, base, extraExcludes = [], baseline = null) {
   if (run(["rev-parse", "--is-inside-work-tree"], root) === null) {
     // A baseline here is stale configuration, most likely copied from a
@@ -96,7 +112,9 @@ export function detectChanges(root, base, extraExcludes = [], baseline = null) {
     };
   }
 
-  const candidates = base ? [base] : BASE_CANDIDATES;
+  const candidates = base
+    ? [base]
+    : [defaultBranch(root), ...BASE_CANDIDATES].filter(Boolean);
   const head = (run(["rev-parse", "HEAD"], root) ?? "").trim();
   const branch = (run(["rev-parse", "--abbrev-ref", "HEAD"], root) ?? "").trim();
 

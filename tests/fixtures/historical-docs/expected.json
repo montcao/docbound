@@ -1,0 +1,12 @@
+{
+  "note": "The changelog and the archive are records of the past: their changelog phrasing and their dead path are not findings. The same path in ARCHITECTURE.md is, and it blocks on the extension alone rather than needing a slash.",
+  "git": true,
+  "errors": {
+    "dead-ref": 1
+  },
+  "warnings": {
+    "dead-ref": 2
+  },
+  "waived": {},
+  "exit": 1
+}

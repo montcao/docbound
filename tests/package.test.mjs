@@ -164,4 +164,14 @@ describe("the published package", () => {
     assert.deepEqual(unwanted, [], "the package carries only what it runs");
     assert.ok(shipped.includes("dist/payload/SKILL.md"), "the hand-vendor payload ships");
   });
+
+  test("the licence and its notice ship", () => {
+    // npm adds LICENSE and README on its own and adds nothing else, so an
+    // Apache-2.0 package whose NOTICE is outside the whitelist distributes the
+    // licence without the attribution the licence asks to be carried with it.
+    const root = ensurePackage();
+    for (const file of ["LICENSE", "NOTICE.md", "README.md"]) {
+      assert.ok(fs.existsSync(path.join(root, file)), `${file} is in the tarball`);
+    }
+  });
 });

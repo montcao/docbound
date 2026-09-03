@@ -3,10 +3,13 @@
 Thanks for looking. This is a small project with a strict shape, and most of the
 rules below exist because breaking one of them silently broke something once.
 
+Participation is under `CODE_OF_CONDUCT.md`, and a security report goes through
+the private channel in `SECURITY.md` rather than a public issue.
+
 ## The short version
 
 ```
-npm test                        # 170 tests, about ten seconds
+npm test                        # every test file, about fifteen seconds
 node scripts/build.mjs          # skill/docbound/ into dist/ and plugin/
 node scripts/check-dist-fresh.mjs
 node cli/index.mjs audit        # the project's own gate

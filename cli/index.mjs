@@ -45,6 +45,7 @@ usage: docbound <command> [options]
   start      open a worklog entry, before the first edit
   close      close a tracked open item by its slug
   scaffold   create the initial docs structure
+  prune      archive old worklog entries, keeping recent and still-open ones
   baseline   record the commit this repository adopted docbound at, so that
              work older than today is out of scope until it is touched
   adr        print the next decision-record number and create the file
@@ -201,7 +202,19 @@ async function commandInstall(options) {
   }
   ensureConfig(root, resolved.providers);
   recordHookChoice(root, options.hooks);
-  process.stdout.write("done. `npx docbound doctor` reports what is wired.\n");
+  // A repository with history gets a blocking gate and a change set covering
+  // its whole branch, which on a real branch means the agent's next stop attempt
+  // fails on work nobody here did. `baseline` is the answer and was findable
+  // only by reading the README
+  // (`docs/decisions/0038-install-points-at-baseline.md`).
+  if (hasHistory(root)) {
+    process.stdout.write(
+      "\nThis repository has history. Run `npx docbound baseline` before your\n" +
+        "next task, or the first audit asks for documentation on everything\n" +
+        "your branch changed.\n",
+    );
+  }
+  process.stdout.write("\ndone. `npx docbound doctor` reports what is wired.\n");
   return 0;
 }
 
@@ -301,6 +314,15 @@ function commandBaseline(options) {
   return 0;
 }
 
+/** True when the repository has a commit older than the one being installed into. */
+function hasHistory(root) {
+  const result = spawnSync("git", ["-C", root, "rev-list", "--count", "HEAD"], {
+    encoding: "utf8",
+  });
+  if (result.status !== 0) return false;
+  return Number((result.stdout ?? "0").trim()) > 1;
+}
+
 function gitRoot() {
   const result = spawnSync("git", ["rev-parse", "--show-toplevel"], { encoding: "utf8" });
   if (result.status !== 0) return null;
@@ -313,6 +335,10 @@ function gitOutput(root, args) {
   if (result.status !== 0) return null;
   const out = (result.stdout ?? "").trim();
   return out === "" ? null : out;
+}
+
+function commandPrune(options) {
+  return passThrough(path.join(SKILL_SCRIPTS, "prune.mjs"), options.rest);
 }
 
 function commandScaffold(options) {
@@ -418,6 +444,8 @@ export async function main(argv) {
       return commandAudit(options);
     case "scaffold":
       return commandScaffold(options);
+    case "prune":
+      return commandPrune(options);
     case "baseline":
       return commandBaseline(options);
     case "summary":

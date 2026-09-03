@@ -155,6 +155,8 @@ Read every finding. Fix it, or add a waiver line with a reason a reviewer would 
 
 Before writing a new item, run `node scripts/summary.mjs --open` to see what is already open and under which slug. An item in `Still open` that will outlive this task gets a slug: `- [retry-jitter] the backoff has no jitter…`. Declare it once. It stays open until some later entry writes `- [retry-jitter] closed: …`, so carrying it forward costs nothing and never means retyping it in different words. Restating an untracked item is how one piece of work becomes five. "Tests pass" is not an outcome; "replaced the in-memory queue with the Redis-backed one in `worker/queue.py`; retry policy unchanged; deleted the stale durability caveat from `worker/README.md`" is.
 
+The ledger is only useful while somebody reads it. Close what your task finished with `node scripts/close.mjs retry-jitter "what happened"`, and delete an item that stopped mattering from the entry that opened it. Above twenty-five open items `open-item-debt` says so on every task until the list comes down, and `node scripts/prune.mjs` archives old entries so the file stays one somebody opens.
+
 Re-run until it exits 0. Then stop (principle 4).
 
 ### 6. Hand off — report doc deltas, not just code deltas
@@ -171,13 +173,13 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `worklog-closed` | error | That entry has non-empty `Outcome` and `Still open` sections |
 | `entry-length` | warn | The newest worklog entry is under twelve lines of prose. Reasoning goes in a decision record; the entry is the index |
 | `doc-coverage` | error | Every changed source file is covered in the same diff: its own or an ancestor module README was touched, or a system doc (root README, ARCHITECTURE, an ADR) was touched *and names the file or its directory*. Tests, trivially small files, and edits that touched only comments and docstrings are exempt |
-| `new-dir-readme` | error | Every new directory containing source has a `README.md` |
+| `new-dir-readme` | error | Every new directory containing source has a `README.md`. A directory whose source is only files a framework locates by name — a route segment — is not a module and is exempt |
 | `dead-ref` | error | No doc references a file path that does not exist. A token carrying an extension or a trailing slash is unambiguous and blocks; a slash between two bare words is reported as a warning |
 | `diagram-refs` | error | No Mermaid diagram names a path that does not exist. A file is written with its extension, a directory with a trailing slash; anything else in a label is prose |
-| `dep-adr` | error | A changed dependency manifest has a new or superseding ADR in the same diff |
+| `dep-adr` | error | A changed dependency has a new or superseding ADR in the same diff. Read from the file: the dependency blocks of a manifest, and every change to a lockfile |
 | `adr-shape` | error | Every new ADR has Context, Decision, and "What would reverse this" sections with content |
 | `adr-immutable` | error | An existing ADR was not edited except its `Status` line |
-| `template-residue` | error | No unfilled template placeholders in any doc |
+| `template-residue` | error | No unfilled template placeholders in any doc, matched against the exact vocabulary the templates ship |
 | `orphan-doc` | warn | Every doc under `docs/` (other than ARCHITECTURE, WORKLOG, decisions) is linked from at least one other doc |
 | `duplicate-block` | warn | No paragraph of substance appears verbatim in two docs |
 | `stale-marker` | warn | Docs do not contain changelog-style phrasing ("previously", "now uses", "as of 2025", "TBD"), and no document claims a span of time without a number. Every worklog entry carries `t=` in Unix seconds and the audit prints one, so state the number or say nothing |
@@ -186,6 +188,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `comment-sentence` | warn | Full-line comments in changed source are complete sentences (capitalized, terminated); commented-out code is flagged |
 | `open-item-typo` | warn | No two `Still open` slugs are within two characters of each other, which is how one item silently becomes two |
 | `open-item-form` | warn | A slug is closed by the bullet form and not by prose, and an item already open is carried forward rather than restated |
+| `open-item-debt` | warn | Twenty-five or fewer items open across the worklog. Above that the list stops being read, so close what is done and delete what stopped mattering |
 | `plain-opening` | warn | A README or `ARCHITECTURE.md` opens with a sentence carrying no identifier, so a reader who does not already know the code can get in |
 
 Subagent mode (`--mode subagent`) adds:

@@ -72,16 +72,20 @@ export function pathClaim(ref, { trailingSlashIsPath = false } = {}) {
 /**
  * True when a token is shaped like a path rather than merely containing a slash.
  *
- * A file carries a known extension; a directory carries a trailing slash.
- * Without this, an ordinary label — `read/write`, `input/output`, `client/server`
- * — reads as a path to a file that was never there, and a blocking check that
- * fires on English is a blocking check somebody turns off.
+ * A file carries a known extension, wherever it sits; a directory carries a
+ * trailing slash. Without this, an ordinary label — `read/write`,
+ * `input/output`, `client/server` — reads as a path to a file that was never
+ * there, and a blocking check that fires on English is a blocking check
+ * somebody turns off.
+ *
+ * The extension is checked before the slash, because a bare `README.npm.md`
+ * says exactly what it is and a slash adds nothing to that claim
+ * (`docs/decisions/0042-a-known-extension-is-a-path-claim.md`).
  */
 export function isPathShaped(token) {
-  if (!token.includes("/")) return false;
-  if (token.endsWith("/")) return true;
   const suffix = suffixOf(token);
-  return SOURCE_EXT.has(suffix) || DATA_EXT.has(suffix);
+  if (SOURCE_EXT.has(suffix) || DATA_EXT.has(suffix)) return true;
+  return token.endsWith("/") && token.includes("/");
 }
 
 /**

@@ -1,0 +1,14 @@
+"""Quote assembly."""
+
+
+def build_quote(items, rate):
+    # Set total to zero
+    total = 0
+    # Loop over items
+    for item in items:
+        # Add the item price to the total
+        total += item["cents"]
+    # Multiply the total by the rate
+    total = total * rate
+    # Return the total
+    return total

@@ -27,6 +27,22 @@ const MANIFESTS = new Set([
 
 const MANIFEST_PATTERNS = [/^requirements[-_.\w]*\.txt$/];
 
+// A lockfile is where a dependency change actually lands. `npm audit fix` and
+// most automated bumps touch nothing else, and none of these were in the set,
+// so the check missed the case it exists for
+// (`docs/decisions/0035-dep-adr-reads-the-dependencies.md`).
+const LOCKFILES = new Set([
+  "package-lock.json", "npm-shrinkwrap.json", "yarn.lock", "pnpm-lock.yaml",
+  "bun.lockb", "Cargo.lock", "poetry.lock", "Pipfile.lock", "uv.lock",
+  "go.sum", "Gemfile.lock", "composer.lock", "mix.lock", "pubspec.lock",
+  "Package.resolved",
+]);
+
+/** True for a file whose every change is a dependency change. */
+export function isLockfile(relpath) {
+  return LOCKFILES.has(relpath.split("/").pop());
+}
+
 const TEST_PATTERNS = [
   /(^|\/)tests?\//, /(^|\/)__tests__\//, /(^|\/)spec\//,
   /(^|\/)test_[^/]+\.py$/, /_test\.(py|go|rs|rb)$/,
@@ -94,6 +110,26 @@ export function isDoc(relpath, extra = []) {
 
 export function isAdr(relpath) {
   return relpath.startsWith("docs/decisions/") && relpath.endsWith(".md");
+}
+
+/**
+ * True for a document that records the past rather than stating current truth.
+ *
+ * The worklog, the archives `prune` writes beside it, the decision records, and
+ * the changelog. Each is written once about a moment and is not rewritten
+ * afterwards, so changelog phrasing belongs in it and a path it names that has
+ * since been deleted is history rather than a defect. A changelog is the clearest
+ * case and was the one missing: "no longer", "previously", and "now uses" are
+ * the vocabulary the format is made of
+ * (`docs/decisions/0041-the-historical-set-is-every-record-of-the-past.md`).
+ */
+export function isHistorical(relpath) {
+  return (
+    relpath === "docs/WORKLOG.md" ||
+    relpath.startsWith("docs/worklog/") ||
+    relpath.split("/").pop() === "CHANGELOG.md" ||
+    isAdr(relpath)
+  );
 }
 
 /**

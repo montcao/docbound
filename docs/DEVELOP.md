@@ -112,6 +112,12 @@ satisfy.
 **4. Add an entry to `docs/checks.md`.** what it detects, why, what is exempt,
 and a waiver example a reviewer would accept.
 
+**5. Add a row to the check table in `README.md`.** A test asserts that every
+module under `skill/docbound/scripts/lib/checks/` appears there and that some
+fixture's `expected.json` produces its ID, so a check that skips step 2 or this
+one fails the suite rather than shipping unpinned
+(`docs/decisions/0037-the-readme-counts-itself.md`).
+
 Then rebuild, because the skill text changed:
 
 ```
@@ -252,8 +258,8 @@ configured, no long-lived secret lives in this repository at all.
 
 npm ignores the `readme` field in `package.json` and always renders the
 `README.md` at the tarball root, whatever `files` says. A second README written
-for the registry is shipped and shown to nobody, which is what happened to
-`README.npm.md`.
+for the registry is shipped and shown to nobody, which is why this project ships
+a single README.
 
 
 ## Style

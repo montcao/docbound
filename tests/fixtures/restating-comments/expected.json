@@ -1,0 +1,11 @@
+{
+  "note": "Every comment in the new file names what the line below it does, which is the reader's last resort spent on nothing. They are also not sentences, which comment-sentence reports separately and correctly.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "comment-sentence": 1,
+    "restating-comments": 1
+  },
+  "waived": {},
+  "exit": 0
+}

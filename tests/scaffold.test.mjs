@@ -8,6 +8,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { after, describe, test } from "node:test";
+import { pathToFileURL } from "node:url";
 
 import {
   SCAFFOLD,
@@ -124,5 +125,25 @@ describe("scaffold", () => {
     assert.equal(status, 1);
     const checks = new Set(json.errors.map((f) => f.check));
     assert.ok(checks.has("template-residue"), "the placeholders are the finding");
+  });
+
+  test("the placeholder set is the vocabulary the templates ship", async () => {
+    // `template-residue` matches exact strings rather than a shape, so the set
+    // in the check and the tokens in the templates are two files that have to
+    // agree. Without this, a renamed placeholder stops being checked and
+    // nothing says so
+    // (`docs/decisions/0033-template-residue-is-a-closed-set.md`).
+    const { PLACEHOLDERS } = await import(
+      pathToFileURL(
+        path.join(SKILL_DIR, "scripts", "lib", "checks", "template-residue.mjs"),
+      ).href
+    );
+    const templates = path.join(SKILL_DIR, "templates");
+    const shipped = new Set();
+    for (const name of fs.readdirSync(templates)) {
+      const text = fs.readFileSync(path.join(templates, name), "utf8");
+      for (const match of text.matchAll(/<([a-z][^<>]{0,80})>/g)) shipped.add(match[1]);
+    }
+    assert.deepEqual([...shipped].sort(), [...PLACEHOLDERS].sort());
   });
 });

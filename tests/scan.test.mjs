@@ -279,6 +279,22 @@ describe("input that must not hang a hook", () => {
     assert.ok(timed(() => definitions(text, ".js")) < BUDGET_MS);
   });
 
+  test("a comment-dense file well inside the size cap terminates promptly", () => {
+    // The cap declines a file over two megabytes, which said nothing about the
+    // ones under it: `comments()` asked for a line number per span and each
+    // answer counted newlines from the start, so a 1 MB file of comments took
+    // nine seconds while the scan under it took four milliseconds. Vendored
+    // bundles and generated files are this shape, and the stop hook pays it on
+    // every stop (`docs/decisions/0040-line-numbers-are-looked-up-not-counted.md`).
+    const text = "// a comment line that says something about the line below\n".repeat(17_000);
+    assert.ok(text.length > 1_000_000, "the fixture is the size that was slow");
+
+    const found = comments(text, ".js");
+    assert.ok(timed(() => comments(text, ".js")) < BUDGET_MS);
+    assert.equal(found.length, 17_000);
+    assert.equal(found.at(-1).line, 17_000, "the line numbers are still right");
+  });
+
   test("empty and one-character inputs are spans, not crashes", () => {
     assert.deepEqual(scan("", ".js"), []);
     assert.deepEqual(shape("a", ".js"), [[CODE, "a"]]);

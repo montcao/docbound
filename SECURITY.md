@@ -25,13 +25,20 @@ is not merged into.
 **No input may hang the hook.** The span scanner advances on every iteration,
 runs no backtracking-capable pattern, and declines a file over two megabytes
 rather than scanning it. The document patterns are anchored against literal
-terminators for the same reason.
+terminators for the same reason. Every step above the scanner is linear in the
+file as well: a line number is a lookup into an index built once, not a count
+from the start of the file, because the second shape is quadratic in the number
+of comments and the size cap says nothing about the files underneath it
+(`docs/decisions/0040-line-numbers-are-looked-up-not-counted.md`).
+`tests/scan.test.mjs` holds a comment-dense file over a megabyte against a
+wall-clock budget for exactly this.
 
 **Findings carry paths and messages, not file contents.** A hook runs at the
-most sensitive moment in a session to be echoing a buffer into a transcript. Two
-checks, `todo-shape` and `stale-marker`, quote a truncated line inside their own
-message, and that is the whole of the file content that reaches a transcript by
-this route.
+most sensitive moment in a session to be echoing a buffer into a transcript.
+Three checks quote a fragment inside their own message: `todo-shape` and
+`stale-marker` truncate a line to eighty characters or fewer, and `dead-ref`
+quotes the backticked token it could not resolve, truncated to eighty. That is
+the whole of the file content that reaches a transcript by this route.
 
 Reports that demonstrate any of those three failing are the most valuable ones.
 

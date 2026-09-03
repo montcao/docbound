@@ -1,6 +1,6 @@
 # Checks
 
-Twenty-four checks. Errors block; warnings print and do not block, but leaving
+Twenty-five checks. Errors block; warnings print and do not block, but leaving
 one is a choice made on the record. The level below is the level a check
 reports at, and `dead-ref` is the one check that reports at both: it blocks on a
 reference that says it is a path and warns on one that only might be.
@@ -143,7 +143,7 @@ waiver: entry-length docs/WORKLOG.md - a migration touching forty files, where
 the list of what moved where is the outcome and has nowhere shorter to live.
 ```
 
-### `doc-coverage`### `doc-coverage`
+### `doc-coverage`
 
 Every changed source file is covered in the same diff. Covered means one of two
 things: its own or an ancestor module README was touched, or a system-level doc
@@ -177,7 +177,14 @@ A new directory is a new module, and a module whose contract lives only in the
 head of whoever wrote it is a module the next reader has to reverse-engineer.
 `skill/docbound/templates/MODULE.md` is the starting point.
 
-Test directories are exempt.
+Test directories are exempt. So is a route directory: one whose every changed
+source file is named by a framework rather than by a person — `route`, `page`,
+`layout`, `middleware`, SvelteKit's `+page` and `+server`, and the rest of the
+reserved set in `skill/docbound/scripts/lib/checks/new-dir-readme.mjs`. A URL
+segment is a path, not a module boundary, and asking for a README beside every
+one produced fifteen blocking findings on the first audit of one Next.js
+application (`docs/decisions/0036-route-directories-are-not-modules.md`). A
+directory holding a route file beside anything else is a module again.
 
 ```
 waiver: new-dir-readme src/migrations - one file per migration, each documented
@@ -216,6 +223,20 @@ it: write the extension or the trailing slash
 (`docs/decisions/0023-ambiguous-path-claims-are-warnings.md`). A waiver against
 `dead-ref` dismisses both.
 
+<!-- docbound-ignore-start -->
+The extension decides on its own, with or without a directory in front of it: a
+backticked `legacy.py` that is nowhere in the tree is an error, since nothing
+about that token is ambiguous
+<!-- docbound-ignore-end -->
+(`docs/decisions/0042-a-known-extension-is-a-path-claim.md`). Resolution stays
+forgiving underneath — a bare file name is satisfied by a file of that name
+anywhere in the repository.
+
+The historical documents never block: the worklog, the archives under
+`docs/worklog/`, the decision records, and `CHANGELOG.md`. Each describes the
+world as it was, so a path it names that has since been deleted is history
+rather than a defect, and satisfying an error would mean falsifying a record.
+
 ```
 waiver: dead-ref docs/ONBOARDING.md - the paths under vendor/ are created by the
 bootstrap script on first run and are absent in a fresh checkout.
@@ -247,12 +268,22 @@ the ones the migration creates.
 
 ### `dep-adr`
 
-A changed dependency manifest has a new or superseding record under
-`docs/decisions/` in the same diff.
+A changed dependency has a new or superseding record under `docs/decisions/` in
+the same diff.
 
 A dependency is a decision with a support cost, a licence, and a supply chain.
 The manifests recognised are the usual ones for the major ecosystems, plus any
-`requirements*.txt`.
+`requirements*.txt`, and the fifteen lockfiles listed in
+`skill/docbound/scripts/lib/paths.mjs`.
+
+What counts as a change is read from the file rather than from its name. A JSON
+manifest is narrowed to the blocks that declare a dependency, so renaming an npm
+script is not a dependency change; every other manifest format is compared
+whole, and every change to a lockfile counts, because that is where an automated
+bump lands (`docs/decisions/0035-dep-adr-reads-the-dependencies.md`).
+
+Not knowing counts as a change. A new manifest, an unparseable one, and one with
+no earlier revision to compare against all ask for a record.
 
 ```
 waiver: dep-adr package.json - a patch-level bump of an existing dependency for
@@ -313,8 +344,14 @@ which contaminates the sections that were filled in. A scaffolded doc failing
 this check is the intent, not a defect: the scaffold creates structure, and
 structure is not documentation.
 
-Placeholders inside fenced code blocks are examples and are skipped, as are
-common HTML tag names.
+A placeholder is one of the exact strings `skill/docbound/templates/` ships, and
+nothing else. A shape rule cannot tell a template's module-name placeholder from a TypeScript
+return type or an HTML element, and reported all three in a repository that had
+never run the scaffold (`docs/decisions/0033-template-residue-is-a-closed-set.md`).
+The set is in `skill/docbound/scripts/lib/checks/template-residue.mjs`, and
+`tests/scaffold.test.mjs` asserts it still matches the templates.
+
+Placeholders inside fenced code blocks are examples and are skipped.
 
 ```
 waiver: template-residue docs/RUNBOOK.md - the angle-bracketed tokens are the
@@ -391,9 +428,11 @@ than asserted.
 
 <!-- docbound-ignore-start -->
 Two faults share the check. Changelog phrasing in a document that should say
-what is true now: "previously", "now uses", "as of 2025", "TBD". The worklog and
-the decision records are exempt from that half, since both are historical by
-design.
+what is true now: "previously", "now uses", "as of 2025", "TBD". The worklog,
+the archives under `docs/worklog/`, the decision records, and `CHANGELOG.md` are
+exempt from that half, since each records the past by design and a changelog is
+made of that vocabulary
+(`docs/decisions/0041-the-historical-set-is-every-record-of-the-past.md`).
 <!-- docbound-ignore-end -->
 
 The second fault is a span of time claimed without a number:
@@ -529,6 +568,34 @@ spelling rather than about truth.
 ```
 waiver: open-item-typo docs/WORKLOG.md - retry-backoff and retry-backups are
 different items; the first is about timing and the second about persistence.
+```
+
+### `open-item-debt`
+
+Twenty-five or fewer items are open across the worklog.
+
+The ledger promises a returning reader an answer to "what is still open", and
+`docbound summary --open` is where they ask for it. A list of seventy is not an
+answer; it is a file nobody opens twice. This project's own log reached 69 open
+items against 8 closed in five days, growing at roughly fourteen a day
+(`docs/decisions/0039-the-ledger-needs-pressure.md`).
+
+One condition only: the size of the list. An entry that opens five items and
+closes none is the normal shape of finishing a task while noticing things, and
+an earlier version of this check that reported it fired on most of this
+project's own fixtures.
+
+A warning, and it fires on every entry until the list comes down, which is the
+pressure. `docbound close`, given a slug, closes what is done; an item that stopped
+mattering is deleted from the entry that opened it, which is the one edit to a
+past entry this project makes. `docbound prune` deals with the length of the
+file rather than the length of the list, and never archives an entry holding
+something still open.
+
+```
+waiver: open-item-debt docs/WORKLOG.md - a migration tracked as one item per
+service, closing as each cuts over; the list is the migration's progress board
+and is read weekly.
 ```
 
 ## Subagent mode

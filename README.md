@@ -53,11 +53,12 @@ reverse.
 
 - The audit runs on this repository in CI, on Node 20, 22, and 24, alongside the
   test suite and a check that the committed build output matches a fresh build.
-- 170 tests. Each check has a small repository built for it, and the assertion
-  is the exact set of check IDs the audit reports, not a subset.
+- Every check has a small repository built for it, and the assertion is the
+  exact set of check IDs the audit reports, not a subset. A test enforces that,
+  so a check with no fixture fails the build.
 - Zero dependencies, at runtime and for development. `package.json` has neither
   key.
-- 29 decision records in `docs/decisions/`, each with the condition that would
+- 42 decision records in `docs/decisions/`, each with the condition that would
   reverse it. Several of them record this project being wrong and what it did
   about it.
 - Pointed at three repositories it had never seen, it found four blocking false
@@ -229,7 +230,9 @@ recorded in the output.
 | `restating-comments` | warn | Comments repeating what the code already says |
 | `todo-shape` | warn | A TODO with no problem, no action, or no owner |
 | `comment-sentence` | warn | Commented-out code, or comments written as notes to self |
+| `open-item-form` | warn | A slug closed in prose rather than by the bullet, or restated when it was already open |
 | `open-item-typo` | warn | Two open-item slugs one typo apart, so one item became two |
+| `open-item-debt` | warn | So much open work on the ledger that nobody reads the list |
 
 Four more apply in subagent mode. `docs/checks.md` covers every check: what it
 detects, what is exempt from it, and a waiver a reviewer would accept.
@@ -408,4 +411,5 @@ tool, `scripts/` is tooling that never ships, `tests/` holds the fixtures, and
 
 ## License
 
-Apache-2.0. See `LICENSE` and `NOTICE.md`.
+Apache-2.0. See `LICENSE` and `NOTICE.md`, both of which ship in the npm
+tarball. Contributing is `CONTRIBUTING.md`, under `CODE_OF_CONDUCT.md`.

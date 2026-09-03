@@ -10,16 +10,21 @@
 // blocking check that fires on prose is a check somebody switches off. They are
 // warnings: still on the record, no longer in the way.
 //
-// The two historical documents never block, whatever the token looks like. A
-// decision record's body is immutable and the worklog is the log of what
-// happened, so a path either one named that has since been deleted cannot be
-// fixed: both are describing the world as it was, correctly, and satisfying an
-// error would mean editing an archive or falsifying a record. `stale-marker`
-// already exempts exactly these two for exactly this reason. This surfaced the
-// moment a record about a check outlived the check
-// (`docs/decisions/0026-docbound-does-not-recommend-logic.md`).
+// The historical documents never block, whatever the token looks like. A
+// decision record's body is immutable, the worklog and its archives are the log
+// of what happened, and a changelog's whole subject is what a version changed,
+// so a path any of them named that has since been deleted cannot be fixed: each
+// is describing the world as it was, correctly, and satisfying an error would
+// mean editing an archive or falsifying a record. `stale-marker` exempts the
+// same set for the same reason
+// (`docs/decisions/0041-the-historical-set-is-every-record-of-the-past.md`).
+//
+// The message a reader gets has to be one they can act on. Telling somebody to
+// "write the extension" on a token that already carries one is advice with no
+// action behind it, and it printed thirteen times in this project's own output
+// (`docs/decisions/0042-a-known-extension-is-a-path-claim.md`).
 
-import { isAdr, readText } from "../paths.mjs";
+import { isHistorical, readText } from "../paths.mjs";
 import { docRoot, isPathShaped, pathClaim, resolves } from "../refs.mjs";
 import { stripIgnored } from "../text.mjs";
 
@@ -27,11 +32,6 @@ export const id = "dead-ref";
 export const level = "error";
 
 const PATH_REF = /`([^`\s]+)`/g;
-
-/** The two documents that describe the past rather than the present. */
-function historical(doc) {
-  return isAdr(doc) || doc === "docs/WORKLOG.md";
-}
 
 export function run(ctx) {
   for (const doc of ctx.docs()) {
@@ -41,14 +41,19 @@ export function run(ctx) {
     const anchor = docRoot(raw);
 
     for (const match of text.matchAll(PATH_REF)) {
-      const ref = match[1];
-      const target = pathClaim(ref);
+      const token = match[1];
+      const target = pathClaim(token);
       if (target === null) continue;
       if (resolves(ctx.root, doc, target, anchor)) continue;
 
-      if (isPathShaped(ref) && !historical(doc)) {
+      // A finding quotes a fragment of a file, so it is bounded like the other
+      // two that do. `SECURITY.md` says how much of a file reaches a transcript
+      // by this route, and an unbounded token would make that untrue.
+      const ref = token.length > 80 ? `${token.slice(0, 80)}…` : token;
+
+      if (isPathShaped(token) && !isHistorical(doc)) {
         ctx.add(id, level, doc, `references \`${ref}\` which does not exist`);
-      } else if (isPathShaped(ref)) {
+      } else if (isPathShaped(token)) {
         ctx.add(
           id,
           "warn",

@@ -10,6 +10,51 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Fixed
 
+- `stale-marker` and `dead-ref` exempt every document that records the past:
+  the worklog, the archives `prune` writes under `docs/worklog/`, the decision
+  records, and `CHANGELOG.md`. A changelog is written in the vocabulary
+  `stale-marker` matches, so every repository with one got a finding for writing
+  it correctly, and archiving a worklog turned its history into blocking
+  findings. `docs/decisions/0041-the-historical-set-is-every-record-of-the-past.md`.
+- `dead-ref` treats a known extension as a path claim with or without a
+  directory in front of it. A backticked file name that named nothing was
+  reported with the advice to "write the extension", which it already carried.
+  `docs/decisions/0042-a-known-extension-is-a-path-claim.md`.
+- `scripts/release.mjs` checks the exit status of `git add`, `git commit`, and
+  `git tag`. A failed commit left the tag on the previous commit while the
+  script reported success.
+- `.github/workflows/ci.yml` declares `permissions: contents: read` rather than
+  inheriting the repository default.
+- A comment-dense file inside the two-megabyte size cap no longer stalls the
+  hook. `comments()` and `definitions()` asked for a line number per result and
+  each answer counted newlines from the start of the file, so a 1 MB file of
+  comments took nine seconds while the scan under it took four. It now takes 27
+  milliseconds, and `tests/scan.test.mjs` holds it to a budget.
+  `docs/decisions/0040-line-numbers-are-looked-up-not-counted.md`.
+- `docs/checks.md` opened by counting twenty-four checks when there were
+  twenty-five. The count is asserted by `tests/build.test.mjs` now, like the
+  README's.
+- `template-residue` matches the exact placeholder vocabulary the templates
+  ship, instead of any angle-bracketed token minus an HTML allowlist. It blocked
+  on ordinary prose — a TypeScript return type, an HTML element named in a style
+  guide — in a repository that had never run the scaffold.
+  `docs/decisions/0033-template-residue-is-a-closed-set.md`.
+- The reference commit comes from refs/remotes/origin/HEAD before the guessed
+  list of main and master, and the audit prints the ref it compared against. A
+  clone whose default branch was neither had all 128 of its files reported as
+  undocumented, with nothing in the output naming the comparison.
+  `docs/decisions/0034-ask-git-for-the-default-branch.md`.
+- `dep-adr` compares the dependency-bearing part of a manifest and treats any
+  change to a lockfile as a dependency change. It blocked an npm script rename
+  and missed `npm audit fix`, which was both directions of wrong.
+  `docs/decisions/0035-dep-adr-reads-the-dependencies.md`.
+- `new-dir-readme` skips a directory whose every source file is named by a
+  framework rather than by a person. One Next.js application produced fifteen
+  blocking findings on its first audit, each asking for a README beside a route
+  handler. `docs/decisions/0036-route-directories-are-not-modules.md`.
+- `npx docbound install` says what `baseline` is for when the repository has
+  history, since without it the first stop after an install audits the whole
+  branch. `docs/decisions/0038-install-points-at-baseline.md`.
 - `doc-coverage` no longer fires when a source edit touched only comments and
   docstrings. Appending one comment line to a file blocked, with no contract
   change to document, which is how a gate gets switched off.
@@ -26,6 +71,23 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- `CODE_OF_CONDUCT.md`, the Contributor Covenant 2.1, with reports going through
+  the same private GitHub channel as a security report.
+- `NOTICE.md` is inside the npm `files` whitelist, so the tarball carries the
+  attribution the licence asks to travel with it. npm adds `LICENSE` and
+  `README.md` on its own and adds nothing else, and `tests/package.test.mjs`
+  now asserts all three are in the packed tree.
+- `open-item-debt` (warn) reports a worklog carrying more than 25 open items,
+  and `docbound prune` archives entries older than the newest ten under
+  `docs/worklog/`, keeping every entry that still holds an open item. This
+  project's own ledger reached 69 open against 8 closed in five days, and the
+  advice to prune after a quarter had no command behind it.
+  `docs/decisions/0039-the-ledger-needs-pressure.md`.
+- The test suite asserts the README's countable claims: the decision-record
+  count, that every check appears in the table its readers use, and that every
+  check has a fixture producing it. Both numbers in the section headed
+  "Evidence, rather than claims" had drifted within five days.
+  `docs/decisions/0037-the-readme-counts-itself.md`.
 - `.github/workflows/publish.yml`. Every push to main asks the registry whether
   the version in `package.json` is already there and stops quietly when it is.
   When it is not, it runs the three gates CI runs, prints the tarball contents,
@@ -51,6 +113,8 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Removed
 
+- `codex` as an npm keyword. Codex is not a supported provider, and a keyword is
+  a claim to the person searching for one.
 - `README.npm.md`, and the `readme` field in `package.json`. npm ignores that
   field and always renders the `README.md` at the tarball root, so the file was
   shipped in every tarball and shown to nobody. It carried four unsupported

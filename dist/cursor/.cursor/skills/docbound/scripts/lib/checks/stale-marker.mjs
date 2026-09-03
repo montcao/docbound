@@ -9,7 +9,7 @@
 // seconds, so the number is available to anyone who wants it
 // (`docs/decisions/0029-unix-timestamps-for-elapsed-time.md`).
 
-import { isAdr, readText, splitLines } from "../paths.mjs";
+import { isAdr, isHistorical, readText, splitLines } from "../paths.mjs";
 import { stripIgnored } from "../text.mjs";
 
 export const id = "stale-marker";
@@ -35,11 +35,12 @@ export function run(ctx) {
     if (raw === null) continue;
     // A document quoting the phrasing it is reporting is not making the claim.
     const text = stripIgnored(raw);
-    // The worklog and the decision records are historical by design, so
-    // changelog phrasing belongs in them. An unmeasured duration does not: it is
-    // a claim about the world that happens to be written in the past tense, and
-    // it is as wrong in an archive as anywhere else.
-    const historical = doc === "docs/WORKLOG.md" || isAdr(doc);
+    // The worklog, its archives, the decision records, and the changelog are
+    // historical by design, so changelog phrasing belongs in them. An unmeasured
+    // duration does not: it is a claim about the world that happens to be
+    // written in the past tense, and it is as wrong in an archive as anywhere
+    // else.
+    const historical = isHistorical(doc);
     // A record's body cannot be edited, so appending a `## Corrections` section
     // is the only thing it is allowed to do about a false statement. Once it
     // has, repeating the finding asks for something that cannot be given. The

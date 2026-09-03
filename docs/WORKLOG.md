@@ -2,8 +2,113 @@
 
 Newest entry first. One entry per task. Intent is written before the first
 edit; Outcome and Still open are written after the audit passes.
-Entries older than a quarter can be pruned once their content is reflected
-in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).
+Old entries are archived by `docbound prune`, which keeps the newest ten and
+every entry still holding an open item. Nothing is deleted: what an entry
+established belongs in ARCHITECTURE, a module README, or a decision record long
+before it is archived.
+
+Older entries are archived:
+
+- `docs/worklog/2026-Q3.md`
+
+## 2026-09-02 - Fix what blocks a public release: the historical set, path-shaped refs, release-script exit codes, and workflow permissions
+
+Agent: claude · Branch: main · t=1788374480
+
+### Intent
+
+Four findings that a public first user meets rather than reads about: a check
+firing on every correct changelog, a message telling a reader to add an
+extension already present, a release script that reports success after a failed
+commit, and CI running with the repository's default token permissions.
+
+### Outcome
+
+`isHistorical` in `skill/docbound/scripts/lib/paths.mjs` is one set for both
+checks and now holds the changelog and the `prune` archives (0041).
+`isPathShaped` reads the extension before the slash (0042). `scripts/release.mjs`
+checks git's exit status on add, commit, and tag. `ci.yml` declares
+`contents: read`. `SECURITY.md` counts `dead-ref` among the checks that quote a
+fragment, and that quote is now truncated like the other two.
+
+### Still open
+
+- [archive-path-convention] the archive exemption is the path `prune` writes; a repository archiving its worklog elsewhere gets no exemption short of `audit.exclude`.
+- [changelog-basename] `HISTORY.md`, `CHANGES.md`, and `NEWS` are the same kind of document and are not in the set.
+
+## 2026-09-02 - Make comments() linear, and count the checks in the reference doc
+
+Agent: claude · Branch: main · t=1788373921
+
+### Intent
+
+An independent pre-release audit found the hook stalling on files well inside
+the size cap, which falsifies a claim in `SECURITY.md`, and `docs/checks.md`
+opening on a count that was one low.
+
+### Outcome
+
+`lineIndex` in `skill/docbound/scripts/lib/scan.mjs` replaces the newline count
+that ran once per span: 1 MB of comments goes from 9,048 ms to 27 ms, pinned by
+a budget in `tests/scan.test.mjs` (0040). `SECURITY.md` now names what makes the
+no-hang claim true. `docs/checks.md` says twenty-five, and
+`tests/build.test.mjs` asserts that count the way it already asserted the
+README's.
+
+### Still open
+
+- [index-memory] the line index costs one offset per line for the length of the call, unmeasured against a generated file near the two-megabyte cap.
+- [audit-wall-clock] nothing bounds the audit end to end; the budget added here covers one function, and the 38-second run that started this was measured by hand.
+
+## 2026-08-31 - Fix the release punch list: package metadata, NOTICE in the tarball, and a code of conduct
+
+Agent: claude · Branch: main · t=1788218849
+
+### Intent
+
+A pre-push review found package metadata that contradicts the docs: `codex` as a
+keyword for an editor that does not ship, and `NOTICE.md` outside the npm files
+whitelist in an Apache-2.0 package. No code of conduct either.
+
+### Outcome
+
+`codex` is out of the keywords and `cursor`, which does ship, is in. `NOTICE.md`
+joins the npm `files` whitelist, and `tests/package.test.mjs` asserts the licence,
+the notice, and the README are all in the packed tree. `CODE_OF_CONDUCT.md` is
+the Contributor Covenant 2.1, reported through the private channel `SECURITY.md`
+already describes, linked from `CONTRIBUTING.md` and the README.
+
+### Still open
+
+- Nothing new from this task. What still stands between here and a publish is
+  already on the ledger: no remote, an unprotected main, and an npm environment
+  with no reviewers on it.
+
+## 2026-08-31 - Fix six blockers from the pre-push review, and put pressure on the ledger
+
+Agent: claude · Branch: main · t=1788190671
+
+### Intent
+
+An adversarial review found six checks or commands that misfire on first contact
+with a repository, and a ledger at 69 open items against 8 closed in five days.
+
+### Outcome
+
+Six fixes, one record each: template-residue's closed set (0033), the default
+branch asked of git and printed (0034), dep-adr reading dependencies rather than
+filenames (0035), route directories exempt from new-dir-readme (0036), the
+README's counts asserted by the suite (0037), install pointing at baseline
+(0038). The ledger gets `open-item-debt` above 25 open and `docbound prune`
+(0039).
+
+### Still open
+
+- [ledger-triage] 69 open against the new cap of 25. The mechanism landed; the triage it exists to provoke did not.
+- [route-file-names] the reserved basenames date with their frameworks, and a lone `index` file is now exempt everywhere.
+- [lockfile-noise] a bot bump now blocks until somebody writes a record, and how often that gets waived is the measurement.
+- [readme-claim-parse] the README assertions read prose with a regular expression, so rewording a true sentence breaks the suite.
+- [bullet-continuation] `entry-length` counts a wrapped bullet's later lines as prose, though its own comment calls bullets structure.
 
 ## 2026-08-31 - Stop doc-coverage firing on comment-only edits, and bound entry length
 
@@ -2107,112 +2212,6 @@ and drops the why.
 - [token-estimates] Token figures are estimates at four characters per token. Good enough for a
   ratio this large, wrong enough that nobody should budget from them.
 
-## 2026-08-26 - Bound what the audit claims to decide
-
-Agent: claude · Branch: main
-
-### Intent
-
-The README's first sentence calls docbound "a documentation discipline for
-coding agents, with a checker that decides when a task is finished." A reader
-asked what that means, and the sentence is the reason they had to ask.
-
-It overclaims. The audit reads documentation. It cannot tell whether a feature
-works, whether a bug is fixed, or whether a test passes. Saying it decides when
-a task is finished invites exactly one question, which is how a documentation
-tool could possibly know that, and the README never answers it because the claim
-was never true in that form.
-
-Under-explaining compounds it. The sentence says the checker decides something
-without saying what it reads, so a reader has no way to size the claim for
-themselves.
-
-The fix is to say what it checks, say plainly what it does not, and repair the
-two later sentences that inherit the same ambiguity. Bounding a claim makes it
-more persuasive rather than less, because an unbounded one has to be taken on
-trust.
-
-### Expected to touch
-
-- `README.md` - the opening claim and the two sentences that repeat it
-
-### Outcome
-
-The opening sentence now names what the audit reads: whether the change you just
-made was written down. Two short blocks follow it. **What it checks** lists the
-three questions in plain language, and **What it does not check** says the audit
-has no opinion on whether the code works, that tests own that half, and that the
-two gates are independent in both directions.
-
-Two inherited sentences repaired. "docbound makes that happen by making it the
-condition for finishing" said nothing about which condition, and now says the
-explanation moves inside the task rather than after it. The gate section repeats
-the bound at the point a reader is most likely to mistake the tool for an
-authority on their work, and points out that wiring tests into the same stop
-hook is available if they want that gate too.
-
-`README.npm.md` carried a quieter version of the same claim, that docbound "ends
-every task" with an audit. Bounded there in two lines, since the npm page earns
-its length differently.
-
-The skill's own phrasing is untouched. `skill/docbound/SKILL.md` says a task is
-not done until the audit exits 0, and its reader is an agent already inside a
-documentation skill, for whom the subject of that sentence is not in doubt.
-
-### Still open
-
-- Nothing from this. The claim now matches what the code does, and
-  `tests/fixtures/` is what would catch it drifting again.
-
-## 2026-08-26 - Settle which writing register applies where
-
-Agent: claude · Branch: main
-
-### Intent
-
-The README rewrite in the entry below left an unresolved conflict: the front
-door addresses the reader directly and argues a case, and the standard the skill
-publishes in `skill/docbound/references/style.md` forbids exactly that. Read
-side by side, the project looks like it does not follow the discipline it sells.
-
-Settle it rather than leave it noted. The resolution is that the split is by
-reader and not by taste, so it can be stated as a rule and applied without
-judgement each time.
-
-### Expected to touch
-
-- `docs/decisions/0011-two-registers.md` - the record
-- `docs/DEVELOP.md` - where a contributor looks before editing prose
-- `docs/WORKLOG.md` - this entry, and the open question it closes
-
-### Outcome
-
-`docs/decisions/0011-two-registers.md` records the split. The adoption register
-covers `README.md` and `README.npm.md` and nothing else; the skill's standard
-covers `docs/`, the module READMEs, the decision records, the worklog, and every
-doc an agent writes through the skill in any repository.
-
-The line is the reader's commitment. A reader who already works here wants the
-fastest true answer and is slowed down by persuasion. A reader deciding whether
-to try the tool has committed nothing, and dry declaration gives them no reason
-to continue.
-
-`docs/DEVELOP.md` says so under Style, because that is where a contributor looks
-before editing prose. `skill/docbound/references/style.md` is unchanged: it names
-its reader in its first section, which is already its scope, and nothing in it
-claims to govern a project's front door.
-
-The record also names the failure mode the standard was preventing on the
-adoption side. A register that persuades can persuade past what is true. The
-guard is that the README's sample output is copied from a fixture rather than
-written by hand, and that it claims nothing the test suite does not cover.
-
-### Still open
-
-- Nothing from this decision. The reversal conditions are in the record: the
-  front door starting to carry reference material, or a claim in it turning out
-  to be unsupported by a test.
-
 ## 2026-08-26 - Rewrite the README for a reader who has not adopted the tool yet
 
 Agent: claude · Branch: main
@@ -2488,25 +2487,6 @@ holds to the same standard as everyone else's.
   eighteen characters of headroom in the skill's description, and the
   wrapped-sentence handling in `comment-sentence`.
 
-## 2026-08-26 — Release 0.1.0
-
-Agent: release script · Branch: main
-
-### Intent
-
-Cut 0.1.0. Written by `scripts/release.mjs`, which refuses to run
-unless the tests, the audit, and the freshness check pass against a clean
-tree first.
-
-### Outcome
-
-Set the version in `package.json`, `.claude-plugin/plugin.json`, and
-`.claude-plugin/marketplace.json`; rolled `CHANGELOG.md`; rebuilt `dist/`,
-`plugin/`, and `skills-lock.json`; tagged.
-
-### Still open
-
-- Nothing from the release itself. Open work is in the entries below.
 ## 2026-08-26 — Make the published package actually installable, and cut 0.1.0
 
 Agent: claude · Branch: main
@@ -2625,7 +2605,6 @@ commit on main passes the audit, including the one that cuts the release.
 - [npm-dependency] The packaging test shells out to `npm`, so the suite now needs npm on the
   path. `docs/decisions/0009-package-is-the-artifact.md` says what would move it
   to a release-only step.
-
 
 ## 2026-08-26 — Ship only verified providers, and close three security findings
 

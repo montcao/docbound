@@ -17,6 +17,10 @@ reverted by the next build.
   the entry skeleton so the agent writes only the Intent.
 - `skill/docbound/scripts/close.mjs`: closes a tracked open item by slug, and
   refuses a slug that is not open.
+- `skill/docbound/scripts/prune.mjs`: archives worklog entries older than the
+  newest ten under `docs/worklog/`, keeping every entry that still holds an open
+  item, so the log stays a file somebody opens
+  (`docs/decisions/0039-the-ledger-needs-pressure.md`).
 - `skill/docbound/scripts/summary.mjs`: step 1 of the loop as a command. Reads
   the documentation set and no source at all; see
   `docs/decisions/0018-no-self-serving-metrics.md`. It makes no claim about

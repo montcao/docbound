@@ -179,12 +179,27 @@ function main(argv) {
 
   // Only what this script writes. `git add -A` would sweep in whatever else
   // happened to be in the tree, and a release commit should be legible.
-  git([
-    "add", ...VERSIONED_FILES, "CHANGELOG.md", "docs/WORKLOG.md",
-    "skills-lock.json", "dist", "plugin",
-  ]);
-  git(["commit", "-m", `release: ${version}`]);
-  git(["tag", "-a", `v${version}`, "-m", `docbound ${version}`]);
+  //
+  // Each step is checked. An unchecked commit that fails — an unset identity, a
+  // signing key that is not there, a rejecting pre-commit hook — leaves the tag
+  // on the previous commit while the script prints success, and the push then
+  // carries a tag pointing at a tree without the version bump in it.
+  const steps = [
+    ["add", ...VERSIONED_FILES, "CHANGELOG.md", "docs/WORKLOG.md",
+      "skills-lock.json", "dist", "plugin"],
+    ["commit", "-m", `release: ${version}`],
+    ["tag", "-a", `v${version}`, "-m", `docbound ${version}`],
+  ];
+  for (const step of steps) {
+    const result = git(step);
+    if (result.status !== 0) {
+      process.stderr.write(
+        `release.mjs: git ${step[0]} failed; the version files are written and ` +
+          `not committed:\n${result.stderr ?? ""}`,
+      );
+      return 1;
+    }
+  }
   process.stdout.write(
     `tagged v${version}. Push with: git push --follow-tags\n` +
       "The push to main is what publishes; the tag is a marker.\n",

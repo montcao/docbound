@@ -68,7 +68,8 @@ export function toText(ctx, findings) {
     `docbound audit · mode=${ctx.mode} · root=${name} · ` +
       `git=${ctx.git ? "yes" : "no"} · ${ctx.changed.size} changed file(s), ` +
       `${sourceCount} source · t=${ctx.timestamp}`,
-  ];
+    ctx.git && ctx.ref ? `  (compared against ${ctx.ref})` : null,
+  ].filter((line) => line !== null);
   if (!ctx.git) {
     out.push("  (no git: whole tree scanned; doc-coverage not evaluated)");
   }

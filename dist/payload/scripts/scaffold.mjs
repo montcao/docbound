@@ -151,8 +151,10 @@ export function worklogInitial(today) {
     "# Worklog\n\n" +
     "Newest entry first. One entry per task. Intent is written before the first\n" +
     "edit; Outcome and Still open are written after the audit passes.\n" +
-    "Entries older than a quarter can be pruned once their content is reflected\n" +
-    "in ARCHITECTURE, module READMEs, or Architecture Decision Records (ADRs).\n\n" +
+    "Old entries are archived by `docbound prune`, which keeps the newest ten\n" +
+    "and every entry still holding an open item. Nothing is deleted: what an\n" +
+    "entry established belongs in ARCHITECTURE, a module README, or a decision\n" +
+    "record long before it is archived.\n\n" +
     entry
   );
 }
