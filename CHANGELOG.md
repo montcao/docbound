@@ -8,6 +8,16 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Changed
+
+- `.github/workflows/ci.yml` and `.github/workflows/publish.yml` pin
+  `actions/checkout` and `actions/setup-node` by commit rather than by tag, and
+  `.github/dependabot.yml` proposes the updates weekly. `id-token: write` is
+  scoped to the publish job, neither checkout persists its credentials, both
+  jobs carry a timeout, and the publish job installs a pinned npm major rather
+  than whatever `latest` resolves to.
+  `docs/decisions/0043-actions-are-pinned-by-commit.md`.
+
 ## 0.2.0 — 2026-09-03
 
 ### Fixed

@@ -58,7 +58,7 @@ reverse.
   so a check with no fixture fails the build.
 - Zero dependencies, at runtime and for development. `package.json` has neither
   key.
-- 42 decision records in `docs/decisions/`, each with the condition that would
+- 43 decision records in `docs/decisions/`, each with the condition that would
   reverse it. Several of them record this project being wrong and what it did
   about it.
 - Pointed at three repositories it had never seen, it found four blocking false

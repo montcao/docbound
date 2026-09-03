@@ -1,0 +1,16 @@
+# Actions are pinned by commit, which is safe and goes stale silently. This is
+# the half that keeps them current: a pull request when a pinned action moves,
+# reviewed like any other change
+# (`docs/decisions/0043-actions-are-pinned-by-commit.md`).
+#
+# There is no npm ecosystem here on purpose. This package has no dependencies,
+# runtime or development, so there is nothing for Dependabot to update.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "ci"

@@ -14,19 +14,29 @@ permissions:
 jobs:
   verify:
     runs-on: ubuntu-latest
+    # A hung job holds a runner and tells nobody. Every step here finishes in
+    # well under a minute.
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
         node: ["20", "22", "24"]
     steps:
-      - uses: actions/checkout@v4
+      # Third-party actions are pinned by commit, not by tag: a tag is mutable and
+      # points at whatever its owner moves it to. `.github/dependabot.yml` is
+      # what keeps the pins current
+      # (`docs/decisions/0043-actions-are-pinned-by-commit.md`).
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, resolved 2026-09-02
         with:
+          # The token this action writes into `.git/config` outlives the step
+          # and is readable by everything after it. Nothing here pushes.
+          persist-credentials: false
           # The audit diffs against the merge base, and a shallow clone does not
           # have one. Without full history every change looks like the whole
           # repository changed.
           fetch-depth: 0
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4, resolved 2026-09-02
         with:
           node-version: ${{ matrix.node }}
 

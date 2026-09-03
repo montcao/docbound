@@ -22,16 +22,24 @@ concurrency:
   group: publish
   cancel-in-progress: false
 
+# Read-only by default. The one job that needs more asks for it itself.
 permissions:
   contents: read
-  # Required for npm provenance, and for trusted publishing if it is configured
-  # on npmjs.com. Without it a publish still works over a token but ships no
-  # provenance attestation.
-  id-token: write
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # Required for npm provenance, and for trusted publishing if it is
+      # configured on npmjs.com. Without it a publish still works over a token
+      # but ships no provenance attestation. Scoped to this job so that a job
+      # added to this file later does not inherit a token that can mint an
+      # identity on the registry.
+      id-token: write
+    # A publish that hangs holds the concurrency group and blocks every release
+    # behind it.
+    timeout-minutes: 30
     # The gate between a push to main and a version nobody can take back after
     # seventy-two hours. Configure required reviewers on this environment in the
     # repository settings, and scope NPM_TOKEN to it if a token is used at all.
@@ -41,12 +49,15 @@ jobs:
       name: npm
       url: https://www.npmjs.com/package/docbound
     steps:
-      - uses: actions/checkout@v4
+      # Pinned by commit; see `.github/workflows/ci.yml` for why.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4, resolved 2026-09-02
         with:
           # The audit diffs against the merge base, and a shallow clone has none.
           fetch-depth: 0
+          # Nothing here pushes, and this job holds a registry identity.
+          persist-credentials: false
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4, resolved 2026-09-02
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
@@ -68,10 +79,12 @@ jobs:
           fi
 
       # Trusted publishing needs a newer npm than the one bundled with Node 22.
-      # Harmless when publishing over a token.
+      # Harmless when publishing over a token. Pinned to a major rather than
+      # `latest`, so the release does not install whatever was published to the
+      # registry an hour ago.
       - name: Use a current npm
         if: steps.check.outputs.publish == 'true'
-        run: npm install -g npm@latest
+        run: npm install -g npm@12
 
       # The same three gates CI runs. They run again here because a publish is
       # the one step that cannot be taken back, and because a push to main can

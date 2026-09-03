@@ -11,6 +11,29 @@ Older entries are archived:
 
 - `docs/worklog/2026-Q3.md`
 
+## 2026-09-03 - Harden the workflows: pin actions by digest, least-privilege tokens, and no credentials left in the checkout
+
+Agent: claude · Branch: main · t=1788408351
+
+### Intent
+
+The publish job holds an identity npm trusts, and it reached that identity
+through two mutable tags, a workflow-wide `id-token: write`, a checkout that
+leaves its token on disk, and `npm@latest`.
+
+### Outcome
+
+Both actions pinned by commit with the tag and date beside them, updates
+proposed by `.github/dependabot.yml`, `id-token: write` moved onto the publish
+job, `persist-credentials: false` on both checkouts, `npm@12` instead of
+`latest`, and a timeout on each job (0043). `SECURITY.md` gains what the release
+chain guarantees; `docs/DEVELOP.md` gains how to upgrade a pinned action.
+
+### Still open
+
+- [pins-behind-latest] the pinned actions are v4 while v7 of both exists; the upgrade arrives as Dependabot's first pull request rather than by assertion here.
+- [npm-major-pin] `npm@12` is load-bearing for trusted publishing and will go stale the same way the action pins would.
+
 ## 2026-09-03 — Release 0.2.0
 
 Agent: release script · Branch: main

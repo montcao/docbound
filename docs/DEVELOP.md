@@ -232,6 +232,25 @@ trigger.
 The version lives in four files plus `skills-lock.json`, which is why setting it
 by hand is four chances to leave one behind.
 
+### What runs in the workflows
+
+Both workflows pin `actions/checkout` and `actions/setup-node` to commit SHAs,
+with the tag and the resolution date in a trailing comment. A tag is mutable and
+the publish job holds an identity npm trusts, so a moved tag is somebody else's
+code publishing under this name. `.github/dependabot.yml` proposes the moves
+weekly, which is what keeps a pin from going stale
+(`docs/decisions/0043-actions-are-pinned-by-commit.md`).
+
+Upgrading an action means merging that pull request, not editing a version
+number. Take the SHA from the bot rather than resolving it by hand:
+
+```
+gh api repos/actions/checkout/git/refs/tags/v4 --jq .object.sha
+```
+
+`id-token: write` is declared on the publish job rather than the workflow, and
+neither checkout keeps its credentials on disk.
+
 ### What has to exist on the GitHub side
 
 The publish job names an environment called `npm`. GitHub creates it implicitly

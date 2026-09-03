@@ -42,6 +42,19 @@ the whole of the file content that reaches a transcript by this route.
 
 Reports that demonstrate any of those three failing are the most valuable ones.
 
+## What the release chain guarantees
+
+The package has no dependencies, runtime or development, and no install
+lifecycle scripts: `npm install docbound` runs no code from this project. What
+ships is the `files` whitelist in `package.json`, and `tests/package.test.mjs`
+packs the real tarball and asserts what is in it.
+
+Releases are published from `.github/workflows/publish.yml` with npm provenance,
+over OIDC rather than a long-lived token. Both actions that workflow uses are
+pinned to commit SHAs rather than tags, and `id-token: write` is scoped to the
+one job that publishes
+(`docs/decisions/0043-actions-are-pinned-by-commit.md`).
+
 ## What is out of scope
 
 docbound reads and writes documentation inside a repository root it is handed.
