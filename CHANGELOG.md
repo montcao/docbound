@@ -8,7 +8,18 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Fixed
+
+- The plugin's skill directory carries the agent definitions, so a tool that
+  copies `skills/docbound/` alone gets a working subagent with it. Installing
+  from the public repository with `npx skills add` delivered the skill without
+  the documenter. `docs/decisions/0044-the-skill-directory-is-self-contained.md`.
+
 ### Changed
+
+- `README.md` says which install route sets up the hooks and which installs the
+  skill alone. Only `npx docbound install` and the Claude Code plugin gate a
+  session; the rest leave the audit to be run deliberately.
 
 - `.github/workflows/ci.yml` and `.github/workflows/publish.yml` pin
   `actions/checkout` and `actions/setup-node` by commit rather than by tag, and

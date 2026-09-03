@@ -58,7 +58,7 @@ reverse.
   so a check with no fixture fails the build.
 - Zero dependencies, at runtime and for development. `package.json` has neither
   key.
-- 43 decision records in `docs/decisions/`, each with the condition that would
+- 44 decision records in `docs/decisions/`, each with the condition that would
   reverse it. Several of them record this project being wrong and what it did
   about it.
 - Pointed at three repositories it had never seen, it found four blocking false
@@ -263,6 +263,29 @@ Check what happened:
 ```
 npx docbound doctor
 ```
+
+### The other routes install the skill without the gate
+
+The skill and the gate are two things. `npx docbound install` is the only route
+that sets up both.
+
+| Route | Skill | Hooks, so the audit blocks |
+|---|---|---|
+| `npx docbound install` | yes | yes |
+| `npx skills add montcao/docbound` | yes | no |
+| `/plugin install docbound@montcao` in Claude Code | yes | yes |
+| Copying `dist/payload/` by hand | yes | no |
+
+Installed without hooks, your agent reads the skill and follows the discipline
+because it was asked to. Nothing stops it finishing with undocumented work
+behind it, which is the part that makes the discipline hold. Run
+`npx docbound install` afterwards to add the hooks to a skill you installed
+another way; it merges into the config that is already there.
+
+The skills CLI needs Node 22.20 or newer. It installs into a shared `.agents`
+directory and symlinks the editors that read from somewhere else. The Claude Code plugin
+carries its own hook manifest, which is why it is the one non-CLI route that
+gates.
 
 ## If your repository already has history
 

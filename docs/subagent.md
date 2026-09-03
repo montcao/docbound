@@ -28,9 +28,11 @@ failure, never as a success with caveats.
 ## Claude Code
 
 `skill/docbound/agents/docbound-documenter.md` is a subagent definition. It
-arrives in a project through any of the install paths. The plugin puts it at
-`plugin/agents/docbound-documenter.md`, and `npx docbound install` puts it
-inside the skill payload, where Claude Code discovers it.
+arrives in a project through every install path, because it travels inside the
+skill payload wherever that payload goes
+(`docs/decisions/0044-the-skill-directory-is-self-contained.md`). The plugin
+writes a second copy at `plugin/agents/docbound-documenter.md`, which is the
+path `.claude-plugin/plugin.json` names and the one Claude Code registers.
 
 A parent agent invokes it after a coding task:
 

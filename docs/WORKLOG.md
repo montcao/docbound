@@ -11,6 +11,29 @@ Older entries are archived:
 
 - `docs/worklog/2026-Q3.md`
 
+## 2026-09-03 - Ship the subagent inside the plugin's skill payload, and say which install gives which
+
+Agent: claude · Branch: main · t=1788411727
+
+### Intent
+
+Installing the published repository with `npx skills add` delivers the skill
+without the documenter subagent, because the plugin build lifts the agent
+definitions out of the skill directory. The README also does not say which
+install route wires the hooks.
+
+### Outcome
+
+`buildPlugin` writes the whole payload under `skills/docbound/` and keeps the
+copy at the plugin root that `plugin.json` names (0044). The README gains a
+table of the four install routes and which of them gate a session, and
+`docs/subagent.md` says the definition travels with the payload.
+
+### Still open
+
+- [skills-cli-untested] nothing in the suite installs through `npx skills add`; the check was one run by hand against the published repository.
+- [route-table-drift] the install table in the README is prose, and nothing asserts that the four routes still behave the way it says.
+
 ## 2026-09-03 - Harden the workflows: pin actions by digest, least-privilege tokens, and no credentials left in the checkout
 
 Agent: claude · Branch: main · t=1788408351

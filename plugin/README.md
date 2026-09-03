@@ -10,8 +10,11 @@ copy stops matching its source.
 ## What is in it
 
 - A skills directory holding the payload, byte-identical to `skill/docbound/`
-  minus the Python reference and the agent definitions.
-- An agents directory holding the documentation subagent.
+  minus the Python reference. The agent definitions are in it, so a tool that
+  copies the skill directory alone gets a working one
+  (`docs/decisions/0044-the-skill-directory-is-self-contained.md`).
+- An agents directory holding the same documentation subagent at the plugin
+  root, which is where `.claude-plugin/plugin.json` points Claude Code.
 - A hooks manifest wiring `PostToolUse` and `Stop`, resolved against the
   plugin root.
 

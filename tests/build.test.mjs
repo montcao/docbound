@@ -78,6 +78,10 @@ describe("build", () => {
     assert.ok(files.has("skills/docbound/SKILL.md"));
     assert.ok(files.has("agents/docbound-documenter.md"));
     assert.ok(files.has("hooks/hooks.json"));
+    // The skill directory is also complete on its own, for the tools that copy
+    // exactly that directory and nothing around it
+    // (`docs/decisions/0044-the-skill-directory-is-self-contained.md`).
+    assert.ok(files.has("skills/docbound/agents/docbound-documenter.md"));
     assert.ok(
       ![...files.keys()].some((f) => f.startsWith("cli/") || f.startsWith("tests/")),
       "the plugin stays slim",

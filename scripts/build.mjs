@@ -90,10 +90,16 @@ function writeTree(root, files) {
 /** The Claude Code plugin bundle: skill, agents, hooks, and nothing else. */
 export function buildPlugin(payload) {
   const files = new Map();
+  // The whole payload, agent definitions included. A skill directory that is
+  // complete on its own is what a tool copying `skills/docbound/` gets, and
+  // `npx skills add` is one of those: it takes the shallowest `skills/<name>/`
+  // it finds and copies the directory
+  // (`docs/decisions/0044-the-skill-directory-is-self-contained.md`).
   for (const [rel, contents] of payload) {
-    if (rel.startsWith("agents/")) continue;
     files.set(`skills/docbound/${rel}`, contents);
   }
+  // And again at the plugin root, because that is where Claude Code looks for
+  // them: `.claude-plugin/plugin.json` points `agents` at `./plugin/agents`.
   for (const [rel, contents] of payload) {
     if (rel.startsWith("agents/")) files.set(rel, contents);
   }
