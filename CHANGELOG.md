@@ -8,6 +8,8 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+## 0.2.1 — 2026-09-03
+
 ### Added
 
 - `adr-actionable` (warn). A new decision record opens with a `## What to do`

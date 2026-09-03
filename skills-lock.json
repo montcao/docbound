@@ -1,5 +1,5 @@
 {
-  "version": "0.2.0",
+  "version": "0.2.1",
   "payloadHash": "sha256:e545f5c6418e0dae7c2f9e3ae6251c208689ad8bc76f2ebe53a6b2ab6793bd90",
   "providers": {
     "claude-code": {

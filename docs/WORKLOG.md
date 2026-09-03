@@ -11,6 +11,25 @@ Older entries are archived:
 
 - `docs/worklog/2026-Q3.md`
 
+## 2026-09-03 — Release 0.2.1
+
+Agent: release script · Branch: main
+
+### Intent
+
+Cut 0.2.1. Written by `scripts/release.mjs`, which refuses to run
+unless the tests, the audit, and the freshness check pass against a clean
+tree first.
+
+### Outcome
+
+Set the version in `package.json`, `.claude-plugin/plugin.json`, and
+`.claude-plugin/marketplace.json`; rolled `CHANGELOG.md`; rebuilt `dist/`,
+`plugin/`, and `skills-lock.json`; tagged.
+
+### Still open
+
+- Nothing from the release itself. Open work is in the entries below.
 ## 2026-09-03 - Decision records lead with what to do about them, and a check says so
 
 Agent: claude · Branch: main · t=1788412267
