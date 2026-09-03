@@ -14,7 +14,6 @@ import { pathToFileURL } from "node:url";
 import { REPO_ROOT, removeTree, tempDir } from "./harness.mjs";
 import { build, buildPlugin, collectPayload, hashFiles } from "../scripts/build.mjs";
 import { checkDistFresh, compareTrees, listTree } from "../scripts/check-dist-fresh.mjs";
-import { PROVIDERS } from "../cli/providers.mjs";
 
 const made = [];
 after(() => {
@@ -39,28 +38,20 @@ describe("build", () => {
     assert.deepEqual(compareTrees(first, second), []);
   });
 
-  test("the payload is identical for every provider", () => {
+  test("the distribution contains one path-neutral payload", () => {
     const dir = buildInto();
-    const payloads = PROVIDERS.map((provider) =>
-      hashFiles(listTree(path.join(dir, "dist", provider.name, provider.payload))),
-    );
-    assert.equal(new Set(payloads).size, 1, "one payload, seven placements");
-  });
+    const payload = listTree(path.join(dir, "dist", "payload"));
+    assert.ok(payload.has("SKILL.md"));
+    assert.equal(hashFiles(payload), hashFiles(collectPayload()));
+    assert.deepEqual(fs.readdirSync(path.join(dir, "dist")), ["payload"]);
 
-  test("each provider gets its own hook manifest and nothing else differs", () => {
-    const dir = buildInto();
-    for (const provider of PROVIDERS) {
-      const root = path.join(dir, "dist", provider.name);
-      assert.ok(fs.existsSync(path.join(root, provider.payload, "SKILL.md")));
-      if (provider.hookFile) {
-        const manifest = JSON.parse(
-          fs.readFileSync(path.join(root, provider.hookFile), "utf8"),
-        );
-        const commands = JSON.stringify(manifest);
-        assert.ok(commands.includes(`${provider.payload}/scripts/hook.mjs`));
-        assert.ok(commands.includes("--event stop"));
-      }
-    }
+    const lock = build({
+      out: path.join(dir, "lock-dist"),
+      pluginOut: path.join(dir, "lock-plugin"),
+      quiet: true,
+    });
+    assert.equal(lock.payload.hash, hashFiles(payload));
+    assert.ok(!("providers" in lock), "provider placement is not build output");
   });
 
   test("the Python reference is not shipped", () => {
@@ -108,7 +99,7 @@ describe("check-dist-fresh", () => {
   test("a changed skill with an unchanged dist is a difference", () => {
     const rebuilt = listTree(path.join(buildInto(), "dist"));
     const stale = new Map(rebuilt);
-    const skillFile = [...stale.keys()].find((f) => f.endsWith("/SKILL.md"));
+    const skillFile = "payload/SKILL.md";
     stale.set(skillFile, Buffer.from("a line the build did not produce\n"));
 
     const problems = compareTrees(stale, rebuilt);
@@ -119,18 +110,18 @@ describe("check-dist-fresh", () => {
   test("a file the build no longer produces is a difference", () => {
     const rebuilt = listTree(path.join(buildInto(), "dist"));
     const withExtra = new Map(rebuilt);
-    withExtra.set("universal/.agents/skills/docbound/LEFTOVER.md", Buffer.from("x"));
+    withExtra.set("payload/LEFTOVER.md", Buffer.from("x"));
 
     const problems = compareTrees(withExtra, rebuilt);
     assert.deepEqual(problems, [
-      "not produced by the build: universal/.agents/skills/docbound/LEFTOVER.md",
+      "not produced by the build: payload/LEFTOVER.md",
     ]);
   });
 
   test("a missing file is a difference", () => {
     const rebuilt = listTree(path.join(buildInto(), "dist"));
     const missing = new Map(rebuilt);
-    const dropped = [...missing.keys()].find((f) => f.endsWith("/SKILL.md"));
+    const dropped = "payload/SKILL.md";
     missing.delete(dropped);
 
     const problems = compareTrees(missing, rebuilt);

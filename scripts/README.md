@@ -9,11 +9,12 @@ nothing in `skill/` or `cli/` imports from it except the provider table.
 
 ## Start here
 
-- `scripts/build.mjs`: `skill/docbound/` into the seven directories under
-  `dist/`, and into `plugin/`.
+- `scripts/build.mjs`: `skill/docbound/` into `dist/payload/`, and into
+  `plugin/`.
 - `scripts/check-dist-fresh.mjs`: rebuilds into a temporary directory and
   compares, so drift is a red build.
-- `scripts/release.mjs`: version, build, verify, tag.
+- `scripts/release.mjs`: derive the next version from mainline commits, or cut
+  a specific release, then build, verify, and tag.
 
 ## Contract
 
@@ -31,9 +32,9 @@ removed and rewritten on every run.
 - Must not read anything outside `skill/docbound/` when deciding what to emit.
   A distribution that depends on the state of the working tree is not
   reproducible and the freshness check would fail intermittently.
-- Must not transform the payload. Providers differ in where the payload lands
-  and in their hook manifest; the payload itself is byte-identical everywhere,
-  and `tests/build.test.mjs` asserts it.
+- Must not transform the payload. Providers differ in where the CLI places the
+  payload and in their hook manifest; `dist/payload/` stays path-neutral and
+  `tests/build.test.mjs` asserts it.
 - Must not ship the Python reference.
 
 ## Use
@@ -41,14 +42,19 @@ removed and rewritten on every run.
 ```
 node scripts/build.mjs
 node scripts/check-dist-fresh.mjs
+node scripts/release.mjs --next
 node scripts/release.mjs --version 0.2.0 --dry-run
 node scripts/release.mjs --version 0.2.0
 ```
 
-`release.mjs` verifies before it writes: tests, audit, and the freshness check
-run against the clean tree, and only then does it set the version, roll the
-changelog and the worklog, rebuild, commit, and tag. A dry run leaves the tree
-exactly as it found it.
+`release.mjs --next` reads the commits since the latest release tag and returns
+the semantic version the next publish should cut: `fix:` is patch, `feat:` is
+minor, and a Conventional Commit breaking marker is major.
+
+`release.mjs --version` verifies before it writes: tests, audit, and the
+freshness check run against the clean tree, and only then does it set the
+version, roll the changelog and the worklog, rebuild, commit, and tag. A dry
+run leaves the tree exactly as it found it.
 
 The audit runs *before* the version bump, against the content being released.
 The release also writes its own worklog entry, because a release is a task that
@@ -59,11 +65,11 @@ the one commit on main that cannot pass this repository's own audit.
 
 `.github/workflows/ci.yml` runs the freshness check.
 
-`scripts/release.mjs` cuts a release and stops there. It verifies on a clean
-tree, sets the version everywhere, rebuilds, commits, and tags, and it does not
-push. Pushing to main is what publishes, through
-`.github/workflows/publish.yml`, so the decision to release stays with a person
-and the mechanics do not.
+`.github/workflows/publish.yml` asks `scripts/release.mjs --next` what version,
+if any, the unreleased commits on main call for. If the version already in git
+is unpublished, it publishes that tagged release as-is. Otherwise it cuts the
+next version with `scripts/release.mjs --version`, pushes the release commit and
+tag, and publishes from that commit.
 
 ## Decisions
 
@@ -71,8 +77,8 @@ and the mechanics do not.
 |---|---|---|---|
 | No formatter or linter | `biome` with a committed config | A dev dependency in a repository whose whole claim is zero dependencies is a claim the reader has to qualify; the style here is small enough to hold by reading | A second regular contributor arrives and style review starts costing more than a config would |
 | `.editorconfig` sets 100 columns | Leaving the width unstated | 100 fits the check modules without wrapping every message string, and an editor that reads the file gets it right without being told. docbound has no opinion about column width (`docs/decisions/0026-docbound-does-not-recommend-logic.md`) | The code stops fitting, in either direction |
-| One provider table, read by build and CLI | A table per consumer | Adding a provider is one entry, and an entry that is wrong is wrong in one place | A provider needs different placement for install than for distribution |
-| `skills-lock.json` records the payload hash once | Once per provider | The payload is byte-identical across providers by construction, so seven copies were seven chances to compare against the wrong one | A provider needs a transformed payload rather than a copy |
+| One provider table, read by the CLI | A table per consumer | Adding a provider is one entry, and an entry that is wrong is wrong in one place | A provider needs different placement for install than the CLI supports |
+| `dist/payload/` is the only npm skill copy | A provider tree for every harness | The CLI already owns provider placement and generates manifests, so duplicate payloads add package weight but no behaviour | A provider needs a transformed payload rather than a copy |
 
 ## Gotchas
 

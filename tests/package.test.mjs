@@ -119,6 +119,20 @@ describe("the published package", () => {
     assert.match(result.stdout, /PASS/);
   });
 
+  test("links from the packaged payload when source is an unpacked package", () => {
+    const repo = project();
+    const result = packagedCli(repo, [
+      "link",
+      `--source=${ensurePackage()}`,
+      "--providers=claude-code",
+    ]);
+    assert.equal(result.status, 0, result.stderr);
+
+    const target = path.join(repo, ".claude/skills/docbound");
+    assert.ok(fs.lstatSync(target).isSymbolicLink());
+    assert.ok(fs.existsSync(path.join(target, "SKILL.md")));
+  });
+
   test("the installed hook blocks a stop when the audit fails", () => {
     const fixture = buildFixture("undocumented-change");
     made.push(fixture.work);
@@ -163,6 +177,10 @@ describe("the published package", () => {
     );
     assert.deepEqual(unwanted, [], "the package carries only what it runs");
     assert.ok(shipped.includes("dist/payload/SKILL.md"), "the hand-vendor payload ships");
+    assert.ok(
+      !shipped.some((f) => f.startsWith("skill/")),
+      "the package ships the built payload once, not its source again",
+    );
   });
 
   test("the licence and its notice ship", () => {

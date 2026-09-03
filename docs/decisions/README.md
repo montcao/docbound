@@ -1,6 +1,6 @@
 # Decisions
 
-Forty-six records, each one decision and the alternatives it beat. This page is
+Forty-eight records, each one decision and the alternatives it beat. This page is
 the index: what each one means for somebody working here, in a line. Open the
 record itself for the reasoning, the costs, and the condition that would reverse
 it.
@@ -29,7 +29,8 @@ reader is a junior engineer), 0028 (sentence-level patterns), 0032 (a worklog
 entry is two or three lines), 0018 (claim the mechanism, never the saving).
 
 **Cut a release.** 0004 (`dist/` is committed), 0009 (the package is the
-artifact under test), 0043 (actions pinned by commit, release token scoped).
+artifact under test), 0043 (actions pinned by commit, release token scoped),
+0047 (the next version comes from releasable commits on `main`).
 
 **Adopt docbound on an existing repository.** 0019 (`docbound baseline`), 0038
 (install says so), 0044 (every install route carries the whole payload).
@@ -84,3 +85,5 @@ artifact under test), 0043 (actions pinned by commit, release token scoped).
 | [0044](0044-the-skill-directory-is-self-contained.md) | A skill directory is complete alone | The subagent travels inside the payload, so `npx skills add` delivers a working one. |
 | [0045](0045-a-record-says-what-to-do-about-it.md) | A record says what to do about it | Open every new record with `## What to do`, and add its row to this table. |
 | [0046](0046-history-is-not-reported-at-all.md) | History is not read for dead paths | The worklog, its archives, the records, and the changelog may name deleted files freely. Live docs may not. |
+| [0047](0047-release-version-comes-from-mainline-commit-prefixes.md) | Release version comes from mainline commit prefixes | Releasable commits on `main` cut the next version automatically: `fix:` patch, `feat:` minor, breaking Conventional Commits major. |
+| [0048](0048-one-path-neutral-npm-payload.md) | One path-neutral npm payload | Add providers through CLI placement and hooks; the npm package ships the skill once at `dist/payload/`. |

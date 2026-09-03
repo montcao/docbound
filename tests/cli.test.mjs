@@ -201,7 +201,8 @@ describe("docbound install", () => {
 
   test("an installed project still passes its audit", () => {
     const repo = project();
-    cli(repo, ["install", "--providers=claude-code,codex", "--yes"]);
+    const result = cli(repo, ["install", "--providers=claude-code,cursor", "--yes"]);
+    assert.equal(result.status, 0, result.stderr);
     const { json, status } = runAudit(repo);
     assert.deepEqual(json.errors, []);
     assert.equal(status, 0);

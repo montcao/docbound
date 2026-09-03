@@ -28,8 +28,8 @@ flowchart LR
 
   skill -->|"scripts/build.mjs copies, byte for byte"| dist
   skill -->|"same payload, plugin layout"| plugin
-  dist -->|"content hash per provider"| lock
-  cli -->|"copies one provider's tree"| project
+  dist -->|"payload hash"| lock
+  cli -->|"places one payload and merges hooks"| project
   dist --> cli
   lock -->|"current or stale"| cli
   project -->|"hook.mjs on edit and on stop"| audit["the audit"]
@@ -49,15 +49,15 @@ that writes into a user's repository.
 - Owns: the skill text, the reference prose, the templates, the audit, the
   scaffold, the summary, the hook, and the documenter agent definition.
 - Must not: import anything outside itself, assume where it is installed, or
-  gain a runtime dependency. It is copied verbatim into seven paths and may also
-  be vendored by hand with nothing else present.
+  gain a runtime dependency. It is copied verbatim into provider paths and may
+  also be vendored by hand with nothing else present.
 - Talks to: git, through `skill/docbound/scripts/lib/git.mjs`, and the
   filesystem below whichever root it is handed. Nothing else.
 
 ### build: `scripts/`
 
-- Owns: `dist/`, `plugin/`, and `skills-lock.json`. Reads the provider table
-  from `cli/providers.mjs`, which ships and therefore lives with the package.
+- Owns: `dist/`, `plugin/`, and `skills-lock.json`. It builds one path-neutral
+  payload; the provider table remains in `cli/providers.mjs` because it ships.
 - Must not: transform the payload, or read anything outside `skill/docbound/`
   when deciding what to emit. The build is a pure function of its input and
   `tests/build.test.mjs` asserts it.
@@ -68,9 +68,9 @@ that writes into a user's repository.
 - Owns: what lands in a user's project, how an existing project's config
   survives an install, and the provider table.
 - Must not: implement a check, or overwrite what the project already owns.
-- Talks to: `cli/providers.mjs` for placement, `dist/` for the payload,
-  `skills-lock.json` to tell current from stale, and the skill's scripts as
-  subprocesses.
+- Talks to: `cli/providers.mjs` for placement and hook manifests, `dist/` for
+  the payload and its scripts, and `skills-lock.json` to tell current from
+  stale.
 
 ### tests: `tests/`
 
@@ -83,10 +83,10 @@ that writes into a user's repository.
 
 There are two, and they meet nowhere.
 
-**Distribution.** `skill/docbound/` → `scripts/build.mjs` → the seven
-directories under `dist/`, and `plugin/`, all committed → `cli/install.mjs`
-copies one distribution into a user's project, or a submodule and a symlink put
-the payload there directly, or the plugin marketplace reads `plugin/` from a
+**Distribution.** `skill/docbound/` → `scripts/build.mjs` → `dist/payload/`
+and `plugin/`, all committed → `cli/install.mjs` copies the payload to a
+provider path and merges its hook manifest, or a submodule and a symlink put the
+payload there directly, or the plugin marketplace reads `plugin/` from a
 checkout.
 
 **Audit.** A repository root → `skill/docbound/scripts/lib/changes.mjs` produces
@@ -151,7 +151,7 @@ reading, like the rules in records 0018, 0026, and 0028.
 | Audit exit codes: 0 pass, 1 errors, 2 usage | `skill/docbound/scripts/audit.mjs` | CI, pre-commit hooks, the CLI | Architecture Decision Record |
 | The check module contract, `{ id, level, run(ctx) }` | `skill/docbound/scripts/audit.mjs` | Every check module | Architecture Decision Record |
 | `.docbound/config.json`: `audit.exclude`, `audit.baseline`, `hook.*` | `skill/docbound/scripts/lib/config.mjs` | Every repository that has installed docbound | Architecture Decision Record |
-| Provider placement and hook manifests | `cli/providers.mjs` | The build and the CLI | Evidence from the harness itself, recorded in the entry |
+| Provider placement and hook manifests | `cli/providers.mjs` | The CLI | Evidence from the harness itself, recorded in the entry |
 | The npm `files` whitelist | `package.json` | Everyone who runs `npx docbound` | A passing `tests/package.test.mjs` |
 | Fixture contract: a setup script and an expected-findings file | `tests/harness.mjs` | Every fixture | Nothing |
 
@@ -162,8 +162,9 @@ reading, like the rules in records 0018, 0026, and 0028.
   `scripts/check-dist-fresh.mjs` in CI.
 - The build is deterministic. Same input, byte-identical output, no timestamps
   and no machine paths. Enforced by `tests/build.test.mjs`.
-- The skill payload is byte-identical across providers. Only placement and the
-  hook manifest differ. Enforced by `tests/build.test.mjs`.
+- The npm package contains one path-neutral skill payload. The CLI supplies a
+  provider's placement and hook manifest. Enforced by `tests/build.test.mjs`
+  and `tests/cli.test.mjs`.
 - Zero runtime dependencies, anywhere. Not enforced by a check; enforced by
   `package.json` having no `dependencies` key and a reviewer noticing one appear.
 - The hook emits findings and never the edited buffer. Enforced by

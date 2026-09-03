@@ -26,12 +26,12 @@ import {
   recordHookChoice,
   setBaseline,
 } from "./install.mjs";
-import { ignoreEpipe, isEntryPoint } from "../skill/docbound/scripts/lib/entry.mjs";
+import { ignoreEpipe, isEntryPoint } from "../dist/payload/scripts/lib/entry.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 export const PACKAGE_ROOT = path.dirname(HERE);
 export const DIST_ROOT = path.join(PACKAGE_ROOT, "dist");
-export const SKILL_SCRIPTS = path.join(PACKAGE_ROOT, "skill", "docbound", "scripts");
+export const SKILL_SCRIPTS = path.join(DIST_ROOT, "payload", "scripts");
 
 const USAGE = `docbound — documentation discipline for coding agents
 
@@ -229,7 +229,7 @@ async function commandUpdate(options) {
   const lock = readLock(PACKAGE_ROOT);
   let changed = 0;
   for (const { provider, current } of installed) {
-    if (current === lock.payloadHash) {
+    if (current === lock.payload.hash) {
       process.stdout.write(`  ${provider.name}: current\n`);
       continue;
     }
@@ -405,7 +405,7 @@ function commandDoctor(options) {
   } else {
     process.stdout.write("skill:\n");
     for (const { payload, current, providers } of payloads) {
-      const state = current === lock.payloadHash ? "current" : "differs from this package";
+      const state = current === lock.payload.hash ? "current" : "differs from this package";
       process.stdout.write(`  ${payload}: ${state}\n`);
       for (const p of providers) {
         const hook = p.hookFile

@@ -13,7 +13,7 @@ import os from "node:os";
 import path from "node:path";
 
 import { PROVIDERS } from "./providers.mjs";
-import { DEFAULT_CONFIG } from "../skill/docbound/scripts/lib/config.mjs";
+import { DEFAULT_CONFIG } from "../dist/payload/scripts/lib/config.mjs";
 
 export function readLock(packageRoot) {
   const file = path.join(packageRoot, "skills-lock.json");
@@ -80,7 +80,7 @@ export function installedPayloads(root) {
 
 /**
  * Hash of an installed skill payload, keyed by path within the payload so it is
- * comparable across providers and against `payloadHash` in the lock. The hook
+ * comparable across providers and against `payload.hash` in the lock. The hook
  * manifest is deliberately not part of it: a merged manifest carries the
  * project's other hooks, and those have nothing to do with whether the skill is
  * current.
@@ -116,14 +116,14 @@ function hashTree(root, provider) {
 }
 
 /**
- * Copy one provider's distribution into `root`. Returns the number of files
- * written. The hook manifest and the tracked config are never copied: each has
- * a function that merges into whatever the project already has.
+ * Copy the one path-neutral distribution into a provider's location. Returns
+ * the number of files written. The hook manifest and tracked config are
+ * generated separately so they can merge with what the project already owns.
  */
 export function copyDist(distRoot, root, provider) {
-  const source = path.join(distRoot, provider.name);
+  const source = path.join(distRoot, "payload");
   if (!fs.existsSync(source)) {
-    throw new Error(`no distribution for ${provider.name}; run the build`);
+    throw new Error("no payload distribution; run the build");
   }
   // A stale payload file is a file the build no longer produces; replacing the
   // directory wholesale is what keeps an update from leaving one behind.
@@ -131,11 +131,7 @@ export function copyDist(distRoot, root, provider) {
 
   let written = 0;
   for (const rel of listFiles(source)) {
-    // The manifest is merged by `mergeHookManifest` and the config by
-    // `ensureConfig`; copying either would discard what the project already has.
-    if (provider.hookFile && rel === provider.hookFile) continue;
-    if (rel === ".docbound/config.json") continue;
-    const target = path.join(root, rel);
+    const target = path.join(root, provider.payload, rel);
     fs.mkdirSync(path.dirname(target), { recursive: true });
     fs.copyFileSync(path.join(source, rel), target);
     written += 1;
@@ -202,7 +198,8 @@ export function setBaseline(root, commit) {
 /** Point the provider's payload path at a checkout instead of copying it. */
 export function linkDist(source, root, provider) {
   const skill = path.join(source, "skill", "docbound");
-  const from = fs.existsSync(skill) ? skill : source;
+  const payload = path.join(source, "dist", "payload");
+  const from = fs.existsSync(skill) ? skill : fs.existsSync(payload) ? payload : source;
   const target = path.join(root, provider.payload);
   fs.rmSync(target, { recursive: true, force: true });
   fs.mkdirSync(path.dirname(target), { recursive: true });

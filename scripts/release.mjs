@@ -2,11 +2,18 @@
 // Cut a release: set the version everywhere it appears, rebuild, verify, move
 // the changelog's Unreleased section under the new number, commit, and tag.
 //
+// It also answers a smaller question the publish workflow needs: given the
+// commits on main since the latest release tag, what semantic version comes
+// next. `fix:` is a patch, `feat:` is a minor, and a Conventional Commit
+// breaking change marker (`!` or `BREAKING CHANGE:`) is a major.
+//
 // It refuses to start on a dirty tree and refuses to finish on a red one. The
 // version appears in four files and `skills-lock.json` records it too, so
 // setting it by hand is four chances to leave one behind.
 //
-// Usage: node scripts/release.mjs --version X.Y.Z [--dry-run]
+// Usage:
+//   node scripts/release.mjs --version X.Y.Z [--dry-run]
+//   node scripts/release.mjs --next [--json]
 
 import fs from "node:fs";
 import path from "node:path";
@@ -23,9 +30,117 @@ const VERSIONED_FILES = [
   ".claude-plugin/marketplace.json",
 ];
 const SEMVER = /^\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?$/;
+const RELEASE_TAG = /^v(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)$/;
+const CONVENTIONAL = /^([a-z]+)(\([^)\r\n]+\))?(!)?:\s+/;
+const BREAKING = /(^|\n)BREAKING[ -]CHANGE:\s+/m;
+const BUMP_WEIGHT = { patch: 1, minor: 2, major: 3 };
 
-function git(args) {
-  return spawnSync("git", args, { cwd: REPO_ROOT, encoding: "utf8" });
+function git(args, cwd = REPO_ROOT) {
+  return spawnSync("git", args, { cwd, encoding: "utf8" });
+}
+
+function readPackageVersion(root = REPO_ROOT) {
+  const file = path.join(root, "package.json");
+  return JSON.parse(fs.readFileSync(file, "utf8")).version;
+}
+
+function versionFromTag(tag) {
+  return RELEASE_TAG.exec(tag)?.[1] ?? null;
+}
+
+export function classifyCommit({ subject, body = "" }) {
+  const line = subject.trim();
+  const match = CONVENTIONAL.exec(line);
+  const breaking = (match && match[3] === "!") || BREAKING.test(body);
+  if (breaking) return "major";
+  if (!match) return null;
+  if (match[1] === "feat") return "minor";
+  if (match[1] === "fix") return "patch";
+  return null;
+}
+
+export function bumpVersion(version, level) {
+  if (!SEMVER.test(version)) {
+    throw new Error(`invalid semver: ${version}`);
+  }
+  if (!BUMP_WEIGHT[level]) {
+    throw new Error(`unknown bump level: ${level}`);
+  }
+  const [core] = version.split("-");
+  const [major, minor, patch] = core.split(".").map(Number);
+  if (level === "major") return `${major + 1}.0.0`;
+  if (level === "minor") return `${major}.${minor + 1}.0`;
+  return `${major}.${minor}.${patch + 1}`;
+}
+
+export function latestReleaseTag(root = REPO_ROOT) {
+  const result = git(
+    ["tag", "--merged", "HEAD", "--list", "v*", "--sort=-version:refname"],
+    root,
+  );
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || "failed to list release tags");
+  }
+  return result.stdout
+    .split("\n")
+    .map((line) => line.trim())
+    .find((line) => versionFromTag(line)) ?? null;
+}
+
+export function commitsSince(tag = null, root = REPO_ROOT) {
+  const range = tag ? `${tag}..HEAD` : "HEAD";
+  const result = git(["log", "--format=%H%x1f%s%x1f%b%x1e", range], root);
+  if (result.status !== 0) {
+    throw new Error(result.stderr.trim() || `failed to read commits in ${range}`);
+  }
+  return result.stdout
+    .split("\x1e")
+    .filter(Boolean)
+    .map((record) => {
+      const [sha = "", subject = "", body = ""] = record.split("\x1f");
+      return {
+        sha: sha.trim(),
+        subject: subject.trim(),
+        body: body.trim(),
+      };
+    });
+}
+
+export function highestBump(commits) {
+  let best = null;
+  for (const commit of commits) {
+    const level = classifyCommit(commit);
+    if (!level) continue;
+    if (!best || BUMP_WEIGHT[level] > BUMP_WEIGHT[best]) best = level;
+  }
+  return best;
+}
+
+export function nextRelease(root = REPO_ROOT) {
+  const currentVersion = readPackageVersion(root);
+  const tag = latestReleaseTag(root);
+  const taggedVersion = tag ? versionFromTag(tag) : null;
+  if (taggedVersion !== null && taggedVersion !== currentVersion) {
+    throw new Error(
+      `package.json says ${currentVersion} but latest release tag is ${tag}; ` +
+        "release history must be reconciled before cutting the next version",
+    );
+  }
+  const releasable = commitsSince(tag, root)
+    .map((commit) => ({ ...commit, level: classifyCommit(commit) }))
+    .filter((commit) => commit.level !== null);
+  const level = highestBump(releasable);
+  return {
+    currentVersion,
+    latestTag: tag,
+    level,
+    nextVersion: level ? bumpVersion(currentVersion, level) : null,
+    releasable: releasable.map(({ sha, subject, level: commitLevel }) => ({
+      sha,
+      subject,
+      level: commitLevel,
+    })),
+  };
 }
 
 export function setVersion(relative, version) {
@@ -93,23 +208,7 @@ export function rollChangelog(version, today) {
   return next;
 }
 
-function main(argv) {
-  let version = null;
-  let dryRun = false;
-  for (let i = 0; i < argv.length; i += 1) {
-    if (argv[i] === "--version") version = argv[++i];
-    else if (argv[i].startsWith("--version=")) version = argv[i].slice(10);
-    else if (argv[i] === "--dry-run") dryRun = true;
-    else {
-      process.stderr.write("usage: release.mjs --version X.Y.Z [--dry-run]\n");
-      return 2;
-    }
-  }
-  if (!version || !SEMVER.test(version)) {
-    process.stderr.write("release.mjs: --version must be a semver string\n");
-    return 2;
-  }
-
+export function cutRelease(version, { dryRun = false } = {}) {
   const status = git(["status", "--porcelain"]);
   if (status.status !== 0) {
     process.stderr.write("release.mjs: not a git repository\n");
@@ -205,6 +304,52 @@ function main(argv) {
       "The push to main is what publishes; the tag is a marker.\n",
   );
   return 0;
+}
+
+function main(argv) {
+  let version = null;
+  let dryRun = false;
+  let next = false;
+  let json = false;
+  for (let i = 0; i < argv.length; i += 1) {
+    if (argv[i] === "--version") version = argv[++i];
+    else if (argv[i].startsWith("--version=")) version = argv[i].slice(10);
+    else if (argv[i] === "--dry-run") dryRun = true;
+    else if (argv[i] === "--next") next = true;
+    else if (argv[i] === "--json") json = true;
+    else {
+      process.stderr.write(
+        "usage: release.mjs --version X.Y.Z [--dry-run]\n" +
+          "       release.mjs --next [--json]\n",
+      );
+      return 2;
+    }
+  }
+
+  if (next) {
+    if (version || dryRun) {
+      process.stderr.write("release.mjs: --next does not take --version or --dry-run\n");
+      return 2;
+    }
+    try {
+      const plan = nextRelease();
+      if (json) {
+        process.stdout.write(`${JSON.stringify(plan, null, 2)}\n`);
+      } else if (plan.nextVersion) {
+        process.stdout.write(`${plan.nextVersion}\n`);
+      }
+      return 0;
+    } catch (error) {
+      process.stderr.write(`release.mjs: ${error.message}\n`);
+      return 1;
+    }
+  }
+
+  if (!version || !SEMVER.test(version)) {
+    process.stderr.write("release.mjs: --version must be a semver string\n");
+    return 2;
+  }
+  return cutRelease(version, { dryRun });
 }
 
 if (isEntryPoint(import.meta.url)) {

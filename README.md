@@ -62,7 +62,7 @@ trust rather than finding out one case at a time.
   so a check with no fixture fails the build.
 - Zero dependencies, at runtime and for development. `package.json` has neither
   key.
-- 46 decision records in `docs/decisions/`, indexed in `docs/decisions/README.md`, each with the condition that would
+- 48 decision records in `docs/decisions/`, indexed in `docs/decisions/README.md`, each with the condition that would
   reverse it. Several of them record this project being wrong and what it did
   about it.
 - Pointed at three repositories it had never seen, it found four blocking false
@@ -409,7 +409,7 @@ whole tree if there is no git repository.
 
 ## Status
 
-0.1.0. The audit, the hooks, and the CLI are covered by a test suite that packs
+0.2.1. The audit, the hooks, and the CLI are covered by a test suite that packs
 the real npm tarball and installs from it. Editor support is deliberately
 narrow; see `docs/providers.md`.
 
@@ -422,9 +422,10 @@ copies into your project, and a build that runs at install time would be a
 build you have to trust. CI rebuilds from source on every push and fails if the
 committed copies differ by a byte.
 
-That is why over half the files here are generated. `cli/` is the command line
-tool, `scripts/` is tooling that never ships, `tests/` holds the fixtures, and
-`docs/` holds the reference and the decision records.
+That is why generated output stays small: `dist/payload/` holds one canonical
+copy for npm and `plugin/` holds the Claude Code layout. `cli/` is the command
+line tool, `scripts/` is tooling that never ships, `tests/` holds the fixtures,
+and `docs/` holds the reference and the decision records.
 
 ## Where to go next
 

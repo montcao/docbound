@@ -1,20 +1,5 @@
 {
   "version": "0.2.1",
-  "payloadHash": "sha256:d3ffa1e63aff173d80a373f78817e4167d848034b8d42f0f394a98379c2e76e8",
-  "providers": {
-    "claude-code": {
-      "payload": ".claude/skills/docbound",
-      "hookFile": ".claude/settings.json",
-      "files": 58,
-      "hash": "sha256:998b6f582d465727c1a5b169b2393dfaad3d4cc50f17123cf39bb6e2362919da"
-    },
-    "cursor": {
-      "payload": ".cursor/skills/docbound",
-      "hookFile": ".cursor/hooks.json",
-      "files": 58,
-      "hash": "sha256:6503662286aa3d63d9814c8857d0777a1fb25be16235c1fdac1182de889af129"
-    }
-  },
   "payload": {
     "files": 56,
     "hash": "sha256:d3ffa1e63aff173d80a373f78817e4167d848034b8d42f0f394a98379c2e76e8"

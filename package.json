@@ -13,15 +13,13 @@
   "files": [
     "cli/",
     "dist/",
-    "skill/",
-    "!skill/docbound/scripts/reference/",
     "skills-lock.json",
     "LICENSE",
     "NOTICE.md"
   ],
   "scripts": {
     "build": "node scripts/build.mjs",
-    "test": "node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/close.test.mjs tests/hook.test.mjs tests/package.test.mjs tests/prune.test.mjs tests/scaffold.test.mjs tests/scan.test.mjs tests/start.test.mjs tests/summary.test.mjs",
+    "test": "node --test tests/audit.test.mjs tests/build.test.mjs tests/cli.test.mjs tests/close.test.mjs tests/hook.test.mjs tests/package.test.mjs tests/prune.test.mjs tests/release.test.mjs tests/scaffold.test.mjs tests/scan.test.mjs tests/start.test.mjs tests/summary.test.mjs",
     "audit": "node cli/index.mjs audit",
     "check-dist": "node scripts/check-dist-fresh.mjs"
   },
@@ -40,8 +38,5 @@
   "homepage": "https://github.com/montcao/docbound#readme",
   "bugs": {
     "url": "https://github.com/montcao/docbound/issues"
-  },
-  "dependencies": {
-    "docbound": "^0.2.1"
   }
 }

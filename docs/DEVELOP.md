@@ -38,7 +38,7 @@ a change to what this repository considers documented, and is reviewed as one.
 | Path | What it is |
 |---|---|
 | `skill/docbound/` | The canonical skill. The only place skill content is edited |
-| `dist/` | Build output, committed. Seven provider distributions |
+| `dist/` | Build output, committed. One path-neutral payload |
 | `plugin/` | Build output, committed. The Claude Code plugin payload |
 | `cli/` | `npx docbound` |
 | `scripts/` | Build, freshness check, release, provider table |
@@ -179,8 +179,10 @@ means moving it from there to here with its evidence, then deleting its section.
 
 Then run `node scripts/build.mjs` and commit `dist/` and `skills-lock.json` with
 the change. The install matrix in `tests/cli.test.mjs` iterates the table, so a
-new entry is covered without editing the test. Correcting an entry
-against better evidence is welcome and needs no decision record.
+new entry is covered without editing the test. The CLI generates its hook
+manifest when it installs; `dist/payload/` remains one path-neutral copy.
+Correcting an entry against better evidence is welcome and needs no decision
+record.
 
 ## Changing the skill's prose
 
@@ -208,26 +210,36 @@ node   skill/docbound/scripts/audit.mjs          --root /some/repo --json
 ## Releasing
 
 ```
-node scripts/release.mjs --version 0.2.0
-git push --follow-tags
+node scripts/release.mjs --next
+node scripts/release.mjs --version 0.2.0 --dry-run
 ```
 
-The script sets the version everywhere it appears, rebuilds, verifies on a clean
-tree, moves the changelog's Unreleased section under the new number, writes its
-own worklog entry, commits, and tags. It refuses to start on a dirty tree and
-refuses to finish on a red one. `--dry-run` writes nothing.
+`release.mjs --next` reads the commits on `main` since the latest release tag
+and returns the semantic version the workflow would cut next: `fix:` is patch,
+`feat:` is minor, and a Conventional Commit breaking marker is major.
+
+`release.mjs --version` is the writer. It sets the version everywhere it
+appears, rebuilds, verifies on a clean tree, moves the changelog's Unreleased
+section under the new number, writes its own worklog entry, commits, and tags.
+It refuses to start on a dirty tree and refuses to finish on a red one.
+`--dry-run` writes nothing.
 
 Pushing is the whole of publishing. `.github/workflows/publish.yml` runs on
-every push to main, asks the registry whether the version in `package.json` is
-already there, and stops quietly when it is. When it is not, it runs the same
-three gates CI runs, prints what would go into the tarball, and publishes with
-provenance. Nothing is published by hand.
+every push to main and does one of three things:
 
-A registry version is immutable, which is why the guard exists: without it,
-every push that does not change the version fails with E403, and most pushes do
-not change the version. With it, a re-run, a revert, and a merge that leaves the
-version alone all skip rather than fail, and the tag is a marker rather than a
-trigger.
+1. If the version already in `package.json` is not yet on npm, it verifies that
+   `v<version>` is tagged in git, runs the same three gates CI runs, and
+   publishes that version.
+2. If the current version is already published and `release.mjs --next` returns
+   a version, it runs `release.mjs --version <next>`, pushes the release commit
+   and tag back to `main`, then publishes the new version with provenance.
+3. If neither is true, it skips quietly: the current version is published and
+   no releasable commit is waiting.
+
+A registry version is immutable, which is why both guards exist. A re-run after
+the release commit was pushed but before npm accepted it still publishes the
+tagged version already in git. A re-run after a successful publish sees that the
+version is already on the registry and skips.
 
 The version lives in four files plus `skills-lock.json`, which is why setting it
 by hand is four chances to leave one behind.
@@ -248,16 +260,18 @@ number. Take the SHA from the bot rather than resolving it by hand:
 gh api repos/actions/checkout/git/refs/tags/v4 --jq .object.sha
 ```
 
-`id-token: write` is declared on the publish job rather than the workflow, and
-neither checkout keeps its credentials on disk.
+`id-token: write` is declared on the publish job rather than the workflow. The
+checkout still leaves no credential on disk; the push uses `GITHUB_TOKEN`
+through a one-shot HTTPS remote, because the release commit and tag are created
+inside the job rather than on a maintainer's machine.
 
 ### What has to exist on the GitHub side
 
 The publish job names an environment called `npm`. GitHub creates it implicitly
 on first use with no rules, so the workflow runs either way, and it blocks
 nothing until required reviewers are configured on it in the repository
-settings. A push to main that carries a new version publishes without review
-until they are.
+settings. A push to main that carries releasable commits publishes without
+review until they are.
 
 Branch protection on main is the other half. Without it, a direct push from
 anyone with write access reaches the registry, and a published version cannot be
@@ -269,11 +283,13 @@ environment rather than to the repository, so no other workflow can read it.
 ### The npm side, once
 
 Trusted publishing has to be configured on npmjs.com against this repository and
-`publish.yml`, which requires the package to exist. So either publish `0.1.0`
-from a maintainer's machine and configure it afterwards, or set an `NPM_TOKEN`
-repository secret and let the workflow publish the first version too. The
-workflow supports both and needs no edit either way. With trusted publishing
-configured, no long-lived secret lives in this repository at all.
+`publish.yml`, which requires the package to exist. That bootstrap is already
+done for this repository. If a future package repeats this setup from scratch,
+either publish the first version over an `NPM_TOKEN` scoped to the `npm`
+environment or publish once from a maintainer's machine and configure trusted
+publishing afterwards. The workflow supports both and needs no edit either way.
+With trusted publishing configured, no long-lived secret lives in this
+repository at all.
 
 npm ignores the `readme` field in `package.json` and always renders the
 `README.md` at the tarball root, whatever `files` says. A second README written

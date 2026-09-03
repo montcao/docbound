@@ -64,9 +64,9 @@ canonical name is what is printed back.
 
 ## Depends on
 
-`dist/` for the payload to copy, `skills-lock.json` to tell a current install
-from a stale one, and `skill/docbound/scripts/` for the audit and the scaffold.
-Nothing here imports from `scripts/`, which is not published.
+`dist/payload/` for the one payload to copy and to run, and `skills-lock.json`
+to tell a current install from a stale one. Nothing here imports from `scripts/`,
+which is not published.
 
 ## Decisions
 
@@ -74,7 +74,7 @@ Nothing here imports from `scripts/`, which is not published.
 |---|---|---|---|
 | Install seeds `audit.exclude` with docbound's own paths | Leave the list empty | Installing a tool should not open a documentation task; see `docs/decisions/0007-audit-exclude-config.md` | An install stops being the only writer of those paths |
 | `update` compares the payload hash only | Compare the whole distribution | A merged hook manifest carries the project's other hooks, so a whole-distribution hash never matches | The manifest becomes a file docbound fully owns |
-| `link` points at a checkout's `skill/docbound/` | Link a built distribution | A linked checkout is for developing the skill, where the canonical source is what you want live | Providers start needing transformed payloads rather than copies |
+| `link` prefers a checkout's `skill/docbound/`, then its built payload | Link one provider tree | A development checkout should be live; an unpacked npm package has only its built payload | Providers start needing transformed payloads rather than copies |
 | Detection reads the project and the home directory | Project only | A harness writes its project directory only once it has something to keep there, so a Cursor user on a fresh repository was detected as nothing at all | A harness starts using a home directory that does not imply the user works with it |
 
 ## Gotchas

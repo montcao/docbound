@@ -1,17 +1,19 @@
 name: publish
 
-# Publishing follows main. Any push that carries a version the registry does not
-# have is published; every other push stops at the guard below.
+# Publishing follows main in two cases. A push can carry a release commit whose
+# version is already in git but not yet on npm, or it can carry releasable
+# commits (`fix:`, `feat:`, or a Conventional Commit breaking change marker), in
+# which case this workflow cuts the next version itself, pushes the release
+# commit and tag, and publishes that version.
 #
-# A registry version is immutable, so a workflow that publishes on every push to
-# main fails with E403 on every push that does not change the version, which is
-# nearly all of them. Asking the registry first turns that into a skip. It also
-# makes the trigger idempotent: a re-run, a revert, and a merge that leaves the
-# version alone all do nothing rather than failing.
+# Registry versions are immutable, so the workflow asks two questions first:
+# whether the version in `package.json` is already published, and whether the
+# commits since the latest release tag call for a new one. A re-run, a revert,
+# and a merge with no releasable commit then all skip rather than failing.
 on:
   push:
     branches: [main]
-  # For re-running a publish that failed after the version was already bumped.
+  # For re-running a publish that failed after the release commit was pushed.
   workflow_dispatch:
 
 # One publish at a time. Two pushes close together would otherwise start two
@@ -30,7 +32,8 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      # This job pushes the release commit and tag when it cuts a version.
+      contents: write
       # Required for npm provenance, and for trusted publishing if it is
       # configured on npmjs.com. Without it a publish still works over a token
       # but ships no provenance attestation. Scoped to this job so that a job
@@ -62,20 +65,37 @@ jobs:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
-      - name: Is this version already on the registry
-        id: check
+      - name: Release state
+        id: state
         run: |
-          version="$(node -p "require('./package.json').version")"
-          echo "version=$version" >> "$GITHUB_OUTPUT"
+          current="$(node -p "require('./package.json').version")"
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          published=false
           # Any lookup failure counts as not published. A name that has never
           # been published and a version that does not exist yet both fail here,
           # and both should publish.
-          if npm view "docbound@$version" version >/dev/null 2>&1; then
-            echo "publish=false" >> "$GITHUB_OUTPUT"
-            echo "docbound@$version is already published; nothing to do."
+          if npm view "docbound@$current" version >/dev/null 2>&1; then
+            published=true
+          fi
+          echo "published=$published" >> "$GITHUB_OUTPUT"
+
+          next="$(node scripts/release.mjs --next)"
+          if [ -n "$next" ]; then
+            echo "next=$next" >> "$GITHUB_OUTPUT"
+          fi
+
+          if [ "$published" = "false" ]; then
+            echo "mode=publish-current" >> "$GITHUB_OUTPUT"
+            echo "version=$current" >> "$GITHUB_OUTPUT"
+            echo "docbound@$current is not on the registry; publishing the tagged version already in git."
+          elif [ -n "$next" ]; then
+            echo "mode=cut-and-publish" >> "$GITHUB_OUTPUT"
+            echo "version=$next" >> "$GITHUB_OUTPUT"
+            echo "docbound@$current is current on the registry; cutting $next from releasable commits on main."
           else
-            echo "publish=true" >> "$GITHUB_OUTPUT"
-            echo "docbound@$version is not on the registry; publishing."
+            echo "mode=skip" >> "$GITHUB_OUTPUT"
+            echo "version=$current" >> "$GITHUB_OUTPUT"
+            echo "docbound@$current is current on the registry and no releasable commits are waiting."
           fi
 
       # Trusted publishing needs a newer npm than the one bundled with Node 22.
@@ -83,30 +103,54 @@ jobs:
       # `latest`, so the release does not install whatever was published to the
       # registry an hour ago.
       - name: Use a current npm
-        if: steps.check.outputs.publish == 'true'
+        if: steps.state.outputs.mode != 'skip'
         run: npm install -g npm@12
 
-      # The same three gates CI runs. They run again here because a publish is
-      # the one step that cannot be taken back, and because a push to main can
-      # arrive without a green CI run beside it.
+      # A version already in git but not yet on the registry is published as-is,
+      # so it needs the same three gates CI runs before the immutable step.
       - name: Tests
-        if: steps.check.outputs.publish == 'true'
+        if: steps.state.outputs.mode == 'publish-current'
         run: npm test
 
       - name: dist is current
-        if: steps.check.outputs.publish == 'true'
+        if: steps.state.outputs.mode == 'publish-current'
         run: node scripts/check-dist-fresh.mjs
 
       - name: docbound audits itself
-        if: steps.check.outputs.publish == 'true'
+        if: steps.state.outputs.mode == 'publish-current'
         run: node cli/index.mjs audit
 
+      - name: Confirm unpublished version is the tagged release commit
+        if: steps.state.outputs.mode == 'publish-current'
+        run: |
+          head="$(git rev-parse HEAD)"
+          tagged="$(git rev-list -n 1 "v${{ steps.state.outputs.version }}")"
+          test "$head" = "$tagged"
+
+      - name: Configure git author
+        if: steps.state.outputs.mode == 'cut-and-publish'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Cut release commit and tag
+        if: steps.state.outputs.mode == 'cut-and-publish'
+        run: node scripts/release.mjs --version "${{ steps.state.outputs.version }}"
+
+      - name: Push release commit and tag
+        if: steps.state.outputs.mode == 'cut-and-publish'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          remote="https://x-access-token:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git push "$remote" HEAD:main --follow-tags
+
       - name: What would be published
-        if: steps.check.outputs.publish == 'true'
+        if: steps.state.outputs.mode != 'skip'
         run: npm pack --dry-run
 
       - name: Publish
-        if: steps.check.outputs.publish == 'true'
+        if: steps.state.outputs.mode != 'skip'
         run: npm publish --provenance --access public
         env:
           # Empty when trusted publishing is configured on npmjs.com, which is
@@ -117,9 +161,12 @@ jobs:
       - name: Summary
         if: always()
         run: |
-          v="${{ steps.check.outputs.version }}"
-          if [ "${{ steps.check.outputs.publish }}" = "true" ]; then
-            echo "published docbound@$v" >> "$GITHUB_STEP_SUMMARY"
+          v="${{ steps.state.outputs.version }}"
+          mode="${{ steps.state.outputs.mode }}"
+          if [ "$mode" = "publish-current" ]; then
+            echo "published docbound@$v from the tagged release already on main" >> "$GITHUB_STEP_SUMMARY"
+          elif [ "$mode" = "cut-and-publish" ]; then
+            echo "cut and published docbound@$v from releasable commits on main" >> "$GITHUB_STEP_SUMMARY"
           else
-            echo "docbound@$v already on the registry; skipped" >> "$GITHUB_STEP_SUMMARY"
+            echo "docbound@$v already on the registry; no releasable commits on main" >> "$GITHUB_STEP_SUMMARY"
           fi

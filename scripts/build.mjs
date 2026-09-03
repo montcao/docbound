@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Build the per-provider distributions and the plugin payload from the one
-// canonical skill under `skill/docbound/`.
+// Build the canonical distribution and the plugin payload from the one skill
+// under `skill/docbound/`.
 //
 // The build is a pure function of its input: same tree in, byte-identical tree
 // out, no timestamps and no absolute paths in anything it writes. That property
@@ -16,7 +16,6 @@ import process from "node:process";
 import { fileURLToPath } from "node:url";
 
 import { PROVIDERS } from "../cli/providers.mjs";
-import { DEFAULT_CONFIG } from "../skill/docbound/scripts/lib/config.mjs";
 import { isEntryPoint } from "../skill/docbound/scripts/lib/entry.mjs";
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -48,23 +47,6 @@ export function collectPayload(source = SKILL_SOURCE) {
 
 function byName(a, b) {
   return a.name < b.name ? -1 : a.name > b.name ? 1 : 0;
-}
-
-/** All files one provider's distribution contains, keyed by target-relative path. */
-function buildProvider(provider, payload) {
-  const files = new Map();
-  for (const [rel, contents] of payload) {
-    files.set(`${provider.payload}/${rel}`, contents);
-  }
-  if (provider.hookFile) {
-    const manifest = provider.hookManifest(provider.payload);
-    files.set(provider.hookFile, Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`));
-  }
-  files.set(
-    ".docbound/config.json",
-    Buffer.from(`${JSON.stringify(DEFAULT_CONFIG, null, 2)}\n`),
-  );
-  return files;
 }
 
 export function hashFiles(files) {
@@ -118,33 +100,20 @@ export function build({
   pluginOut = path.join(REPO_ROOT, "plugin"),
   quiet = false,
 } = {}) {
-  // Remove the whole tree first. Writing per provider leaves the directory of a
-  // provider that has been dropped from the table sitting in the package, which
-  // is how an unsupported harness keeps shipping after it was removed.
+  // Remove the whole tree first so files dropped from the skill do not keep
+  // shipping in an old distribution.
   fs.rmSync(out, { recursive: true, force: true });
 
   const payload = collectPayload();
-  // Identical for every provider by construction, and the value an installed
-  // copy is compared against; see `cli/install.mjs`.
   const payloadHash = hashFiles(payload);
-  const lock = { version: readVersion(), payloadHash, providers: {} };
+  const lock = { version: readVersion() };
 
-  for (const provider of PROVIDERS) {
-    const files = buildProvider(provider, payload);
-    writeTree(path.join(out, provider.name), files);
-    lock.providers[provider.name] = {
-      payload: provider.payload,
-      hookFile: provider.hookFile ?? null,
-      files: files.size,
-      hash: hashFiles(files),
-    };
-    if (!quiet) process.stdout.write(`  ${provider.name}: ${files.size} file(s)\n`);
-  }
-
-  // The payload with no harness path wrapped around it, for anyone vendoring
-  // by hand into a location this project has not verified.
+  // The CLI supplies each provider's destination and hook manifest at install
+  // time. Keeping only this path-neutral tree prevents the npm package from
+  // carrying a byte-for-byte copy for every provider.
   writeTree(path.join(out, "payload"), payload);
   lock.payload = { files: payload.size, hash: payloadHash };
+  if (!quiet) process.stdout.write(`  payload: ${payload.size} file(s)\n`);
 
   const pluginFiles = buildPlugin(payload);
   writeTree(pluginOut, pluginFiles);
