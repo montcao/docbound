@@ -47,6 +47,7 @@ import * as deadRef from "./lib/checks/dead-ref.mjs";
 import * as diagramRefs from "./lib/checks/diagram-refs.mjs";
 import * as depAdr from "./lib/checks/dep-adr.mjs";
 import * as adrShape from "./lib/checks/adr-shape.mjs";
+import * as adrActionable from "./lib/checks/adr-actionable.mjs";
 import * as adrImmutable from "./lib/checks/adr-immutable.mjs";
 import * as templateResidue from "./lib/checks/template-residue.mjs";
 import * as orphanDoc from "./lib/checks/orphan-doc.mjs";
@@ -69,7 +70,7 @@ import * as logicTouched from "./lib/checks/logic-touched.mjs";
 export const AUTHOR_CHECKS = [
   worklogEntry, worklogClosed, entryLength, docCoverage, newDirReadme, deadRef, diagramRefs,
   depAdr,
-  adrShape, adrImmutable, templateResidue, orphanDoc, duplicateBlock,
+  adrShape, adrActionable, adrImmutable, templateResidue, orphanDoc, duplicateBlock,
   staleMarker, restatingComments, todoShape, commentSentence,
   openItemTypo, openItemForm, openItemDebt, plainOpening,
 ];

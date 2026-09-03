@@ -70,6 +70,10 @@ cat > docs/decisions/0002-exponential-backoff.md <<MD
 - Status: accepted
 - Supersedes: none
 
+## What to do
+
+Nothing. The backoff is in the worker.
+
 ## Context
 
 Inferred: retries were immediate and the upstream rejected them in bursts.

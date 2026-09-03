@@ -40,6 +40,10 @@ cat > docs/decisions/0002-reject-reason.md <<MD
 - Status: accepted
 - Supersedes: none
 
+## What to do
+
+Nothing. The reason codes are in the response already.
+
 ## Context
 
 Callers of \`src/app.py\` could tell that a body was rejected and not why, so

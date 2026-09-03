@@ -96,6 +96,11 @@ export function adoptionAdr(today, root) {
 - Status: accepted
 - Supersedes: none
 
+## What to do
+
+Run the audit before calling a task done, and open a worklog entry before the
+first edit. With the hook installed, both happen without being asked.
+
 ## Context
 
 Code in this repository is written and modified by AI agents across sessions that

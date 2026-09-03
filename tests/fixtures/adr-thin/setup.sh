@@ -13,6 +13,10 @@ cat > docs/decisions/0002-json-logs.md <<MD
 - Status: accepted
 - Supersedes: none
 
+## What to do
+
+Nothing yet; the terminal formatter is still to be written.
+
 ## Context
 
 Log lines are parsed by two consumers that each guess at the field boundaries.

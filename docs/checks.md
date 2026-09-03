@@ -1,6 +1,6 @@
 # Checks
 
-Twenty-five checks. Errors block; warnings print and do not block, but leaving
+Twenty-six checks. Errors block; warnings print and do not block, but leaving
 one is a choice made on the record. The level below is the level a check
 reports at, and `dead-ref` is the one check that reports at both: it blocks on a
 reference that says it is a path and warns on one that only might be.
@@ -305,6 +305,31 @@ Only new records are checked; an existing one belongs to `adr-immutable`.
 waiver: adr-shape docs/decisions/0009-vendor-selection.md - the reversal
 condition is the contract's renewal date, which is not public and sits in the
 procurement record linked from Context.
+```
+
+### `adr-actionable`
+
+A new decision record opens with a `## What to do` section that has content.
+
+The rest of a record is written for somebody deciding whether the decision was
+right. This section is for the commoner reader: somebody who arrived mid-task,
+sent here by a comment in the code, who needs to know whether this changes what
+they were about to do. "Nothing, it is already in the build" is a complete
+answer (`docs/decisions/0045-a-record-says-what-to-do-about-it.md`).
+
+Only records the change set added. An accepted record cannot gain the section
+without an edit `adr-immutable` forbids, and a repository adopting docbound with
+records already in it would otherwise open on a finding per record. A section
+present but still holding its template placeholder is a scaffolded record that
+`template-residue` already reports, and is not reported twice.
+
+A warning rather than an error: a record missing its summary is still a record,
+and blocking a task over the shape of one would be a check about formatting.
+
+```
+waiver: adr-actionable docs/decisions/0007-vendor-selection.md - the decision is
+a procurement constraint with no action for a reader; the Context says who to
+ask instead.
 ```
 
 ### `adr-immutable`

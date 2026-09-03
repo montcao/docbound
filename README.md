@@ -58,7 +58,7 @@ reverse.
   so a check with no fixture fails the build.
 - Zero dependencies, at runtime and for development. `package.json` has neither
   key.
-- 44 decision records in `docs/decisions/`, each with the condition that would
+- 45 decision records in `docs/decisions/`, indexed in `docs/decisions/README.md`, each with the condition that would
   reverse it. Several of them record this project being wrong and what it did
   about it.
 - Pointed at three repositories it had never seen, it found four blocking false
@@ -233,6 +233,7 @@ recorded in the output.
 | `open-item-form` | warn | A slug closed in prose rather than by the bullet, or restated when it was already open |
 | `open-item-typo` | warn | Two open-item slugs one typo apart, so one item became two |
 | `open-item-debt` | warn | So much open work on the ledger that nobody reads the list |
+| `adr-actionable` | warn | A new decision record that never says what a reader should do about it |
 
 Four more apply in subagent mode. `docs/checks.md` covers every check: what it
 detects, what is exempt from it, and a waiver a reviewer would accept.

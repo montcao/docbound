@@ -109,7 +109,12 @@ export function isDoc(relpath, extra = []) {
 }
 
 export function isAdr(relpath) {
-  return relpath.startsWith("docs/decisions/") && relpath.endsWith(".md");
+  if (!relpath.startsWith("docs/decisions/") || !relpath.endsWith(".md")) return false;
+  // An index of the records is not one of them. `docs/decisions/README.md`
+  // describes what each record means for a reader, so it is an ordinary live
+  // document: it has no Context section to demand and it is rewritten whenever
+  // a record is added (`docs/decisions/0045-a-record-says-what-to-do-about-it.md`).
+  return relpath.split("/").pop() !== "README.md";
 }
 
 /**

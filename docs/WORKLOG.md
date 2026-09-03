@@ -11,6 +11,28 @@ Older entries are archived:
 
 - `docs/worklog/2026-Q3.md`
 
+## 2026-09-03 - Decision records lead with what to do about them, and a check says so
+
+Agent: claude · Branch: main · t=1788412267
+
+### Intent
+
+Forty-five records over 3,700 lines, every one written for a reader evaluating
+the decision, none for the reader who arrived mid-task and needs to know whether
+it changes what they were about to do. No index either.
+
+### Outcome
+
+The ADR template opens with `## What to do`, `adr-actionable` (warn) reports a
+new record without it, and `docs/decisions/README.md` indexes all forty-five
+with what each means for a reader — asserted complete by `tests/build.test.mjs`
+(0045). `isAdr` stops counting the index as a record.
+
+### Still open
+
+- [summary-line-unchecked] nothing checks that a record's `What to do` line matches the decision under it; it can be written and be wrong.
+- [index-by-hand] the index rows are written by hand, and the test asserts only that every record appears, not that its line is true.
+
 ## 2026-09-03 - Ship the subagent inside the plugin's skill payload, and say which install gives which
 
 Agent: claude · Branch: main · t=1788411727

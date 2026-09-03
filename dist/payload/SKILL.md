@@ -135,6 +135,8 @@ Two tiers. Pick by consequence, not by how much you feel like writing.
 
 **Small — one row in the `Decisions` table** of the nearest module `README.md` (or `docs/ARCHITECTURE.md` if no module fits) when the decision is local, cheap to reverse, and affects only the implementation inside one module. What was chosen, what was rejected, why, reverse if.
 
+Open the record with `## What to do`: one or two lines for the reader who found it mid-task and needs to know whether it changes what they were about to do. "Nothing, it is already in the build" is a complete answer (`docs/decisions/0045-a-record-says-what-to-do-about-it.md`).
+
 If unsure which tier, it is structural. An unnecessary ADR costs two minutes. A missing one costs a future engineer re-deriving your reasoning, wrongly.
 
 ADRs are archives (principle 5). Once accepted, never edit the body. If the decision changes, write a new ADR that names the old one in `Supersedes`, and change only the old one's `Status` line to `superseded by NNNN`. If the decision stands but the record states something factually false, append a `## Corrections` section at the end with a bullet carrying the Unix timestamp and what is wrong. Those two edits are the only ones the audit accepts. `scripts/audit.mjs --next-adr` prints the next number.
@@ -178,6 +180,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `diagram-refs` | error | No Mermaid diagram names a path that does not exist. A file is written with its extension, a directory with a trailing slash; anything else in a label is prose |
 | `dep-adr` | error | A changed dependency has a new or superseding ADR in the same diff. Read from the file: the dependency blocks of a manifest, and every change to a lockfile |
 | `adr-shape` | error | Every new ADR has Context, Decision, and "What would reverse this" sections with content |
+| `adr-actionable` | warn | A new decision record opens with a `## What to do` section: one or two lines saying what a reader does about it, or that there is nothing to do |
 | `adr-immutable` | error | An existing ADR was not edited except its `Status` line |
 | `template-residue` | error | No unfilled template placeholders in any doc, matched against the exact vocabulary the templates ship |
 | `orphan-doc` | warn | Every doc under `docs/` (other than ARCHITECTURE, WORKLOG, decisions) is linked from at least one other doc |

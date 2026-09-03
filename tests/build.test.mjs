@@ -188,11 +188,30 @@ describe("the README's counts are true", () => {
     assert.equal(fromWords(claimed), checkIds().length, `docs/checks.md says ${claimed}`);
   });
 
+  test("the decision index lists every record, and only real ones", () => {
+    // The index is prose about forty-five archives, which is exactly the shape
+    // that goes stale silently
+    // (`docs/decisions/0045-a-record-says-what-to-do-about-it.md`).
+    const dir = path.join(REPO_ROOT, "docs", "decisions");
+    const records = fs
+      .readdirSync(dir)
+      .filter((n) => /^\d{4}-.*\.md$/.test(n))
+      .sort();
+    const index = fs.readFileSync(path.join(dir, "README.md"), "utf8");
+
+    const missing = records.filter((n) => !index.includes(`(${n})`));
+    assert.deepEqual(missing, [], `not in the index: ${missing.join(", ")}`);
+
+    const linked = [...index.matchAll(/\((\d{4}-[a-z0-9-]+\.md)\)/g)].map((m) => m[1]);
+    const dangling = linked.filter((n) => !records.includes(n));
+    assert.deepEqual(dangling, [], `indexed but absent: ${dangling.join(", ")}`);
+  });
+
   test("the decision record count matches the directory", () => {
     const claimed = Number(/- (\d+) decision records/.exec(readme)?.[1]);
     const actual = fs
       .readdirSync(path.join(REPO_ROOT, "docs", "decisions"))
-      .filter((n) => n.endsWith(".md")).length;
+      .filter((n) => /^\d{4}-.*\.md$/.test(n)).length;
     assert.equal(claimed, actual, `README says ${claimed} records, there are ${actual}`);
   });
 

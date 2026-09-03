@@ -8,6 +8,10 @@
 
 <This record is an archive. After acceptance, only the Status line changes ("superseded by NNNN", "deprecated"). To change the decision, write a new ADR.>
 
+## What to do
+
+<what a reader does about this; "nothing, it is already in the build" is an answer>
+
 ## Context
 
 <The situation that forced a choice. What constraint, requirement, or failure made this necessary. Point at where the pressure shows: `<path>`.>

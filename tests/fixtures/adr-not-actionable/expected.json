@@ -1,0 +1,10 @@
+{
+  "note": "A complete record with no line saying what a reader does about it. A warning: the reasoning is written down, which is what the errors are for.",
+  "git": true,
+  "errors": {},
+  "warnings": {
+    "adr-actionable": 1
+  },
+  "waived": {},
+  "exit": 0
+}

@@ -8,6 +8,16 @@ breaking change to any of them is a major version and carries a decision record.
 
 ## Unreleased
 
+### Added
+
+- `adr-actionable` (warn). A new decision record opens with a `## What to do`
+  section: one or two lines for the reader who arrived mid-task and needs to
+  know whether the decision changes what they were about to do. The ADR
+  template carries the section, and `docs/decisions/README.md` indexes every
+  record with what it means for a reader, asserted complete by
+  `tests/build.test.mjs`.
+  `docs/decisions/0045-a-record-says-what-to-do-about-it.md`.
+
 ### Fixed
 
 - The plugin's skill directory carries the agent definitions, so a tool that

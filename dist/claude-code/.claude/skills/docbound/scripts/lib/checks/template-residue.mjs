@@ -52,6 +52,7 @@ export const PLACEHOLDERS = new Set([
   "the data or behavior it is the single authority for",
   "unix seconds, from `date +%s`",
   "what",
+  "what a reader does about this; \"nothing, it is already in the build\" is an answer",
   "what you deliberately left out, and why",
   "what you did not settle, and why",
   "who depends on it",

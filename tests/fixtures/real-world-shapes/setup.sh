@@ -115,6 +115,10 @@ cat > docs/decisions/0002-sample-projects-carry-real-manifests.md <<'MD'
 - Status: accepted
 - Supersedes: none
 
+## What to do
+
+Nothing. The sample manifests are committed.
+
 ## Context
 
 The identifier keys off the file a project carries, so a sample project without

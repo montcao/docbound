@@ -251,6 +251,10 @@ MD
 - Status: accepted
 - Supersedes: none
 
+## What to do
+
+Run the audit before calling a task done, and open a worklog entry first.
+
 ## Context
 
 This repository is written and modified by agents across sessions that share no
