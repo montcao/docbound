@@ -12,6 +12,9 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Added
 
+- `docs/limitations.md`: what each check does not catch, and why. Forty items
+  that had accumulated on this project's own ledger as permanent limitations
+  now live where somebody deciding whether to adopt this would look for them.
 - `adr-actionable` (warn). A new decision record opens with a `## What to do`
   section: one or two lines for the reader who arrived mid-task and needs to
   know whether the decision changes what they were about to do. The ADR
@@ -45,6 +48,11 @@ breaking change to any of them is a major version and carries a decision record.
 
 ### Fixed
 
+- `dead-ref` does not read historical documents at all, rather than reporting
+  them as warnings that said they were not defects. Two thirds of this
+  project's own warnings were that message, one per mention of every file it
+  had ever deleted, and the count grows with history.
+  `docs/decisions/0046-history-is-not-reported-at-all.md`.
 - `stale-marker` and `dead-ref` exempt every document that records the past:
   the worklog, the archives `prune` writes under `docs/worklog/`, the decision
   records, and `CHANGELOG.md`. A changelog is written in the vocabulary

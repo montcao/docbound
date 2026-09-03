@@ -176,7 +176,7 @@ IDs are what you reference in waivers. Errors block; warnings print and do not b
 | `entry-length` | warn | The newest worklog entry is under twelve lines of prose. Reasoning goes in a decision record; the entry is the index |
 | `doc-coverage` | error | Every changed source file is covered in the same diff: its own or an ancestor module README was touched, or a system doc (root README, ARCHITECTURE, an ADR) was touched *and names the file or its directory*. Tests, trivially small files, and edits that touched only comments and docstrings are exempt |
 | `new-dir-readme` | error | Every new directory containing source has a `README.md`. A directory whose source is only files a framework locates by name — a route segment — is not a module and is exempt |
-| `dead-ref` | error | No doc references a file path that does not exist. A token carrying an extension or a trailing slash is unambiguous and blocks; a slash between two bare words is reported as a warning |
+| `dead-ref` | error | No live doc references a file path that does not exist. A token carrying an extension or a trailing slash is unambiguous and blocks; a slash between two bare words is reported as a warning. The worklog, its archives, the records, and the changelog describe the past and are not read |
 | `diagram-refs` | error | No Mermaid diagram names a path that does not exist. A file is written with its extension, a directory with a trailing slash; anything else in a label is prose |
 | `dep-adr` | error | A changed dependency has a new or superseding ADR in the same diff. Read from the file: the dependency blocks of a manifest, and every change to a lockfile |
 | `adr-shape` | error | Every new ADR has Context, Decision, and "What would reverse this" sections with content |

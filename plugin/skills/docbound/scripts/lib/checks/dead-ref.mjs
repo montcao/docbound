@@ -10,13 +10,16 @@
 // blocking check that fires on prose is a check somebody switches off. They are
 // warnings: still on the record, no longer in the way.
 //
-// The historical documents never block, whatever the token looks like. A
-// decision record's body is immutable, the worklog and its archives are the log
-// of what happened, and a changelog's whole subject is what a version changed,
-// so a path any of them named that has since been deleted cannot be fixed: each
-// is describing the world as it was, correctly, and satisfying an error would
-// mean editing an archive or falsifying a record. `stale-marker` exempts the
-// same set for the same reason
+// The historical documents are not read at all. A decision record's body is
+// immutable, the worklog and its archives are the log of what happened, and a
+// changelog's whole subject is what a version changed, so a path any of them
+// named that has since been deleted cannot be fixed: each is describing the
+// world as it was, correctly, and satisfying a finding would mean editing an
+// archive or falsifying a record. Reporting it anyway produced a warning per
+// deleted file per mention, thirty-six of them here, each carrying a message
+// that said it was not a defect
+// (`docs/decisions/0046-history-is-not-reported-at-all.md`). `stale-marker`
+// exempts the same set for the same reason
 // (`docs/decisions/0041-the-historical-set-is-every-record-of-the-past.md`).
 //
 // The message a reader gets has to be one they can act on. Telling somebody to
@@ -35,6 +38,7 @@ const PATH_REF = /`([^`\s]+)`/g;
 
 export function run(ctx) {
   for (const doc of ctx.docs()) {
+    if (isHistorical(doc)) continue;
     const raw = readText(ctx.root, doc);
     if (raw === null) continue;
     const text = stripIgnored(raw);
@@ -51,17 +55,8 @@ export function run(ctx) {
       // by this route, and an unbounded token would make that untrue.
       const ref = token.length > 80 ? `${token.slice(0, 80)}…` : token;
 
-      if (isPathShaped(token) && !isHistorical(doc)) {
+      if (isPathShaped(token)) {
         ctx.add(id, level, doc, `references \`${ref}\` which does not exist`);
-      } else if (isPathShaped(token)) {
-        ctx.add(
-          id,
-          "warn",
-          doc,
-          `references \`${ref}\` which no longer exists; this document records ` +
-            "what happened and is not rewritten, so it is history rather than a " +
-            "defect",
-        );
       } else {
         ctx.add(
           id,

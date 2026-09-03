@@ -1,6 +1,6 @@
 # Decisions
 
-Forty-five records, each one decision and the alternatives it beat. This page is
+Forty-six records, each one decision and the alternatives it beat. This page is
 the index: what each one means for somebody working here, in a line. Open the
 record itself for the reasoning, the costs, and the condition that would reverse
 it.
@@ -60,15 +60,15 @@ artifact under test), 0043 (actions pinned by commit, release token scoped).
 | [0020](0020-doc-local-directives.md) | Two directives a document can carry | `docbound-root:` re-anchors relative paths; `docbound-ignore` exempts a region `dead-ref` or `template-residue` reads wrongly. |
 | [0021](0021-line-length-needs-a-convention.md) | Line length came from the repository | Superseded in practice by 0026: the check is gone. Formatting is a formatter's job. |
 | [0022](0022-report-each-finding-once.md) | Each finding is reported once | The edit hook remembers what it said. A finding that goes away and returns is reported again. |
-| [0023](0023-ambiguous-path-claims-are-warnings.md) | Unambiguous path claims block | Write a path with its extension or a trailing slash and `dead-ref` blocks on it. A bare `owner/repo` only warns. |
+| [0023](0023-ambiguous-path-claims-are-warnings.md) | Unambiguous path claims block | Write a path with its extension or a trailing slash and `dead-ref` blocks on it. A bare two-word token with a slash in it only warns. |
 | [0024](0024-a-fixture-of-real-world-shapes.md) | A fixture of real-world shapes | A construct that caused a false positive goes into `tests/fixtures/real-world-shapes/`, not into a new fixture. |
 | [0025](0025-the-slug-ledger-checks-itself.md) | The ledger checks its own upkeep | Close an item with the bullet form `- [slug] closed: …`. Prose that reads like closing it does not close it. |
 | [0026](0026-docbound-does-not-recommend-logic.md) | docbound documents, never recommends logic | A check may not have an opinion on naming, formatting, or structure. If it does, it does not belong here. |
 | [0027](0027-open-plainly-then-go-deep.md) | The reader is a junior engineer | Open a document so somebody new can enter it, then go as deep as the subject needs. |
 | [0028](0028-write-it-do-not-perform-it.md) | Sentence patterns are in the standard | Six patterns in `skill/docbound/references/anti-patterns.md` that no check enforces. Read them before writing prose that ships. |
-| [0029](0029-unix-timestamps-for-elapsed-time.md) | Unix seconds on every entry | Put `t=` on a worklog entry. Never write "months ago" — subtract the timestamps instead. |
+| [0029](0029-unix-timestamps-for-elapsed-time.md) | Unix seconds on every entry | Put `t=` on a worklog entry. Write a duration as a subtraction of two timestamps, never as a phrase. |
 | [0030](0030-waiver-targets-hold-hyphens.md) | A waiver target is one token | Write `waiver: check-id path/to/file - reason`, with spaces around the separator. |
-| [0031](0031-comment-edits-need-no-doc.md) | A comment-only edit needs no doc | Fixing a typo in a comment no longer blocks. Changing a signature still does. |
+| [0031](0031-comment-edits-need-no-doc.md) | A comment-only edit needs no doc | A typo fix in a comment passes. A signature change still needs its doc. |
 | [0032](0032-worklog-entries-are-short.md) | An entry is two or three lines | Put reasoning in a record and link it. `entry-length` argues above twelve lines of prose. |
 | [0033](0033-template-residue-is-a-closed-set.md) | Placeholders are an exact list | `template-residue` matches only the strings the templates ship, so `Promise<void>` in a doc is safe. Edit a template, edit the list. |
 | [0034](0034-ask-git-for-the-default-branch.md) | The default branch comes from git | The audit prints the ref it compared against. If that ref is wrong, pass `--base`. |
@@ -83,3 +83,4 @@ artifact under test), 0043 (actions pinned by commit, release token scoped).
 | [0043](0043-actions-are-pinned-by-commit.md) | Actions are pinned by commit | Upgrade a workflow action by merging Dependabot's pull request, not by editing a tag. |
 | [0044](0044-the-skill-directory-is-self-contained.md) | A skill directory is complete alone | The subagent travels inside the payload, so `npx skills add` delivers a working one. |
 | [0045](0045-a-record-says-what-to-do-about-it.md) | A record says what to do about it | Open every new record with `## What to do`, and add its row to this table. |
+| [0046](0046-history-is-not-reported-at-all.md) | History is not read for dead paths | The worklog, its archives, the records, and the changelog may name deleted files freely. Live docs may not. |

@@ -16,6 +16,9 @@ repositories this project cannot see, so an ID is never renamed and a level is
 never changed without a superseding decision record. Each ID is also the file name of its
 implementation, in `skill/docbound/scripts/lib/checks/`.
 
+What each check does not catch is in `docs/limitations.md`, beside the reason it
+is not caught.
+
 ## Waivers
 
 A waiver goes in the `### Waivers` section of the current worklog entry:
@@ -232,10 +235,13 @@ about that token is ambiguous
 forgiving underneath — a bare file name is satisfied by a file of that name
 anywhere in the repository.
 
-The historical documents never block: the worklog, the archives under
+The historical documents are not read: the worklog, the archives under
 `docs/worklog/`, the decision records, and `CHANGELOG.md`. Each describes the
 world as it was, so a path it names that has since been deleted is history
-rather than a defect, and satisfying an error would mean falsifying a record.
+rather than a defect, and satisfying a finding would mean falsifying a record.
+Reporting it anyway made two thirds of this project's own warnings a message
+saying there was nothing to do
+(`docs/decisions/0046-history-is-not-reported-at-all.md`).
 
 ```
 waiver: dead-ref docs/ONBOARDING.md - the paths under vendor/ are created by the

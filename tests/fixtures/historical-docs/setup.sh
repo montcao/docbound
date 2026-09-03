@@ -2,8 +2,10 @@
 # A changelog, an archived worklog, and a live doc naming a file that is gone.
 #
 # The changelog and the archive record the past, so changelog phrasing and a
-# path that has since been deleted belong in both
-# (`docs/decisions/0041-the-historical-set-is-every-record-of-the-past.md`).
+# path that has since been deleted belong in both, and neither is read for a
+# finding at all
+# (`docs/decisions/0041-the-historical-set-is-every-record-of-the-past.md`,
+# `docs/decisions/0046-history-is-not-reported-at-all.md`).
 # The live doc's reference carries an extension, which says it is a path whether
 # or not it also carries a slash
 # (`docs/decisions/0042-a-known-extension-is-a-path-claim.md`).

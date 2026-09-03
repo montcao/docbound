@@ -49,6 +49,10 @@ green audit means the change is explained, not that it is correct, and the two
 gates run independently, so your tests can pass while the audit fails and the
 reverse.
 
+Every check is a heuristic over English and file paths, so each has an edge it
+gets wrong. `docs/limitations.md` is the list, kept so you can decide what to
+trust rather than finding out one case at a time.
+
 ## Evidence, rather than claims
 
 - The audit runs on this repository in CI, on Node 20, 22, and 24, alongside the
@@ -58,7 +62,7 @@ reverse.
   so a check with no fixture fails the build.
 - Zero dependencies, at runtime and for development. `package.json` has neither
   key.
-- 45 decision records in `docs/decisions/`, indexed in `docs/decisions/README.md`, each with the condition that would
+- 46 decision records in `docs/decisions/`, indexed in `docs/decisions/README.md`, each with the condition that would
   reverse it. Several of them record this project being wrong and what it did
   about it.
 - Pointed at three repositories it had never seen, it found four blocking false
@@ -283,7 +287,7 @@ behind it, which is the part that makes the discipline hold. Run
 `npx docbound install` afterwards to add the hooks to a skill you installed
 another way; it merges into the config that is already there.
 
-The skills CLI needs Node 22.20 or newer. It installs into a shared `.agents`
+The skills CLI needs Node 22.20 or newer. It installs into a shared agents
 directory and symlinks the editors that read from somewhere else. The Claude Code plugin
 carries its own hook manifest, which is why it is the one non-CLI route that
 gates.

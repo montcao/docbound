@@ -40,5 +40,8 @@
   "homepage": "https://github.com/montcao/docbound#readme",
   "bugs": {
     "url": "https://github.com/montcao/docbound/issues"
+  },
+  "dependencies": {
+    "docbound": "^0.2.1"
   }
 }

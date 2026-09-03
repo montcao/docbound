@@ -234,7 +234,7 @@ by hand is four chances to leave one behind.
 
 ### What runs in the workflows
 
-Both workflows pin `actions/checkout` and `actions/setup-node` to commit SHAs,
+Both workflows pin the checkout and setup-node actions to commit SHAs,
 with the tag and the resolution date in a trailing comment. A tag is mutable and
 the publish job holds an identity npm trusts, so a moved tag is somebody else's
 code publishing under this name. `.github/dependabot.yml` proposes the moves
