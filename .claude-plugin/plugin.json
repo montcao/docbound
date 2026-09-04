@@ -1,6 +1,6 @@
 {
   "name": "docbound",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Continuous documentation discipline for coding agents: a worklog entry before the first edit, decisions recorded when they are made, docs moved in the same change as the code, and a blocking audit that defines done.",
   "author": {
     "name": "Montcao Labs"

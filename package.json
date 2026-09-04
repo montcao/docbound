@@ -1,6 +1,6 @@
 {
   "name": "docbound",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Continuous documentation discipline for AI coding agents, with a blocking audit that defines done.",
   "type": "module",
   "license": "Apache-2.0",

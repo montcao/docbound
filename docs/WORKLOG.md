@@ -11,6 +11,25 @@ Older entries are archived:
 
 - `docs/worklog/2026-Q3.md`
 
+## 2026-09-04 — Release 0.2.2
+
+Agent: release script · Branch: main
+
+### Intent
+
+Cut 0.2.2. Written by `scripts/release.mjs`, which refuses to run
+unless the tests, the audit, and the freshness check pass against a clean
+tree first.
+
+### Outcome
+
+Set the version in `package.json`, `.claude-plugin/plugin.json`, and
+`.claude-plugin/marketplace.json`; rolled `CHANGELOG.md`; rebuilt `dist/`,
+`plugin/`, and `skills-lock.json`; tagged.
+
+### Still open
+
+- Nothing from the release itself. Open work is in the entries below.
 ## 2026-09-03 - Audit the minimal core, and move releases to semantic versioning from main commits
 
 Agent: codex · Branch: main · t=1788453354
